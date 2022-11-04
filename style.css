@@ -1,0 +1,54 @@
+/* Video Panel */
+
+#videoPanel {
+    display:flex;
+    flex-direction: row;
+}
+
+#videoPanel video {
+    width: 35em;
+    height: 20em;
+    /*debug*/
+    background-color: grey;
+    border: 0.1em black solid;
+}
+
+/* Chat Box */
+
+button img {
+    max-width: 4em;
+    height: 4em;
+}
+
+#chatBox {
+    border: 0.2em black solid;
+    width: 25em;
+    height: 50em;
+}
+
+/* The grids dont work for some reason, any help would be appreciated */
+#chatarea {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+}
+
+#chatbox {
+    grid-column: 1/3;
+    grid-row: 1/9;
+}
+
+#sendFile {
+    grid-column: 1/2;
+    grid-row: 9/10;
+}
+
+#sendImage {
+    grid-column: 2/3;
+    grid-row: 9/10;
+}
+
+#sendFile {
+    grid-column: 4/4;
+    grid-row: 9/10;
+}
