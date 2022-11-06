@@ -17,14 +17,22 @@
     </header>
 
     <main>
-        <article id="roomSelect">
-            <label for="room_input">Type the room's ID:</label>
-            <input type="text" id="room_input" name="Room ID">
+        <article>
+            <form method="get" name="login">
+                <label for="username_input">Username:</label>
+                <input type="text" id="username_input" name="username" required>
+    
+                <label for="room_input">Type the room's ID:</label>
+                <input type="text" id="room_input" name="room_ID" required>
+            </form>
         </article>    
 
-        <button> <h3>Join the Room</h3></button>
+        <button type="submit"> <h3>Join the Room</h3></button>
         <button> <h3>Create a Room</h3></button>
     </main>
+
+    <script src="/socketio/socketio/socketio.js" async defer></script>
+    <script src="client.js" async defer></script>
 </body>
 
 </html>
