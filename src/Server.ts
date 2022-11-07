@@ -9,6 +9,7 @@ import e from "express";
 import { constructMessage, getNewMessages, getUniqueRoomId } from "./routes";
 
 // Create the server
+const PORT = 8080;
 const app = express();
 var http = new ht.Server(app);
 var io = new s.Server(http);
@@ -20,7 +21,6 @@ var log: logging.Logging;
 log = new logging.FileLog(path.join(__dirname, "../logging.txt"))
 //You can use the console version
 // log=new logging.ConsoleLog();
-const PORT = 8080;
 var rooms: string[] = [];
 var chats: Map<string,Message[]>=new Map();
 
@@ -29,7 +29,7 @@ app.get("/room/create", (req: Request, res: Response) => {
     var room: string=getUniqueRoomId(rooms);
     chats.set(room,[]);
     log.i("Created room " + room);
-    res.status(200).json({ room_id: room });
+    res.status(200).send(room);
 })
 
 io.on("connection",socket=>{
