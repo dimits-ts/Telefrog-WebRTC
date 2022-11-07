@@ -14,7 +14,7 @@ const socket = io("http://localhost"); // change this later lmao
 const joinRoom = function(message) {
     socket.emit("join", message);
 
-    socket.on("created", room => {
+    socket.on("joined", room => {
         navigator.mediaDevices.getSupportedConstraints(streamConstraints)
         .then(stream => {
             let localStream = stream;
