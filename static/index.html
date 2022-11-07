@@ -24,11 +24,39 @@
     
                 <label for="room_input">Type the room's ID:</label>
                 <input type="text" id="room_input" name="room_ID" required>
+                
+                <button type="submit" id="join_room_button"> <h3>Join the Room</h3></button>
+                <button type="submit" id="create_room_button"> <h3>Create a Room</h3></button>
             </form>
-        </article>    
+        </article>
 
-        <button type="submit"> <h3>Join the Room</h3></button>
-        <button> <h3>Create a Room</h3></button>
+        <article id="videoPanel">
+
+            <section id="video_streams">
+                <!--We will probably want to dynamically
+                add video elements depending on the number of
+                participants-->
+                <video id="localVideo" autoplay></video>
+                <video id="remoteVideo" autoplay></video>
+            </section>
+
+            <section id="chatArea">
+                <div id="chatBox" open>This is a chatbox</div>
+
+                <button id="sendFile" title="Send a File">
+                    <img src="resources/file_icon.png" alt="send file">
+                </button>
+
+                <button id="sendImage" title="Send an Image">
+                    <img src="resources/image_icon.gif" alt="send image">
+                </button>
+
+                <button id="sendMessage" title="Send the message">
+                    <img src="resources/send_icon.png" alt="send">
+                </button>
+            </section>
+
+        </article>
     </main>
 
     <script src="/socketio/socketio/socketio.js" async defer></script>
