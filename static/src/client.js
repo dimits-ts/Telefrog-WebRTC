@@ -9,6 +9,7 @@ const streamConstraints = {audio: true, video: true};
 
 const socket = io("http://localhost"); // change this later lmao
 
+const connectedPeers = {}
 
 // Procedures
 function joinRoom(message) {
@@ -29,9 +30,21 @@ function joinRoom(message) {
 
 function connectVideo(videoGrid, video){
     socket.on("joined", () => {
-        navigator.mediaDevices.getSupportedConstraints(streamConstraints)
+        navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
             addVideoStream(videoGrid, video, stream);
+
+            // set up call
+            myPeer.on("call", call => {
+                // listen to incoming streams
+                call.answer(stream);
+
+                // respond to incoming streams
+                const video = document.createElement("video");
+                call.on("stream", userVideoStream => {
+                    addVideoStream(videoGrid, video, userVideoStream);
+                })
+            });
 
             socket.on("user-connected", userId => {
                 connectToNewUser(userId, stream);
@@ -64,6 +77,9 @@ function connectToNewUser(userId, stream){
     call.on("close", () => {
         video.remove();
     });
+
+    // update connected users
+    connectedPeers[userId] = call;
 }
 
 window.onload = function(){
@@ -97,8 +113,15 @@ window.onload = function(){
             roomInput.textContent = roomId;
         })        
     };
+
+    socket.on("user-disconnected", id => {
+        console.log("User disconnected " + id);
+        
+        if(peers[userId]){
+            peers[userId].close();
+        }
+    });
     
 }
-
 
 
