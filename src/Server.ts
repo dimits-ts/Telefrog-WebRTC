@@ -10,6 +10,8 @@ const app = express();
 var http = new ht.Server(app);
 var io = new s.Server(http);
 
+
+
 var log: logging.Logging;
 // This is a file logger, if you want to change the path take into account that this will run from out/Server.js
 log = new logging.FileLog(path.join(__dirname, "../logging.txt"))
@@ -32,33 +34,21 @@ app.get("/room/create", (req: Request, res: Response) => {
     res.status(200).json({ room_id: room });
 })
 
-//Just copied these I haven't found out what they do yet
-io.on("connection", socket => {
-    socket.on("join", room => {
-        log.i(`Attempt to join room: ${room.room} by user ${room.username}`);
-
-        //join the room
-        socket.join(room.room);
-        socket.emit("joined");
+io.on("connection",socket=>{
+    socket.on("join",roomObj=>{
+        socket.join(roomObj.room);
+        //high chance of going to shit
+        socket.to(roomObj.room).emit("user-connected",roomObj.username);
+        socket.on("disconnect",()=>{
+            socket.to(roomObj.room).emit("user-disconnected",roomObj.username);
+        });
     });
-
-    socket.on("ready",room=>{
-        log.i(`Broadcaster ${room.username} is ready to broadcast to room ${room.room}`);
-        socket.broadcast.to(room).emit("ready");
-    });
-
-    socket.on("candidate",room=>{
-        socket.broadcast.to(room.room).emit("candidate",room);
-    })
-    socket.on("offer",room=>{
-        socket.broadcast.to(room.room).emit("offer",room.sdp);;
-    })
-    socket.on("answer",room=>{
-        socket.broadcast.to(room.room).emit("answer",room.sdp);
-    })
 })
 
 //TODO: ADD GET REQUESTS
+app.get("chatbox/refresh",(req:Request,res:Response)=>{
+    
+})
 
 //Define where the static html content will be found.
 app.use("/static", express.static(path.join(__dirname, "../static")));
