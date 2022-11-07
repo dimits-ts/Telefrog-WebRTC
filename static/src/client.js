@@ -101,7 +101,7 @@ window.onload = function(){
     createRoomButton.onclick = () => {
         // send to socket
         fetch(URL + "/room/create", {method: "GET"}).then(roomId => {
-            
+            console.log("Created server with " + roomId);
             // place the roomId into the room input area
             let roomInput = document.getElementById("room_input");
             roomInput.textContent = roomId;
