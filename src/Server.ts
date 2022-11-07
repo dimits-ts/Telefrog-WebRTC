@@ -34,6 +34,7 @@ app.get("/room/create", (req: Request, res: Response) => {
 
 io.on("connection",socket=>{
     socket.on("join",roomObj=>{
+        log.i(`Attempt from user ${roomObj.username} to join room ${roomObj.room}`);
         socket.join(roomObj.room);
         //high chance of going to shit
         socket.to(roomObj.room).emit("user-connected",roomObj.username);
