@@ -4,9 +4,10 @@
   "description": "",
   "main": "./out/Server.js",
   "scripts": {
-    "debug":"nodemon src/Server.ts",
-    "start":"node out/Server.js",
-    "build":"npx tsc "
+    "debug": "nodemon src/Server.ts",
+    "start": "node out/Server.js",
+    "build": "npx tsc",
+    "peer": "npx peerjs --port 3001"
   },
   "repository": {
     "type": "git",

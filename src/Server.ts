@@ -3,7 +3,9 @@ import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
+import { Message,MessageType } from "./messages";
+import e from "express";
 
 // Create the server
 const app = express();
@@ -19,6 +21,7 @@ log = new logging.FileLog(path.join(__dirname, "../logging.txt"))
 // log=new logging.ConsoleLog();
 const PORT = 8080;
 var rooms: string[] = [];
+var chats: Map<string,Message[]>=new Map();
 
 app.get("/room/create", (req: Request, res: Response) => {
     // Create room id
@@ -30,6 +33,7 @@ app.get("/room/create", (req: Request, res: Response) => {
             break;
         }
     }
+    chats.set(room,[]);
     log.i("Created room " + room);
     res.status(200).json({ room_id: room });
 })
@@ -46,8 +50,48 @@ io.on("connection",socket=>{
 })
 
 //TODO: ADD GET REQUESTS
-app.get("chatbox/refresh",(req:Request,res:Response)=>{
-    
+app.get("chat-box/refresh",(req:Request,res:Response)=>{
+    const room=String(req.query.room);
+    const last_message=String(req.query.last_message);
+    var messages=chats.get(room);
+    if (messages!==undefined){
+        var toSend:Message[]=[];
+        for (const m of messages.reverse()) {
+            if(m.messageId===last_message)break;
+            toSend.push(m);
+        }
+        res.status(200).json(toSend);
+    }else{
+        log.c("attempted to get data from empty room");
+        res.sendStatus(400);
+    }
+});
+
+app.post("chat-box/message/new",(req:Request,res:Response)=>{
+    let data=req.body;
+    var type:MessageType;
+    let roomId=data.room;
+    switch (data.type) {
+        case "Image":
+            type=MessageType.Image
+            break;
+        case "File":
+            type=MessageType.File
+            break;
+        default:
+            type=MessageType.Text
+            break;
+    }
+    let message:Message={messageId:randomUUID(),poster:String(data.username),type,contents:data.content}
+    let chat=chats.get(roomId);
+    if(chat===undefined){
+        log.c("Tried to submit message to chat that doesn't exist.");
+        res.sendStatus(404);
+    }else{
+        log.i(`User ${message.poster} submitted text with id ${message.messageId}.`);
+        chat.push(message);
+        res.sendStatus(200);
+    }
 })
 
 //Define where the static html content will be found.
