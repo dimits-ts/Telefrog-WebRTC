@@ -1,13 +1,8 @@
 // Configurations
-const iceServer = {
-    "iceServers":[
-        {"url": "stun.stun.services.mozilla.com"},
-        {"url": "stun.stun.I.google.com:19302"}
-    ]
-};
+const URL = "http://localhost:8080"
 const streamConstraints = {audio: true, video: true};
 
-const socket = io("http://localhost"); // change this later lmao
+const socket = io.connect(URL); // change this later lmao
 
 const connectedPeers = {}
 
@@ -16,15 +11,15 @@ function joinRoom(message) {
     let myPeer = new Peer(undefined, {
         host: "/",
         port: "3001"
-    })
+    });
 
     myPeer.on("open", id => {
-        socket.emit("join", message)
-    })
+        socket.emit("join", message);
+    });
 
     socket.on("user-connected", userId => {
-        console.log("User connected: " + userId)
-    })
+        console.log("User connected: " + userId);
+    });
 }
 
 
@@ -43,7 +38,7 @@ function connectVideo(videoGrid, video){
                 const video = document.createElement("video");
                 call.on("stream", userVideoStream => {
                     addVideoStream(videoGrid, video, userVideoStream);
-                })
+                });
             });
 
             socket.on("user-connected", userId => {
@@ -105,18 +100,18 @@ window.onload = function(){
     
     createRoomButton.onclick = () => {
         // send to socket
-        socket.emit("create");
-
-        // display
-        socket.on("created", roomId=>{
+        fetch(URL + "/room/create", {method: "GET"}).then(roomId => {
+            
+            // place the roomId into the room input area
             let roomInput = document.getElementById("room_input");
             roomInput.textContent = roomId;
-        })        
+        });    
     };
 
+    // handle disconnects
     socket.on("user-disconnected", id => {
         console.log("User disconnected " + id);
-        
+
         if(peers[userId]){
             peers[userId].close();
         }
