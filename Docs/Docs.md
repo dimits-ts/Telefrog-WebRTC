@@ -12,6 +12,7 @@
 5. Client closes connection
 
 ### Join Room
+
 1. Client opens connection to server  
 2. Client sends a join room request with the room-id.
 3. Open video stream
