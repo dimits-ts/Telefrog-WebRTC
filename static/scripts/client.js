@@ -103,9 +103,11 @@ window.onload = function(){
     createRoomButton.onclick = e => {
         // send to socket
         fetch(URL + "/room/create", {method: "GET"})
+        .then(res=>res.json())
         .then(response => {
 
-            let roomId = response.room_id;
+            let roomId = response.room;
+
             // place the roomId into the room input area
             let roomInput = document.getElementById("room_input");
             roomInput.value = roomId;
