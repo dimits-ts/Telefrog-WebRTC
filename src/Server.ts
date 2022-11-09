@@ -29,7 +29,7 @@ app.get("/room/create", (req: Request, res: Response) => {
     var room: string=getUniqueRoomId(rooms);
     chats.set(room,[]);
     log.i("Created room " + room);
-    res.status(200).send(room);
+    res.status(200).send({room});
 })
 
 io.on("connection",socket=>{
