@@ -2,7 +2,7 @@
 const URL = "http://localhost:8080"
 const streamConstraints = {audio: true, video: true};
 
-const socket = io.connect(URL); // change this later lmao
+const socket = io(URL); // change this later lmao
 
 const connectedPeers = {}
 
@@ -28,19 +28,20 @@ function connectVideo(username, roomId, videoGrid, video){
             // set up call
             myPeer.on("call", call => {
                 // listen to incoming streams
+                console.log("called");
                 call.answer(stream);
     
                 // respond to incoming streams
                 const video = document.createElement("video");
                 call.on("stream", userVideoStream => {
+
                     addVideoStream(videoGrid, video, userVideoStream);
                 });
             });
     
             // when other user connects
             socket.on("user-connected", (username, peer) => {
-                console.log("SEEEEEEEEEX");
-                connectToNewUser(myPeer, videoGrid, peer, stream);
+                setTimeout(()=>connectToNewUser(myPeer, videoGrid, peer, stream),2000);
             });
     
         }).catch(err => {
@@ -61,10 +62,12 @@ function addVideoStream(videoGrid, video, stream) {
 
 
 function connectToNewUser(myPeer, videoGrid, userId, stream){
+    console.log(`attempt to call user ${userId}`);
     const call = myPeer.call(userId, stream);
     const video = document.createElement("video");
 
     call.on("stream", userVideoStream => {
+        console.log("Got stream from "+userId);
         addVideoStream(videoGrid, video, userVideoStream);
     });
 
