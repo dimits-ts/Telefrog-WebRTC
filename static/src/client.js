@@ -77,6 +77,7 @@ function connectToNewUser(userId, stream){
     connectedPeers[userId] = call;
 }
 
+
 window.onload = function(){
     const usernameInput = document.getElementById("username_input")
     const roomIdInput = document.getElementById("room_input")
@@ -87,7 +88,8 @@ window.onload = function(){
     const myVideo = document.createElement("video");
     myVideo.muted = true;
 
-    joinRoomButton.onclick = () => {
+    joinRoomButton.onclick = e => {
+        e.preventDefault();
         let username = usernameInput.value;
         let roomId = roomIdInput.value;
         let request = {username: username, roomId: roomId};
@@ -98,14 +100,18 @@ window.onload = function(){
         connectVideo(videoGrid, myVideo);
     };
     
-    createRoomButton.onclick = () => {
+    createRoomButton.onclick = e => {
         // send to socket
-        fetch(URL + "/room/create", {method: "GET"}).then(roomId => {
-            console.log("Created server with " + roomId);
+        fetch(URL + "/room/create", {method: "GET"})
+        .then(res => res.json())
+        .then(response => {
+
+            let roomId = response.room_id;
             // place the roomId into the room input area
             let roomInput = document.getElementById("room_input");
-            roomInput.textContent = roomId;
-        });    
+            roomInput.value = roomId;
+        });
+        e.preventDefault();
     };
 
     // handle disconnects
