@@ -19,12 +19,11 @@ function connectVideo(username, roomId, videoGrid, video){
             room: roomId,
             peer: peerId
         };
-        socket.emit("join", message);
-
+        
         navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
             addVideoStream(videoGrid, video, stream);
-    
+            socket.emit("join", message);
             // set up call
             myPeer.on("call", call => {
                 // listen to incoming streams
@@ -41,7 +40,7 @@ function connectVideo(username, roomId, videoGrid, video){
     
             // when other user connects
             socket.on("user-connected", (username, peer) => {
-                setTimeout(()=>connectToNewUser(myPeer, videoGrid, peer, stream),2000);
+                connectToNewUser(myPeer, videoGrid, peer, stream)
             });
     
         }).catch(err => {
