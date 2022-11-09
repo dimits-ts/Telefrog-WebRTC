@@ -37,9 +37,9 @@ io.on("connection",socket=>{
         log.i(`Attempt from user ${roomObj.username} to join room ${roomObj.room}`);
         socket.join(roomObj.room);
         //high chance of going to shit
-        socket.to(roomObj.room).emit("user-connected",roomObj.username);
+        socket.to(roomObj.room).emit("user-connected",roomObj.username,roomObj.peer);
         socket.on("disconnect",()=>{
-            socket.to(roomObj.room).emit("user-disconnected",roomObj.username);
+            socket.to(roomObj.room).emit("user-disconnected",roomObj.username,roomObj.peer);
         });
     });
 })
