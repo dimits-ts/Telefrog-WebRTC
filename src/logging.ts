@@ -20,7 +20,7 @@ export class FileLog implements Logging{
     }
 
     Log(tag:string,message:string|number):void{
-        fs.writeFileSync(this.logFile,`[${tag}]:${message}`);
+        fs.appendFileSync(this.logFile,`[${tag}]:${message}`);
     }
 
     i(message: string | number): void {
