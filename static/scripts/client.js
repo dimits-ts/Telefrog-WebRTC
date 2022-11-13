@@ -1,12 +1,80 @@
 // Configurations
 const URL = "http://localhost:8080"
-const streamConstraints = {audio: true, video: true};
+const streamConstraints = { audio: true, video: true };
 
 const socket = io(URL); // change this later lmao
 
 const connectedPeers = {}
 
-function connectVideo(username, roomId, videoGrid, video){
+const videoPanel = document.getElementById("videoPanel");
+const videoGrid = document.getElementById("videoStreams");
+
+const usernameInput = document.getElementById("username_input");
+const roomIdInput = document.getElementById("room_input");
+const errorMessage = document.getElementById("errorMessage");
+
+const joinRoomButton = document.getElementById("join_room_button");
+const createRoomButton = document.getElementById("create_room_button");
+
+
+joinRoomButton.onclick = e => {
+    e.preventDefault();
+
+    let username = usernameInput.value;
+    let roomId = roomIdInput.value;
+    console.log("Sending request to join");
+
+    const myVideo = document.createElement("video");
+    myVideo.muted = true;
+
+    //begin streaming
+    connectVideo(username, roomId, myVideo);
+};
+
+createRoomButton.onclick = e => {
+    e.preventDefault();
+
+    // send to socket
+    fetch(URL + "/room/create", { method: "GET" })
+        .then(res => res.json())
+        .then(response => {
+            // place the roomId into the room input area
+            let roomInput = document.getElementById("room_input");
+            roomInput.value = response.room;
+        });
+};
+
+// handle disconnects
+socket.on("user-disconnected", id => {
+    console.log("User disconnected " + id);
+
+    if (connectedPeers[id]) 
+        connectedPeers[id].close();
+});
+
+
+function usernameIsValid(username) {
+    // check if is whitespace
+    return username.trim().length === 0;
+}
+
+
+function showError(errorMessage){
+    errorMessage.textContents = errorMessage;
+}
+
+
+function hideErrors() {
+    errorMessage.textContent = "";
+}
+
+
+function connectVideo(username, roomId, video) {
+    if (usernameIsValid(username)) {
+        showError("Please enter a valid username.");
+        return;
+    }
+
     let myPeer = new Peer(undefined, {
         host: "/",
         port: "3001"
@@ -19,39 +87,51 @@ function connectVideo(username, roomId, videoGrid, video){
             room: roomId,
             peer: peerId
         };
-        
+
         navigator.mediaDevices.getUserMedia(streamConstraints)
-        .then(stream => {
-            addVideoStream(videoGrid, video, stream);
-            socket.emit("join", message);
-            // set up call
-            myPeer.on("call", call => {
-                // listen to incoming streams
-                console.log("called");
-                call.answer(stream);
-    
-                // respond to incoming streams
-                const video = document.createElement("video");
-                call.on("stream", userVideoStream => {
+            .then(stream => {
+                // request session from server
+                socket.emit("join", message);
 
-                    addVideoStream(videoGrid, video, userVideoStream);
+                // receive session status from server
+                socket.on("joined-status", (statusCode, statusMessage) => {
+                    if (statusCode === 200) {
+                        hideErrors();
+
+                        // set up video streams
+                        addVideoStream(video, stream);
+                        videoPanel.style.visibility = "visible";
+
+                        // set up call
+                        myPeer.on("call", call => {
+                            // listen to incoming streams
+                            console.log("called");
+                            call.answer(stream);
+
+                            // respond to incoming streams
+                            const video = document.createElement("video");
+                            call.on("stream", userVideoStream => {
+                                addVideoStream(video, userVideoStream);
+                            });
+                        });
+
+                        // when other user connects
+                        socket.on("user-connected", (username, peer) => {
+                            connectToNewUser(myPeer, peer, stream)
+                        });
+                    } else {
+                        showError("Cannot join room " + statusCode + ": " + statusMessage);
+                    }
                 });
-            });
-    
-            // when other user connects
-            socket.on("user-connected", (username, peer) => {
-                connectToNewUser(myPeer, videoGrid, peer, stream)
-            });
-    
-        }).catch(err => {
-            console.log("Error while accessing media devices" + err);
-        });
-    });
 
+            }).catch(err => {
+                showError("Error while accessing media devices: " + err);
+            });
+    });
 }
 
 
-function addVideoStream(videoGrid, video, stream) {
+function addVideoStream(video, stream) {
     video.srcObject = stream;
     video.addEventListener("loadedmetadata", () => {
         video.play();
@@ -60,14 +140,14 @@ function addVideoStream(videoGrid, video, stream) {
 }
 
 
-function connectToNewUser(myPeer, videoGrid, userId, stream){
+function connectToNewUser(myPeer, userId, stream) {
     console.log(`attempt to call user ${userId}`);
     const call = myPeer.call(userId, stream);
     const video = document.createElement("video");
 
     call.on("stream", userVideoStream => {
-        console.log("Got stream from "+userId);
-        addVideoStream(videoGrid, video, userVideoStream);
+        console.log("Got stream from " + userId);
+        addVideoStream(video, userVideoStream);
     });
 
     call.on("close", () => {
@@ -76,50 +156,4 @@ function connectToNewUser(myPeer, videoGrid, userId, stream){
 
     // update connected users
     connectedPeers[userId] = call;
-}
-
-
-window.onload = function(){
-    const videoPanel = document.getElementById("videoPanel");
-    const usernameInput = document.getElementById("username_input");
-    const roomIdInput = document.getElementById("room_input");
-    const joinRoomButton = document.getElementById("join_room_button");
-    const createRoomButton = document.getElementById("create_room_button");
-    
-    const videoGrid = document.getElementById("videoStreams");
-    const myVideo = document.createElement("video");
-    myVideo.muted = true;
-
-    joinRoomButton.onclick = e => {
-        e.preventDefault();
-        videoPanel.style.visibility = "visible";
-        let username = usernameInput.value;
-        let roomId = roomIdInput.value;
-        console.log("Sending request to join");
-
-        //begin streaming
-        connectVideo(username, roomId, videoGrid, myVideo);
-    };
-    
-    createRoomButton.onclick = e => {
-        // send to socket
-        fetch(URL + "/room/create", {method: "GET"})
-        .then(res=>res.json())
-        .then(response => {
-            // place the roomId into the room input area
-            let roomInput = document.getElementById("room_input");
-            roomInput.value = response.room;
-        });
-        e.preventDefault();
-    };
-
-    // handle disconnects
-    socket.on("user-disconnected", id => {
-        console.log("User disconnected " + id);
-
-        if(connectedPeers[id]){
-            connectedPeers[id].close();
-        }
-
-    });
 }
