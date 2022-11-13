@@ -37,4 +37,6 @@
 
 - post chat-box/message/new {room_id:...,username:..., message_type:...,contents:...} -> status code
 
+- get chat-box/multimedia/:room?multimediaId=... {} ->  file
+
 - Video Conference: with WebRTC we have the tutorial for one on  one so the challenge is to adjust it to more pc.
