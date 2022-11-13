@@ -3,10 +3,11 @@ export type Message = {
     type: MessageType;
     poster: string;
     contents: any;
+    title?:string;
 }
 
 export enum MessageType {
-    Text, Image, File
+    Text="Text", Image="Image", File="File"
 }
 
 export type CreateRoomResponse = {
@@ -29,4 +30,10 @@ export type ChatboxRefreshRequest = {
 
 export type ChatBoxRefreshResponse = {
     newMessages: Message[];
+}
+
+export type Multimedia={
+    id: string,
+    type: MessageType,
+    contents:any
 }
