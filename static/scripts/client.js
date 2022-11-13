@@ -80,10 +80,11 @@ function connectToNewUser(myPeer, videoGrid, userId, stream){
 
 
 window.onload = function(){
-    const usernameInput = document.getElementById("username_input")
-    const roomIdInput = document.getElementById("room_input")
-    const joinRoomButton = document.getElementById("join_room_button")
-    const createRoomButton = document.getElementById("create_room_button")
+    const videoPanel = document.getElementById("videoPanel");
+    const usernameInput = document.getElementById("username_input");
+    const roomIdInput = document.getElementById("room_input");
+    const joinRoomButton = document.getElementById("join_room_button");
+    const createRoomButton = document.getElementById("create_room_button");
     
     const videoGrid = document.getElementById("videoStreams");
     const myVideo = document.createElement("video");
@@ -91,6 +92,7 @@ window.onload = function(){
 
     joinRoomButton.onclick = e => {
         e.preventDefault();
+        videoPanel.style.visibility = "visible";
         let username = usernameInput.value;
         let roomId = roomIdInput.value;
         console.log("Sending request to join");
@@ -118,5 +120,6 @@ window.onload = function(){
         if(connectedPeers[id]){
             connectedPeers[id].close();
         }
+
     });
 }

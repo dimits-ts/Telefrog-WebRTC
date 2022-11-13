@@ -1,16 +1,14 @@
 /* Video Panel */
 
 #videoPanel {
-    display:flex;
+    display: flex;
+    visibility: hidden;
     flex-direction: row;
 }
 
 #videoPanel video {
     width: 35em;
     height: 20em;
-    /*debug*/
-    background-color: grey;
-    border: 0.1em black solid;
 }
 
 /* Chat Box */
