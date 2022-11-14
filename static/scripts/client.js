@@ -2,7 +2,7 @@
 const URL = "http://localhost:8080"
 const streamConstraints = { audio: true, video: true };
 
-const socket = io(URL); // change this later lmao
+const socket = io(URL);
 
 const connectedPeers = {}
 
@@ -15,9 +15,15 @@ const usernameInput = document.getElementById("username_input");
 const roomIdInput = document.getElementById("room_input");
 const errorMessageArea = document.getElementById("errorMessage");
 
+const chatInput = document.getElementById("chat-input");
+const fileInput = document.getElementById("file-input");
+const imageInput = document.getElementById("image-input");
+const sendMessageButton = document.getElementById("sendMessage");
+
 const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 
+// ========== CALL HANDLERS ==========
 
 joinRoomButton.onclick = e => {
     e.preventDefault();
@@ -49,7 +55,7 @@ createRoomButton.onclick = e => {
         });
 };
 
-// handle disconnects
+// handle disconnect
 socket.on("user-disconnected", id => {
     console.log("User disconnected " + id);
 
@@ -67,6 +73,7 @@ function usernameIsValid(username) {
 function showError(errorMessage) {
     errorMessageArea.innerText = errorMessage;
 }
+
 
 function onConnect(roomId) {
     errorMessageArea.innerText = "";
@@ -157,4 +164,42 @@ function connectToNewUser(myPeer, userId, stream) {
 
     // update connected users
     connectedPeers[userId] = call;
+}
+
+// ========== CHAT HANDLERS ==========
+
+sendMessageButton.addEventListener("click", () => {
+    // Send any field that is filled
+    text = chatInput.value;
+    if(text.trim() !== "") 
+        sendText(text);
+
+    
+    for(image of imageInput.files)
+        if(image)
+            sendImage(image);
+
+    for(file of fileInput.files)
+        if(file)
+            sendFile(file)
+
+    // reset input
+    chatInput.value = "";
+    imageInput.value = "";
+    fileInput.value = "";
+});
+
+
+function sendText(text) {
+    console.log(text);
+}
+
+
+function sendImage(image) {
+    console.log(image);
+}
+
+
+function sendFile(file) {
+    console.log(file);
 }
