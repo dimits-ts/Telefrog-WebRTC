@@ -43,31 +43,37 @@
         </article>
 
         <article id="videoPanel">
-            <section id="videoStreams">
+            <h2 id="roomBanner"></h2>
+
+            <div id="videoMain">
+                <section id="videoStreams">
                 
-            </section>
+                </section>
+    
+                <section id="chatArea">
+                    <div id="chat-box">
+                        <div id="chat-display">This is a chatbox</div>
+    
+                        <div id="text-input-area">
+                            <input type="text">
+                            <button id="sendMessage" title="Send the message">
+                                <img src="resources/send_icon.png" alt="send">
+                            </button>
+                        </div>
+                        
 
-            <section id="chatArea">
-                <div id="chat-box">
-                    <div id="chat-display">This is a chatbox</div>
-
-                    <div id="textarea">
-                        <input type="text" id="text-input-area">
                     </div>
-                </div>
-                
-                <button id="sendFile" title="Send a File">
-                    <img src="resources/file_icon.png" alt="send file">
-                </button>
-
-                <button id="sendImage" title="Send an Image">
-                    <img src="resources/image_icon.gif" alt="send image">
-                </button>
-
-                <button id="sendMessage" title="Send the message">
-                    <img src="resources/send_icon.png" alt="send">
-                </button>
-            </section>
+                    
+                    <button id="sendFile" title="Send a File">
+                        <img src="resources/file_icon.png" alt="send file">
+                    </button>
+    
+                    <button id="sendImage" title="Send an Image">
+                        <img src="resources/image_icon.gif" alt="send image">
+                    </button>
+                </section>
+            </div>
+           
 
         </article>
     </main>

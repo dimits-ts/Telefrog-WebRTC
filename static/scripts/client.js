@@ -6,6 +6,8 @@ const socket = io(URL); // change this later lmao
 
 const connectedPeers = {}
 
+const loginPanel = document.getElementById("login");
+const roomBanner = document.getElementById("roomBanner");
 const videoPanel = document.getElementById("videoPanel");
 const videoGrid = document.getElementById("videoStreams");
 
@@ -62,13 +64,14 @@ function usernameIsValid(username) {
 }
 
 
-function showError(errorMessage){
+function showError(errorMessage) {
     errorMessageArea.innerText = errorMessage;
 }
 
-
-function hideErrors() {
+function onConnect(roomId) {
     errorMessageArea.innerText = "";
+    loginPanel.style.display = "none";
+    roomBanner.innerText = "You are connected to room " + roomId;
 }
 
 
@@ -94,7 +97,7 @@ function connectVideo(username, roomId, video) {
                 // receive session status from server
                 socket.on("join-status", (statusCode, statusMessage) => {
                     if (statusCode === 200) {
-                        hideErrors();
+                        onConnect(roomId);
 
                         // set up video streams
                         addVideoStream(video, stream);
