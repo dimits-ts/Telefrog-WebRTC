@@ -55,7 +55,6 @@ io.on("connection",socket=>{
     });
 })
 
-//TODO: ADD GET REQUESTS
 app.get("chat-box/refresh",(req:Request,res:Response)=>{
     const room=String(req.query.room);
     const last_message=String(req.query.last_message);

@@ -1,7 +1,6 @@
 import { Message, MessageType, Multimedia, ErrorData } from "./messages";
 import crypto from "crypto";
 
-//TODO-[13/11/2022]: test
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
         var messages = chat.get(room);
