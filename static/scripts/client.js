@@ -2,7 +2,7 @@
 const URL = "http://localhost:8080"
 const streamConstraints = { audio: true, video: true };
 
-const socket = io(URL); // change this later lmao
+const socket = io(URL);
 
 const connectedPeers = {}
 
@@ -15,15 +15,24 @@ const usernameInput = document.getElementById("username_input");
 const roomIdInput = document.getElementById("room_input");
 const errorMessageArea = document.getElementById("errorMessage");
 
+const chatInput = document.getElementById("chat-input");
+const fileInput = document.getElementById("file-input");
+const imageInput = document.getElementById("image-input");
+const sendMessageButton = document.getElementById("sendMessage");
+
 const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 
+let roomId;
+let username;
+
+// ========== CALL HANDLERS ==========
 
 joinRoomButton.onclick = e => {
     e.preventDefault();
 
-    let username = usernameInput.value;
-    let roomId = roomIdInput.value;
+    username = usernameInput.value;
+    roomId = roomIdInput.value;
     console.log("Sending request to join");
 
     const myVideo = document.createElement("video");
@@ -49,7 +58,7 @@ createRoomButton.onclick = e => {
         });
 };
 
-// handle disconnects
+// handle disconnect
 socket.on("user-disconnected", id => {
     console.log("User disconnected " + id);
 
@@ -67,6 +76,7 @@ function usernameIsValid(username) {
 function showError(errorMessage) {
     errorMessageArea.innerText = errorMessage;
 }
+
 
 function onConnect(roomId) {
     errorMessageArea.innerText = "";
@@ -157,4 +167,82 @@ function connectToNewUser(myPeer, userId, stream) {
 
     // update connected users
     connectedPeers[userId] = call;
+}
+
+// ========== CHAT HANDLERS ==========
+
+sendMessageButton.addEventListener("click", () => {
+    // Send any field that is filled
+    text = chatInput.value;
+    if(text.trim() !== "") 
+        sendText(text);
+
+    
+    for(image of imageInput.files)
+        if(image)
+            sendImage(image);
+
+    for(file of fileInput.files)
+        if(file)
+            sendFile(file)
+
+    // reset input
+    chatInput.value = "";
+    imageInput.value = "";
+    fileInput.value = "";
+});
+
+
+function sendText(text) {
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "Text");
+    data.append("content", text);
+
+    fetch(URL + "/message/new", { 
+        method: "POST", 
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+    console.log("Sent text : " + text);
+}
+
+
+function sendImage(image) {
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "Image");
+    data.append("content", JSON.stringify(image));
+
+    fetch(URL + "/message/new", { 
+        method: "POST",
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+
+    console.log(image);
+}
+
+
+function sendFile(file) {
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "File");
+    data.append("content", JSON.stringify(file));
+
+    fetch(URL + "/message/new", { 
+        method: "POST",
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+    console.log(image);
 }

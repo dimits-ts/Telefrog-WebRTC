@@ -55,22 +55,24 @@
                         <div id="chat-display">This is a chatbox</div>
     
                         <div id="text-input-area">
-                            <input type="text">
+                            <input type="text" id="chat-input">
                             <button id="sendMessage" title="Send the message">
                                 <img src="resources/send_icon.png" alt="send">
                             </button>
                         </div>
-                        
-
                     </div>
-                    
-                    <button id="sendFile" title="Send a File">
-                        <img src="resources/file_icon.png" alt="send file">
-                    </button>
-    
-                    <button id="sendImage" title="Send an Image">
-                        <img src="resources/image_icon.gif" alt="send image">
-                    </button>
+
+                    <div id="file-controls">
+                        <div id="send-image-button" title="Send an Image">
+                            <img src="resources/image_icon.gif" alt="send image">
+                            <input type="file" id="image-input" name="image_uploads" accept=".jpg, .jpeg, .png" multiple>
+                        </div>
+
+                        <div id="send-file-button" title="Send a File">
+                            <img src="resources/file_icon.png" alt="send file">
+                            <input type="file" id="file-input" name="file_uploads" multiple>
+                        </div>
+                    </div>
                 </section>
             </div>
            
