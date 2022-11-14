@@ -1,4 +1,4 @@
-import { Message, MessageType, Multimedia } from "./messages";
+import { Message, MessageType, Multimedia, ErrorData } from "./messages";
 import crypto from "crypto";
 
 //TODO-[13/11/2022]: test
@@ -17,12 +17,11 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
                 resolve(messages);
             }
         } else {
-            reject("attempted to get data from empty room");
+            reject({code:404,message:"attempted to get data from empty room",}as ErrorData);
         }
     })
 }
 
-//TODO-[13/11/2022]: test
 export function getUniqueRoomId(rooms: string[]): string {
     while (true) {
         var room: string = crypto.randomBytes(8).toString("hex");
@@ -34,7 +33,6 @@ export function getUniqueRoomId(rooms: string[]): string {
     return room;
 }
 
-//TODO-[13/11/2022]: test
 export function constructMessage(username: string, message_type: string, contents: any, title?: string): [Message, Multimedia | undefined] {
     var type: MessageType;
     switch (message_type) {
@@ -61,4 +59,20 @@ export function constructMessage(username: string, message_type: string, content
         message = { messageId: crypto.randomUUID(), poster: String(username), type, contents };
     }
     return [message, multi];
+}
+
+export function getMultimedia(room:Multimedia[]|undefined,id:string|undefined):Promise<Multimedia> {
+    return new Promise<Multimedia>((resolve, reject) => {
+        if(room===undefined||id===undefined){
+            reject({code:404,message:"item_not_found"}as ErrorData);
+        }else{
+            let multi=String(id);
+            var file=room.filter(value=>multi===value.id);
+            if(file.length===0){
+                reject({code:404,message:"item_not_found",args:multi}as ErrorData);
+            }else{
+                resolve(file[0]);
+            }
+        }
+    })
 }

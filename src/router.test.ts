@@ -1,5 +1,5 @@
-import { constructMessage, getNewMessages, getUniqueRoomId } from "./routes";
-import { Message, MessageType } from "./messages";
+import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
+import { Message, MessageType, Multimedia } from "./messages";
 import fs from "fs";
 import crypto from "crypto"
 import path from "path"
@@ -54,14 +54,45 @@ describe('Get Messages', () => {
         });
     
         it('Should a list of messages a valid last name id was given contain', () => {
-
-            expect(getNewMessages(chat, "ooo1", messages[1])).resolves.toEqual(room?.slice(2).reverse());
+            let result=room?.slice(2).reverse();
+            expect(getNewMessages(chat, "ooo1", messages[1])).resolves.toEqual(result);
         });
         it('Should return all messages if an empty string was given', () => {
             expect(getNewMessages(chat, "ooo1", "")).resolves.toEqual(room)
         });
         it('Should return all messages if a non-existent string was given', () => {
             expect(getNewMessages(chat, "ooo1", "sexyman")).resolves.toEqual(room)
+        });
+    }
+});
+
+
+describe('Get multimedia', () => {
+
+    let vault:Map<string,Multimedia[]> =new Map();
+    let image_data: string = String(fs.readFileSync(path.join(__dirname, "../static/resources/frog.PNG")));
+    let image=constructMessage("lamragiotis panagopoulos","Image",image_data,"frog.PNG")[1];
+    let file_data: string = String(fs.readFileSync(path.join(__dirname, "../Docs/Docs.md"), { encoding: "utf-8" }));
+    let file=constructMessage("Faymetrics","File",file_data,"Docs.md")[1];
+    if(image!==undefined && file!==undefined){
+        vault.set("hoi4",[image,file]);
+        let room=vault.get("hoi4");
+        let ids=room?.map(item=>item.id);
+        it('Should reject if room does not exist', () => {
+            expect(getMultimedia(undefined,"1")).rejects.toBeDefined();
+        });
+        it('Should reject if no id was found', () => {
+            expect(getMultimedia(room,undefined)).rejects.toBeDefined();
+        });
+        it('Should reject if the id does not exist in the room', () => {
+            expect(getMultimedia(room,"1")).rejects.toBeDefined();
+        });
+        it('Should resolve with the data', () => {
+            if (ids!==undefined) {
+                expect(getMultimedia(room,ids[0])).resolves.toEqual(image);
+            }else{
+                expect(false).toEqual(true);
+            }
         });
     }
 });

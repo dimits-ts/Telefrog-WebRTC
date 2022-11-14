@@ -37,3 +37,9 @@ export type Multimedia={
     type: MessageType,
     contents:any
 }
+
+export type ErrorData={
+    code: number;
+    message: string;
+    args?: any|any[];
+}

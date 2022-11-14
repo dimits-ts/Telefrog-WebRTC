@@ -3,15 +3,19 @@ import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import { Message,MessageType, Multimedia } from "./messages";
-import { constructMessage, getNewMessages, getUniqueRoomId } from "./routes";
+import { Message,MessageType, Multimedia,ErrorData } from "./messages";
+import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
+import body_parser from "body-parser";
 
 // Create the server
 const PORT = 8080;
 const app = express();
 var http = new ht.Server(app);
-var io = new s.Server(http);
+var io = new s.Server(http,{
+    maxHttpBufferSize:10*1024*1024
+});
 
+body_parser.urlencoded({ extended: true })
 app.use(express.json({limit:"10mb"}));
 app.use(express.urlencoded({limit:"10mb"}));
 
@@ -78,6 +82,7 @@ app.post("chat-box/message/new",(req:Request,res:Response)=>{
         if (vault!==undefined) {
             vault.push(multi);
         } else {
+            log.c("multimedia channel not found");
             res.sendStatus(404);
         }
     }
@@ -86,31 +91,24 @@ app.post("chat-box/message/new",(req:Request,res:Response)=>{
         res.sendStatus(404);
     }else{
         log.i(`User ${message.poster} submitted text with id ${message.messageId}.`);
-        if (message.type!==MessageType.Text) {
-            
-        } else {
-            chat.push(message);
-        }
+        chat.push(message);
         res.sendStatus(200);
     }
 })
 
 app.get("chat-box/multimedia/:room",(req:Request,res:Response)=>{
-    var id=req.query.multimediaId;
+    var id=(req.query.multimediaId!==undefined)?String(req.query.multimediaId):undefined;
     var vault=multimedia.get(req.params.room);
-    if(vault===undefined||id===undefined){
-        log.c(`Attempt to access multimedia folder that does not exist`);
-        res.sendStatus(404);
-    }else{
-        let multi=String(id);
-        var file=vault.filter(value=>multi===value.id);
-        if(file.length===0){
-            log.c(`Multimedia item of id ${multi} was not found`);
+    getMultimedia(vault,id).then(result=>res.status(200).json(result))
+        .catch(er=>{
+            let err=er as ErrorData;
+            if (err.message==="room_not_found") {
+                log.c(`Attempt to access multimedia folder that does not exist`);
+            } else {
+                log.c(`Multimedia item of id ${err.args} was not found`);
+            }
             res.sendStatus(404);
-        }else{
-            res.status(200).json(file[0]);
-        }
-    }
+        });
 })
 
 
