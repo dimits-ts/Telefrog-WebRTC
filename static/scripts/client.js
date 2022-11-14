@@ -23,13 +23,16 @@ const sendMessageButton = document.getElementById("sendMessage");
 const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 
+let roomId;
+let username;
+
 // ========== CALL HANDLERS ==========
 
 joinRoomButton.onclick = e => {
     e.preventDefault();
 
-    let username = usernameInput.value;
-    let roomId = roomIdInput.value;
+    username = usernameInput.value;
+    roomId = roomIdInput.value;
     console.log("Sending request to join");
 
     const myVideo = document.createElement("video");
@@ -191,15 +194,55 @@ sendMessageButton.addEventListener("click", () => {
 
 
 function sendText(text) {
-    console.log(text);
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "Text");
+    data.append("content", text);
+
+    fetch(URL + "/message/new", { 
+        method: "POST", 
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+    console.log("Sent text : " + text);
 }
 
 
 function sendImage(image) {
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "Image");
+    data.append("content", JSON.stringify(image));
+
+    fetch(URL + "/message/new", { 
+        method: "POST",
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+
     console.log(image);
 }
 
 
 function sendFile(file) {
-    console.log(file);
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", "File");
+    data.append("content", JSON.stringify(file));
+
+    fetch(URL + "/message/new", { 
+        method: "POST",
+        body: data})
+        .then(res => res.json())
+        .then(response => {
+            // TODO: React to response
+        });
+    console.log(image);
 }
