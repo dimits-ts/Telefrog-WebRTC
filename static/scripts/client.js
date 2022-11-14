@@ -11,7 +11,7 @@ const videoGrid = document.getElementById("videoStreams");
 
 const usernameInput = document.getElementById("username_input");
 const roomIdInput = document.getElementById("room_input");
-const errorMessage = document.getElementById("errorMessage");
+const errorMessageArea = document.getElementById("errorMessage");
 
 const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
@@ -27,8 +27,11 @@ joinRoomButton.onclick = e => {
     const myVideo = document.createElement("video");
     myVideo.muted = true;
 
-    //begin streaming
-    connectVideo(username, roomId, myVideo);
+    if (usernameIsValid(username)) 
+        showError("Please enter a valid username.");
+    else
+        //begin streaming
+        connectVideo(username, roomId, myVideo);
 };
 
 createRoomButton.onclick = e => {
@@ -60,21 +63,16 @@ function usernameIsValid(username) {
 
 
 function showError(errorMessage){
-    errorMessage.textContents = errorMessage;
+    errorMessageArea.innerText = errorMessage;
 }
 
 
 function hideErrors() {
-    errorMessage.textContent = "";
+    errorMessageArea.innerText = "";
 }
 
 
 function connectVideo(username, roomId, video) {
-    if (usernameIsValid(username)) {
-        showError("Please enter a valid username.");
-        return;
-    }
-
     let myPeer = new Peer(undefined, {
         host: "/",
         port: "3001"
@@ -94,7 +92,7 @@ function connectVideo(username, roomId, video) {
                 socket.emit("join", message);
 
                 // receive session status from server
-                socket.on("joined-status", (statusCode, statusMessage) => {
+                socket.on("join-status", (statusCode, statusMessage) => {
                     if (statusCode === 200) {
                         hideErrors();
 
