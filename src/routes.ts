@@ -5,10 +5,10 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
     return new Promise<Message[]>((resolve, reject) => {
         var messages = chat.get(room);
         if (messages !== undefined) {
-            if (messages.filter(value => value.messageId === last_message).length !== 0) {
+            if (messages.filter(value => value.message_id === last_message).length !== 0) {
                 var toSend: Message[] = [];
                 for (const m of messages.reverse()) {
-                    if (m.messageId === last_message) break;
+                    if (m.message_id === last_message) break;
                     toSend.push(m);
                 }
                 resolve(toSend);
@@ -50,12 +50,12 @@ export function constructMessage(username: string, message_type: string, content
     var multi: Multimedia | undefined = undefined
     if (type !== MessageType.Text) {
         multi = { id: multi_id, type, contents };
-        message = { messageId: crypto.randomUUID(), poster: String(username), type, contents: multi_id };
+        message = { message_id: crypto.randomUUID(), username: String(username), type, content: multi_id };
         if (title !== undefined) {
             message.title = title;
         }
     } else {
-        message = { messageId: crypto.randomUUID(), poster: String(username), type, contents };
+        message = { message_id: crypto.randomUUID(), username: String(username), type, content:contents };
     }
     return [message, multi];
 }
