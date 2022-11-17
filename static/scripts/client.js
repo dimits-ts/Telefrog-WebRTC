@@ -90,7 +90,7 @@ joinRoomButton.onclick = e => {
     myVideo.muted = true;
 
     if (usernameIsValid(username))
-        showError("Please enter a valid username.");
+        showInputFormError("Please enter a valid username.");
     else
         //begin streaming
         connectVideo(username, roomId, myVideo);
@@ -151,7 +151,7 @@ sendMessageButton.addEventListener("click", () => {
 
 
 function sendFile(URI, type) {
-    let image = new File([URI], URI.name, { type: URI.type, message_type: type});
+    let image = new File([URI], URI.name, { type: URI.type, message_type: type });
     console.log(URI);
     sendMessage("multipart/form-data", type, image);
 }
@@ -173,10 +173,18 @@ function sendMessage(encoding, type, content) {
         headers: headers,
         body: data
     }).then(response => {
-        // TODO: React to response
+        if (!response.ok) {
+            showGeneralError("An error occured while sending the message to the server");
+            console.log("Error while sending message : " + response.text);
+        }
     });
     console.log("Sent message : ");
     console.log(data);
+}
+
+
+function showGeneralError(errorMessage) {
+    alert(errorMessage);
 }
 
 
@@ -205,7 +213,7 @@ function usernameIsValid(username) {
 }
 
 
-function showError(errorMessage) {
+function showInputFormError(errorMessage) {
     errorMessageArea.innerText = errorMessage;
 }
 
@@ -263,12 +271,12 @@ function connectVideo(username, roomId, video) {
                             connectToNewUser(myPeer, peer, stream)
                         });
                     } else {
-                        showError("Cannot join room " + statusCode + ": " + statusMessage);
+                        showInputFormError("Cannot join room " + statusCode + ": " + statusMessage);
                     }
                 });
 
             }).catch(err => {
-                showError("Error while accessing media devices: " + err);
+                showInputFormError("Error while accessing media devices: " + err);
             });
     });
 }
