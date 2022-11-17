@@ -55,7 +55,7 @@ io.on("connection",socket=>{
     });
 })
 
-app.get("chat-box/refresh",(req:Request,res:Response)=>{
+app.get("/chat-box/refresh",(req:Request,res:Response)=>{
     const room=String(req.query.room);
     const last_message=String(req.query.last_message);
     getNewMessages(chats,room,last_message)
@@ -66,7 +66,7 @@ app.get("chat-box/refresh",(req:Request,res:Response)=>{
         });
 });
 
-app.post("chat-box/message/new",(req:Request,res:Response)=>{
+app.post("/chat-box/message/new",(req:Request,res:Response)=>{
     let roomId=req.body.room;
     if (req.body.title!==undefined) {
         var [message,multi]=constructMessage(req.body.username,req.body.type,req.body.contents,req.body.title);
@@ -95,7 +95,7 @@ app.post("chat-box/message/new",(req:Request,res:Response)=>{
     }
 })
 
-app.get("chat-box/multimedia/:room",(req:Request,res:Response)=>{
+app.get("/chat-box/multimedia/:room",(req:Request,res:Response)=>{
     var id=(req.query.multimediaId!==undefined)?String(req.query.multimediaId):undefined;
     var vault=multimedia.get(req.params.room);
     getMultimedia(vault,id).then(result=>res.status(200).json(result))
