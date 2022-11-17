@@ -10,15 +10,15 @@ class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.messages[this.messages.length - 1];
+            return this.#messages[this.#messages.length - 1];
         }
     }
 
     addMessage(message) {
-        let username = message.username;
+        let username = message.poster;
         let type = message.type;
 
-        this.#messages.append(message);
+        this.#messages.push(message);
 
         if (type === "Text") {
             this.#addTextToChat(username, message.content);
@@ -124,19 +124,23 @@ socket.on("user-disconnected", id => {
 sendMessageButton.addEventListener("click", () => {
     // Send any field that is filled
     text = chatInput.value;
-    if (text.trim() !== "")
-        sendText(text);
+    if (text.trim() !== ""){
+        sendMessage(text, "Text");
+    }
 
-
-    for (image of imageInput.files)
-        if (image)
-            sendImage(image);
-
-    for (file of fileInput.files)
-        if (file)
-            sendFile(file)
-
-    // reset input
+    for (image of imageInput.files){
+        if (image){
+            sendMessage(image, "Image");
+        }
+    }
+        
+    for (file of fileInput.files){
+        if (file){
+            sendMessage(file, "File");
+        }
+    }
+        
+    // reset inputs
     chatInput.value = "";
     imageInput.value = "";
     fileInput.value = "";
@@ -144,18 +148,16 @@ sendMessageButton.addEventListener("click", () => {
 
 
 function refreshChat() {
-    console.log("Refreshing chat");
-
     let url = new URL(hostURL + "/chat-box/refresh");
     url.search = new URLSearchParams({
         room_id: roomId,
         last_message: chat.getLastMessageId()
     });
 
-
     fetch(url, { method: "GET" })
         .then(res => res.json())
         .then(list => {
+            console.log(list);
             // if no new messages nothing will happen
             for (message of list) {
                 chat.addMessage(message);
@@ -266,55 +268,25 @@ function connectToNewUser(myPeer, userId, stream) {
     connectedPeers[userId] = call;
 }
 
-
-function sendText(text) {
-    const data = new FormData();
-    data.append("room_id", roomId);
-    data.append("username", username);
-    data.append("message_type", "Text");
-    data.append("content", text);
+function sendMessage(content, type) {
+    const headers = {          
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    
+    const data = {
+        room_id: roomId,
+        username: username,
+        message_type: type,
+        content: content
+    }
 
     fetch(hostURL + "/chat-box/message/new", {
         method: "POST",
-        body: data
+        headers: headers,
+        body: JSON.stringify(data)
     }).then(response => {
         // TODO: React to response
     });
     console.log("Sent text : " + text);
-}
-
-
-function sendImage(image) {
-    const data = new FormData();
-    data.append("room_id", roomId);
-    data.append("username", username);
-    data.append("message_type", "Image");
-    data.append("content", JSON.stringify(image));
-
-    fetch(hostURL + "/chat-box/message/new", {
-        method: "POST",
-        body: data
-    }).then(response => {
-        // TODO: React to response
-    });
-
-    console.log(image);
-}
-
-
-function sendFile(file) {
-    const data = new FormData();
-    data.append("room_id", roomId);
-    data.append("username", username);
-    data.append("message_type", "File");
-    data.append("content", JSON.stringify(file));
-
-    fetch(hostURL + "/message/new", {
-        method: "POST",
-        body: data
-    }).then(response => {
-        // TODO: React to response
-    });
-
-    console.log(image);
 }
