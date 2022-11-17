@@ -66,10 +66,12 @@ app.get("/chat-box/refresh", (req: Request, res: Response) => {
         });
 });
 
-app.post("/chat-box/message/new", (req: Request, res: Response) => {
-    let roomId = req.body.room;
-    if (req.body.title !== undefined) {
-        var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.contents, req.body.title);
+app.post("/chat-box/message/new",(req:Request,res:Response)=>{
+    console.log(req);
+    
+    let roomId=req.body.room_id;
+    if (req.body.title!==undefined) {
+        var [message,multi]=constructMessage(req.body.username,req.body.type,req.body.contents,req.body.title);
     } else {
         var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.contents);
     }
