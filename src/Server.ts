@@ -71,9 +71,9 @@ app.post("/chat-box/message/new", (req: Request, res: Response) => {
 
     let roomId = req.body.room_id;
     if (req.body.title !== undefined) {
-        var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.content, req.body.title);
+        var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content, req.body.title);
     } else {
-        var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.content);
+        var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content);
     }
     let chat = chats.get(roomId);
 
