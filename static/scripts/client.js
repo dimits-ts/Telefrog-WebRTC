@@ -274,7 +274,7 @@ function sendText(text) {
     data.append("message_type", "Text");
     data.append("content", text);
 
-    fetch(hostURL + "/message/new", {
+    fetch(hostURL + "/chat-box/message/new", {
         method: "POST",
         body: data
     }).then(response => {
@@ -291,7 +291,7 @@ function sendImage(image) {
     data.append("message_type", "Image");
     data.append("content", JSON.stringify(image));
 
-    fetch(hostURL + "/message/new", {
+    fetch(hostURL + "/chat-box/message/new", {
         method: "POST",
         body: data
     }).then(response => {
