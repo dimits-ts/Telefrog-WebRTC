@@ -3,11 +3,11 @@ export type Message = {
     type: MessageType;
     username: string;
     content: any;
-    title?:string;
+    title?: string;
 }
 
 export enum MessageType {
-    Text="Text", Image="Image", File="File"
+    Text = "Text", Image = "Image", File = "File"
 }
 
 export type CreateRoomResponse = {
@@ -32,14 +32,14 @@ export type ChatBoxRefreshResponse = {
     newMessages: Message[];
 }
 
-export type Multimedia={
+export type Multimedia = {
     id: string,
     type: MessageType,
-    contents:any
+    contents: any
 }
 
-export type ErrorData={
+export type ErrorData = {
     code: number;
     message: string;
-    args?: any|any[];
+    args?: any | any[];
 }

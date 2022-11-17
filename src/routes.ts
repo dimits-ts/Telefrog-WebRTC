@@ -16,7 +16,7 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
                 resolve(messages);
             }
         } else {
-            reject({code:404,message:"attempted to get data from empty room",}as ErrorData);
+            reject({ code: 404, message: "attempted to get data from empty room", } as ErrorData);
         }
     })
 }
@@ -55,21 +55,21 @@ export function constructMessage(username: string, message_type: string, content
             message.title = title;
         }
     } else {
-        message = { message_id: crypto.randomUUID(), username: String(username), type, content:contents };
+        message = { message_id: crypto.randomUUID(), username: String(username), type, content: contents };
     }
     return [message, multi];
 }
 
-export function getMultimedia(room:Multimedia[]|undefined,id:string|undefined):Promise<Multimedia> {
+export function getMultimedia(room: Multimedia[] | undefined, id: string | undefined): Promise<Multimedia> {
     return new Promise<Multimedia>((resolve, reject) => {
-        if(room===undefined||id===undefined){
-            reject({code:404,message:"item_not_found"}as ErrorData);
-        }else{
-            let multi=String(id);
-            var file=room.filter(value=>multi===value.id);
-            if(file.length===0){
-                reject({code:404,message:"item_not_found",args:multi}as ErrorData);
-            }else{
+        if (room === undefined || id === undefined) {
+            reject({ code: 404, message: "item_not_found" } as ErrorData);
+        } else {
+            let multi = String(id);
+            var file = room.filter(value => multi === value.id);
+            if (file.length === 0) {
+                reject({ code: 404, message: "item_not_found", args: multi } as ErrorData);
+            } else {
                 resolve(file[0]);
             }
         }
