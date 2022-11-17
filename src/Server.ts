@@ -3,7 +3,7 @@ import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import { Message, MessageType, Multimedia, ErrorData } from "./messages";
+import { Message, Multimedia, ErrorData } from "./messages";
 import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
 import body_parser from "body-parser";
 
@@ -71,9 +71,9 @@ app.post("/chat-box/message/new",(req:Request,res:Response)=>{
     
     let roomId=req.body.room_id;
     if (req.body.title!==undefined) {
-        var [message,multi]=constructMessage(req.body.username,req.body.type,req.body.contents,req.body.title);
+        var [message,multi]=constructMessage(req.body.username,req.body.type,req.body.content,req.body.title);
     } else {
-        var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.contents);
+        var [message, multi] = constructMessage(req.body.username, req.body.type, req.body.content);
     }
     let chat = chats.get(roomId);
 
@@ -88,10 +88,10 @@ app.post("/chat-box/message/new",(req:Request,res:Response)=>{
         }
     }
     if (chat === undefined) {
-        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.poster}.`);
+        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
         res.sendStatus(404);
     } else {
-        log.i(`User ${message.poster} submitted text with id ${message.messageId}.`);
+        log.i(`User ${message.username} submitted text with id ${message.message_id}.`);
         chat.push(message);
         res.sendStatus(200);
     }

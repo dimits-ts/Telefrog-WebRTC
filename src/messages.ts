@@ -1,8 +1,8 @@
 export type Message = {
-    messageId: string;
+    message_id: string;
     type: MessageType;
-    poster: string;
-    contents: any;
+    username: string;
+    content: any;
     title?:string;
 }
 

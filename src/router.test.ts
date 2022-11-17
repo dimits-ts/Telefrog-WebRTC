@@ -28,7 +28,7 @@ describe('Create Message Object', () => {
     test('Create a md message file', () => {
         let [msg, multi] = constructMessage("Makrigiorgou", "Text", "Dimitry idk what this means, I asked how to make this test disturbing and he said this I am sry");
         expect(multi).toBe(undefined);
-        expect(msg.poster).toBe("Makrigiorgou");
+        expect(msg.username).toBe("Makrigiorgou");
         expect(msg).toHaveProperty("messageId")
     });
 });
