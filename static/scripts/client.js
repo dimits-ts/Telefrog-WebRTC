@@ -17,7 +17,7 @@ class Chat {
 
     addMessage(message) {
         let username = message.username;
-        let type = message.type;
+        let type = message.message_type;
 
         this.#messages.push(message);
 
@@ -94,7 +94,7 @@ joinRoomButton.onclick = e => {
     else
         //begin streaming
         connectVideo(username, roomId, myVideo);
-    
+
     // perioducally refresh chat showing new messages
     setInterval(refreshChat, CHAT_REFRESH_MS);
 };
@@ -127,22 +127,22 @@ socket.on("user-disconnected", id => {
 sendMessageButton.addEventListener("click", () => {
     // Send any field that is filled
     text = chatInput.value;
-    if (text.trim() !== ""){
+    if (text.trim() !== "") {
         sendMessage("text/plain", "Text", text);
     }
 
-    for (image of imageInput.files){
+    for (image of imageInput.files) {
         if (image) {
             sendFile(image, "Image");
         }
     }
-        
-    for (file of fileInput.files){
+
+    for (file of fileInput.files) {
         if (file) {
             sendFile(file, "File");
         }
     }
-        
+
     // reset inputs
     chatInput.value = "";
     imageInput.value = "";
@@ -151,30 +151,17 @@ sendMessageButton.addEventListener("click", () => {
 
 
 function sendFile(URI, type) {
-    //TODO find name
-    let image=new File([URI],URI.filename,{type:URI.type})
-    sendMessage("multipart/form-data", type, image)
-    // const reader = new FileReader();
-
-    // reader.onload = () => {
-    //     console.log("Parsed file");
-    //     let image=new File(reader.result,URI);
-    //     image.onload(e=>sendMessage("multipart/form-data", type, image))
-    // }
-
-    // reader.onerror = () => {
-    //     console.log("Error while parsing file: " + reader.error);
-    // }
-
-    // reader.readAsDataURL(URI);
+    let image = new File([URI], URI.name, { type: URI.type, message_type: type});
+    console.log(URI);
+    sendMessage("multipart/form-data", type, image);
 }
 
 
 function sendMessage(encoding, type, content) {
-    const headers = {       
+    const headers = {
         'enctype': encoding
     }
-    
+
     const data = new FormData();
     data.append("room_id", roomId);
     data.append("username", username);
