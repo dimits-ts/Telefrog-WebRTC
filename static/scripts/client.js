@@ -15,7 +15,7 @@ class Chat {
     }
 
     addMessage(message) {
-        let username = message.poster;
+        let username = message.username;
         let type = message.type;
 
         this.#messages.push(message);
@@ -119,24 +119,26 @@ socket.on("user-disconnected", id => {
         connectedPeers[id].close();
 });
 
+
 // ========== CHAT HANDLERS ==========
+
 
 sendMessageButton.addEventListener("click", () => {
     // Send any field that is filled
     text = chatInput.value;
     if (text.trim() !== ""){
-        sendMessage(text, "Text");
+        sendMessage("text/plain", "Text", text);
     }
 
     for (image of imageInput.files){
-        if (image){
-            sendMessage(image, "Image");
+        if (image) {
+            sendFile(image, "Image");
         }
     }
         
     for (file of fileInput.files){
-        if (file){
-            sendMessage(file, "File");
+        if (file) {
+            sendFile(file, "File");
         }
     }
         
@@ -145,6 +147,45 @@ sendMessageButton.addEventListener("click", () => {
     imageInput.value = "";
     fileInput.value = "";
 });
+
+
+function sendFile(URI, type) {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        console.log("Parsed file");
+        sendMessage("multipart/form-data", type, reader.result,);
+    }
+
+    reader.onerror = () => {
+        console.log("Error while parsing file: " + reader.error);
+    }
+
+    reader.readAsArrayBuffer(URI);
+}
+
+
+function sendMessage(encoding, type, content) {
+    const headers = {          
+        'enctype': encoding
+    }
+    
+    const data = new FormData();
+    data.append("room_id", roomId);
+    data.append("username", username);
+    data.append("message_type", type);
+    data.append("content", content);
+
+    fetch(hostURL + "/chat-box/message/new", {
+        method: "POST",
+        headers: headers,
+        body: data
+    }).then(response => {
+        // TODO: React to response
+    });
+    console.log("Sent message : ");
+    console.log(data);
+}
 
 
 function refreshChat() {
@@ -266,27 +307,4 @@ function connectToNewUser(myPeer, userId, stream) {
 
     // update connected users
     connectedPeers[userId] = call;
-}
-
-function sendMessage(content, type) {
-    const headers = {          
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }
-    
-    const data = {
-        room_id: roomId,
-        username: username,
-        message_type: type,
-        content: content
-    }
-
-    fetch(hostURL + "/chat-box/message/new", {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data)
-    }).then(response => {
-        // TODO: React to response
-    });
-    console.log("Sent text : " + text);
 }
