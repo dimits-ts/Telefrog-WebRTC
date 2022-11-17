@@ -56,7 +56,7 @@ io.on("connection",socket=>{
 })
 
 app.get("/chat-box/refresh",(req:Request,res:Response)=>{
-    const room=String(req.query.room);
+    const room=String(req.query.room_id);
     const last_message=String(req.query.last_message);
     getNewMessages(chats,room,last_message)
         .then(toSend=>res.status(200).json(toSend))
