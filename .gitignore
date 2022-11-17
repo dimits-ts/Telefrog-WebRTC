@@ -2,3 +2,4 @@ node_modules/
 logging.txt
 out/
 coverage/
+uploads/

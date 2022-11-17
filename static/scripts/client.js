@@ -1,3 +1,4 @@
+
 /**
  *  A class containing the chat messages and displaying new ones to
  *  the HTML chatbox.
@@ -10,7 +11,7 @@ class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.#messages[this.#messages.length - 1];
+            return this.#messages[this.#messages.length - 1].message_id;
         }
     }
 
@@ -150,23 +151,27 @@ sendMessageButton.addEventListener("click", () => {
 
 
 function sendFile(URI, type) {
-    const reader = new FileReader();
+    //TODO find name
+    let image=new File([URI],URI.filename,{type:URI.type})
+    sendMessage("multipart/form-data", type, image)
+    // const reader = new FileReader();
 
-    reader.onload = () => {
-        console.log("Parsed file");
-        sendMessage("multipart/form-data", type, reader.result,);
-    }
+    // reader.onload = () => {
+    //     console.log("Parsed file");
+    //     let image=new File(reader.result,URI);
+    //     image.onload(e=>sendMessage("multipart/form-data", type, image))
+    // }
 
-    reader.onerror = () => {
-        console.log("Error while parsing file: " + reader.error);
-    }
+    // reader.onerror = () => {
+    //     console.log("Error while parsing file: " + reader.error);
+    // }
 
-    reader.readAsArrayBuffer(URI);
+    // reader.readAsDataURL(URI);
 }
 
 
 function sendMessage(encoding, type, content) {
-    const headers = {          
+    const headers = {       
         'enctype': encoding
     }
     

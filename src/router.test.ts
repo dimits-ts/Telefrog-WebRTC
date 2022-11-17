@@ -11,7 +11,7 @@ describe('Create Message Object', () => {
 
         let [msg, multi] = constructMessage("CupcakKe", "File", file_data, "docs.md");
         expect(multi).toBeDefined();
-        expect(msg.type).toBe(MessageType.File);
+        expect(msg.message_type).toBe(MessageType.File);
         if (multi !== undefined)
             expect(multi.id).toBe(msg.content);
         expect(msg.title).toBe("docs.md");
@@ -20,7 +20,7 @@ describe('Create Message Object', () => {
         let file_data: string = String(fs.readFileSync(path.join(__dirname, "../static/resources/frog.PNG")));
         let [msg, multi] = constructMessage("Elfectra", "Image", file_data, path.join(__dirname, "../static/resources/frog.PNG"));
         expect(multi).toBeDefined();
-        expect(msg.type).toBe(MessageType.Image);
+        expect(msg.message_type).toBe(MessageType.Image);
         if (multi !== undefined)
             expect(multi.id).toBe(msg.content);
         expect(msg).toHaveProperty("messageId")

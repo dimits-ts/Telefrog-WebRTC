@@ -6,6 +6,8 @@ import * as logging from "./logging";
 import { Message, Multimedia, ErrorData } from "./messages";
 import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
 import body_parser from "body-parser";
+import multer, { FileFilterCallback } from "multer";
+import { randomUUID } from "crypto";
 
 // Create the server
 const PORT = 8080;
@@ -14,12 +16,21 @@ var http = new ht.Server(app);
 var io = new s.Server(http, {
     maxHttpBufferSize: 10 * 1024 * 1024
 });
+const storage=multer.diskStorage({destination:"./uploads",filename: function (req:Request,file:Express.Multer.File,cb) {
+    
+    cb(null,randomUUID()+".png");
+}});
 
-body_parser.urlencoded({ extended: true })
+const upload= multer({storage,fileFilter:(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
+    if(req.body.message_type==="Text"){
+        cb(null,false);
+    }else{
+        cb(null,true);
+    }
+}})
+
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb" }));
-
-
+app.use(express.urlencoded({extended:true, limit: "10mb" }));
 
 var log: logging.Logging;
 // This is a file logger, if you want to change the path take into account that this will run from out/Server.js
@@ -70,35 +81,24 @@ app.get("/chat-box/refresh", (req: Request, res: Response) => {
 
 
 //Route for reading new Data
-app.post("/chat-box/message/new", (req: Request, res: Response) => {
-    console.log(req);
+app.post("/chat-box/message/new",upload.single("content"), (req: Request, res: Response) => {
+    console.log(req.body);
 
     let roomId = req.body.room_id;
-    if (req.body.title !== undefined) {
+    if (req.body.message_type==="Text") {
         var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content, req.body.title);
-    } else {
-        var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content);
-    }
-    let chat = chats.get(roomId);
-
-    // Add file content to multimedia folder
-    if (multi !== undefined) {
-        let vault: Multimedia[] | undefined = multimedia.get(roomId);
-        if (vault !== undefined) {
-            vault.push(multi);
-        } else {
-            log.c("multimedia channel not found");
-            res.sendStatus(404);
+        StoreMessage(roomId, multi, res, message);
+    } else {   
+        if (req.file===undefined) {
+            res.status(400).send("File could not be uploaded");
+        }else{
+            console.log(req.body);
+            console.log(req.file);
+            var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.file,undefined,req.file.filename);
+            StoreMessage(roomId, multi, res, message);
         }
     }
-    if (chat === undefined) {
-        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
-        res.sendStatus(404);
-    } else {
-        log.i(`User ${message.username} submitted text with id ${message.message_id}.`);
-        chat.push(message);
-        res.sendStatus(200);
-    }
+    
 })
 
 // Getter function for multimedia data
@@ -129,3 +129,26 @@ app.get("/", (req: Request, res: Response) => {
 http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
 });
+
+function StoreMessage(roomId: any, multi: Multimedia | undefined, res: express.Response<any, Record<string, any>>, message: Message) {
+    let chat = chats.get(roomId);
+
+    // Add file content to multimedia folder
+    if (multi !== undefined) {
+        let vault: Multimedia[] | undefined = multimedia.get(roomId);
+        if (vault !== undefined) {
+            vault.push(multi);
+        } else {
+            log.c("multimedia channel not found");
+            res.sendStatus(404);
+        }
+    }
+    if (chat === undefined) {
+        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
+        res.sendStatus(404);
+    } else {
+        log.i(`User ${message.username} submitted text with id ${message.message_id}.`);
+        chat.push(message);
+        res.sendStatus(200);
+    }
+}

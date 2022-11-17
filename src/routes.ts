@@ -32,7 +32,7 @@ export function getUniqueRoomId(rooms: string[]): string {
     return room;
 }
 
-export function constructMessage(username: string, message_type: string, contents: any, title?: string): [Message, Multimedia | undefined] {
+export function constructMessage(username: string, message_type: string, contents: any, title?: string,mediaUUID?:string): [Message, Multimedia | undefined] {
     var type: MessageType;
     switch (message_type) {
         case "Image":
@@ -45,17 +45,17 @@ export function constructMessage(username: string, message_type: string, content
             type = MessageType.Text
             break;
     }
-    let multi_id = crypto.randomUUID();
+    let multi_id = mediaUUID===undefined?crypto.randomUUID():mediaUUID;
     var message: Message;
     var multi: Multimedia | undefined = undefined
     if (type !== MessageType.Text) {
         multi = { id: multi_id, type, contents };
-        message = { message_id: crypto.randomUUID(), username: String(username), type, content: multi_id };
+        message = { message_id: crypto.randomUUID(), username: String(username), message_type:type, content: multi_id };
         if (title !== undefined) {
             message.title = title;
         }
     } else {
-        message = { message_id: crypto.randomUUID(), username: String(username), type, content: contents };
+        message = { message_id: crypto.randomUUID(), username: String(username), message_type:type, content: contents };
     }
     return [message, multi];
 }
