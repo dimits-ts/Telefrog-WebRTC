@@ -1,9 +1,55 @@
-// Configurations
-const URL = "http://localhost:8080"
-const streamConstraints = { audio: true, video: true };
-const CHAT_REFRESH_MS = 500;
+/**
+ *  A class containing the chat messages and displaying new ones to
+ *  the HTML chatbox.
+ */
+class Chat {
+    static NO_MESSAGES_ID = "";
+    #messages = []
 
-const socket = io(URL);
+    getLastMessageId() {
+        if (this.#messages.length == 0) {
+            return Chat.NO_MESSAGES_ID;
+        } else {
+            return this.messages[this.messages.length - 1];
+        }
+    }
+
+    addMessage(message) {
+        let username = message.username;
+        let type = message.type;
+
+        this.#messages.append(message);
+
+        if (type === "Text") {
+            this.#addTextToChat(username, message.content);
+        } else if (type === "Image") {
+            this.#addImageToChat(username, message);
+        } else if (type === "File") {
+            this.#addFileToChat(username, message);
+        } else {
+            throw ("Invalid message type " + type);
+        }
+    }
+
+    #addTextToChat(username, text) {
+        console.log(username, text);
+    }
+
+    #addImageToChat(username, image) {
+        console.log(username, image);
+    }
+
+    #addFileToChat(username, file) {
+        console.log(username, file);
+    }
+}
+
+// Configurations
+const hostURL = "http://localhost:8080"
+const streamConstraints = { audio: true, video: true };
+const CHAT_REFRESH_MS = 2000;
+
+const socket = io(hostURL);
 const connectedPeers = {};
 
 // elements
@@ -29,52 +75,6 @@ const chat = new Chat();
 let roomId;
 let username;
 
-/**
- *  A class containing the chat messages and displaying new ones to
- *  the HTML chatbox.
- */ 
-class Chat {
-    static NO_MESSAGES_ID = "";
-    #messages = []
-
-    getLastMessageId() {
-        if (this.messages.length == 0) {
-            return NO_MESSAGES_ID;
-        } else {
-            return this.messages[this.messages.length - 1];
-        }
-    }
-
-    addMessage(message) {
-        let username = message.username;
-        let type = message.type;
-
-        this.messages.append(message);
-
-        if(type === "Text"){
-            this.#addTextToChat(username, message.content);
-        } else if (type === "Image") {
-            this.#addImageToChat(username, message);
-        } else if (type === "File") {
-            this.#addFileToChat(username, message);
-        } else {
-            throw("Invalid message type " + type);
-        }
-    }
-
-    #addTextToChat(username, text) {
-        console.log(username, text);
-    }
-    
-    #addImageToChat(username, image) {
-        console.log(username, image);
-    }
-    
-    #addFileToChat(username, file) {
-        console.log(username, file);
-    }
-}
-
 
 // ========== CALL HANDLERS ==========
 
@@ -93,13 +93,16 @@ joinRoomButton.onclick = e => {
     else
         //begin streaming
         connectVideo(username, roomId, myVideo);
+    
+    // perioducally refresh chat showing new messages
+    setInterval(refreshChat, CHAT_REFRESH_MS);
 };
 
 createRoomButton.onclick = e => {
     e.preventDefault();
 
     // send to socket
-    fetch(URL + "/room/create", { method: "GET" })
+    fetch(hostURL + "/room/create", { method: "GET" })
         .then(res => res.json())
         .then(response => {
             // place the roomId into the room input area
@@ -139,21 +142,19 @@ sendMessageButton.addEventListener("click", () => {
     fileInput.value = "";
 });
 
-// perioducally refresh chat showing new messages
-timedLoop(CHAT_REFRESH_MS, refreshChat);
-
 
 function refreshChat() {
     console.log("Refreshing chat");
 
-    const data = new FormData();
-    data.append("room_id", roomId);
-    data.append("last_message", chat.getLastMessageId());
+    let url = new URL(hostURL + "/chat-box/refresh");
+    url.search = new URLSearchParams({
+        room_id: roomId,
+        last_message: chat.getLastMessageId()
+    });
 
-    fetch(URL + "/chat-box/refresh", {
-        method: "GET",
-        body: data
-    }).then(res => res.json())
+
+    fetch(url, { method: "GET" })
+        .then(res => res.json())
         .then(list => {
             // if no new messages nothing will happen
             for (message of list) {
@@ -161,6 +162,7 @@ function refreshChat() {
             }
         });
 }
+
 
 function usernameIsValid(username) {
     // check if is whitespace
@@ -264,6 +266,7 @@ function connectToNewUser(myPeer, userId, stream) {
     connectedPeers[userId] = call;
 }
 
+
 function sendText(text) {
     const data = new FormData();
     data.append("room_id", roomId);
@@ -271,7 +274,7 @@ function sendText(text) {
     data.append("message_type", "Text");
     data.append("content", text);
 
-    fetch(URL + "/message/new", {
+    fetch(hostURL + "/message/new", {
         method: "POST",
         body: data
     }).then(response => {
@@ -288,7 +291,7 @@ function sendImage(image) {
     data.append("message_type", "Image");
     data.append("content", JSON.stringify(image));
 
-    fetch(URL + "/message/new", {
+    fetch(hostURL + "/message/new", {
         method: "POST",
         body: data
     }).then(response => {
@@ -306,7 +309,7 @@ function sendFile(file) {
     data.append("message_type", "File");
     data.append("content", JSON.stringify(file));
 
-    fetch(URL + "/message/new", {
+    fetch(hostURL + "/message/new", {
         method: "POST",
         body: data
     }).then(response => {
