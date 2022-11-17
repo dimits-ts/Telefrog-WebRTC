@@ -39,6 +39,7 @@ app.get("/room/create", (req: Request, res: Response) => {
     res.status(200).send({ room });
 })
 
+//Socket io connections
 io.on("connection", socket => {
     socket.on("join", roomObj => {
         if (rooms.filter(value => roomObj.room === value).length === 0) {
@@ -55,6 +56,7 @@ io.on("connection", socket => {
     });
 })
 
+//Callback to refresh the 
 app.get("/chat-box/refresh", (req: Request, res: Response) => {
     const room = String(req.query.room_id);
     const last_message = String(req.query.last_message);
@@ -66,6 +68,8 @@ app.get("/chat-box/refresh", (req: Request, res: Response) => {
         });
 });
 
+
+//Route for reading new Data
 app.post("/chat-box/message/new", (req: Request, res: Response) => {
     console.log(req);
 
@@ -97,6 +101,7 @@ app.post("/chat-box/message/new", (req: Request, res: Response) => {
     }
 })
 
+// Getter function for multimedia data
 app.get("/chat-box/multimedia/:room", (req: Request, res: Response) => {
     var id = (req.query.multimediaId !== undefined) ? String(req.query.multimediaId) : undefined;
     var vault = multimedia.get(req.params.room);
