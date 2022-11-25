@@ -8,6 +8,7 @@ export class Chat {
     #username;
     #roomId;
 
+    #chatboxElement;
     #hostURL;
     #presenter;
     #messages;
@@ -17,7 +18,8 @@ export class Chat {
      * @param {string} hostURL - The remote server's URL 
      * @param {Presenter} presenter - The presenter for the HTML page 
      */
-    constructor(hostURL, presenter) {
+    constructor(chatBoxElement, hostURL, presenter) {
+        this.#chatboxElement = chatBoxElement;
         this.#hostURL = hostURL;
         this.#messages = [];
         this.#presenter = presenter;
@@ -70,7 +72,7 @@ export class Chat {
             .then(list => {
                 console.log(list);
                 // if no new messages nothing will happen
-                for (message of list) {
+                for (let message of list) {
                     this.#addMessage(message);
                 }
             });
@@ -110,13 +112,15 @@ export class Chat {
         data.append("message_type", type);
         data.append("content", content);
 
-        fetch(this.#hostURL + "/chat-box/message/new", {
+        let chatThis = this; // I love javascript I love javascript
+
+        fetch(chatThis.#hostURL + "/chat-box/message/new", {
             method: "POST",
             headers: headers,
             body: data
         }).then(response => {
             if (!response.ok) {
-                this.#presenter.showGeneralError("An error occured while sending the message to the server");
+                chatThis.#presenter.showGeneralError("An error occured while sending the message to the server");
                 console.log("Error while sending message : " + response.text);
             }
         });
@@ -148,7 +152,10 @@ export class Chat {
     }
 
     #addTextToChat(username, text) {
-        console.log(username, text);
+        const message = document.createElement("p");
+        message.innerText = text;
+
+        this.#generateMessage(username, message);
     }
 
     #addImageToChat(username, image) {
@@ -157,5 +164,21 @@ export class Chat {
 
     #addFileToChat(username, file) {
         console.log(username, file);
+    }
+
+    #generateMessage(poster, contents) {
+        const label = document.createElement("p");
+        label.innerText = poster + ":"
+
+        const container = document.createElement("div");
+        container.classList.add("chat-message");
+        container.appendChild(label);
+        container.appendChild(contents);
+
+        this.#appendToChatBox(container);
+    }
+
+    #appendToChatBox(message) {
+        this.#chatboxElement.appendChild(message);
     }
 }

@@ -11,11 +11,12 @@ const socket = io(hostURL);
 const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 const sendMessageButton = document.getElementById("sendMessage");
+const chatBox = document.getElementById("chat-display");
 
 // Globals
 const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
-const chat = new Chat(hostURL, presenter);
+const chat = new Chat(chatBox, hostURL, presenter);
 
 // ========== CALL HANDLERS ==========
 
@@ -35,7 +36,7 @@ joinRoomButton.onclick = e => {
 
     // perioducally refresh chat showing new messages
     // use a lambda for the class context to work
-    setInterval(() => chat.refreshChat, CHAT_REFRESH_MS);
+    setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
     e.preventDefault();
 };
 
