@@ -167,11 +167,15 @@ export class Chat {
     }
 
     #generateMessage(poster, contents) {
-        const label = document.createElement("p");
-        label.innerText = poster + ":"
+        const label = document.createElement("h5");
+        label.innerText = poster + ":";
+        label.classList.add("chat-username-label");
+        if(poster === this.#username){
+            label.classList.add("chat-own-username-label");
+        }
 
         const container = document.createElement("div");
-        container.classList.add("chat-message");
+        container.classList.add("chat-message-container");
         container.appendChild(label);
         container.appendChild(contents);
 
