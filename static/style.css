@@ -69,10 +69,11 @@ fieldset>legend {
     color: red;
 }
 
-/* Video Panel */
+/* Video and Chat Panel */
 
 #videoPanel {
     visibility: hidden;
+    height: 50em;
 }
 
 #roomBanner {
@@ -105,17 +106,17 @@ fieldset>legend {
     padding-bottom: 1.5%;
     box-shadow: 0em 0em 0.3em 0.3em rgba(0, 37, 138, 0.1);
     overflow: hidden;
+    height: 100%;
 }
 
-#chatBox {
-    border: 0.2em black solid;
+#chat-box {
     width: 100%;
+    height: 35em;
 }
 
 #chat-display {
-    height: 30em;
+    height: 80%;
     overflow-y: scroll;
-    overflow-x: auto;
 }
 
 .chat-message-container {
