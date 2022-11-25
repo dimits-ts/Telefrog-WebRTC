@@ -8,6 +8,7 @@ export class Conference {
 
     #username; // useful to keep around
     #roomId;
+    #myPeer;
 
     #socket;
     #presenter;
@@ -32,12 +33,13 @@ export class Conference {
     connect(username, roomId) {
         this.#username = username;
         this.#roomId = roomId;
-
-        let myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
+        
+        // must be created here and not in constructor
+        this.#myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
 
         // Could have extracted the parameters from the presenter but its clearer to 
         // explicitly ask for them in the method
-        myPeer.on("open", peerId => {
+        this.#myPeer.on("open", peerId => {
             console.log("Opened on peer server, sending join request to server");
             let message = {
                 username: username,
@@ -45,7 +47,7 @@ export class Conference {
                 peer: peerId
             };
 
-            this.#setUpStream(myPeer, message);
+            this.#setUpStream(message);
         });
     }
 
@@ -60,10 +62,9 @@ export class Conference {
 
     /**
      * Start streaming self and configure the peer server as to receive and send video.
-     * @param {Peer} myPeer - The user's peer server
      * @param {any} message - A message object as defined by Docs.md
      */
-    #setUpStream(myPeer, message) {
+    #setUpStream( message) {
         let myVideo = document.createElement("video");
         myVideo.muted = true;
 
@@ -81,7 +82,7 @@ export class Conference {
                         this.#addVideoStream(myVideo, stream);
 
                         // set up call
-                        myPeer.on("call", call => {
+                        this.#myPeer.on("call", call => {
                             // listen to incoming streams
                             console.log("called");
                             call.answer(stream);
@@ -109,17 +110,16 @@ export class Conference {
 
     /**
      * Establish a new stream on the user's screen.
-     * @param {Peer} newPeer the connecting peer server
-     * @param {string} userId the connecting user's id
+     * @param {string} peerId the connecting user's peer id
      * @param {MediaSession} stream the connecting user's stream
      */
-    #connectToNewUser(newPeer, userId, stream) {
-        console.log(`Attempt to call user ${userId}`);
-        const call = newPeer.call(userId, stream);
+    #connectToNewUser(peerId, stream) {
+        console.log(`Attempt to call user ${peerId}`);
+        const call = this.#myPeer.call(peerId, stream);
         const video = document.createElement("video");
 
         call.on("stream", userVideoStream => {
-            console.log("Got stream from " + userId);
+            console.log("Got stream from " + peerId);
             this.#addVideoStream(video, userVideoStream);
         });
 
@@ -128,7 +128,7 @@ export class Conference {
         });
 
         // update connected users
-        this.#connectedPeers[userId] = call;
+        this.#connectedPeers[peerId] = call;
     }
 
     /**
