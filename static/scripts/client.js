@@ -4,7 +4,7 @@ import { Chat } from "./modules/chat.mjs";
 
 // Configurations
 const hostURL = "http://localhost:8080"
-const CHAT_REFRESH_MS = 2000;
+const CHAT_REFRESH_MS = 500;
 const socket = io(hostURL);
 
 // Elements

@@ -43,7 +43,6 @@ export class Chat {
      */
     sendFile(URI, type) {
         let image = new File([URI], URI.name, { type: URI.type, message_type: type });
-        console.log(URI);
         this.#sendMessage("multipart/form-data", type, image);
     }
 
@@ -70,7 +69,7 @@ export class Chat {
         fetch(url, { method: "GET" })
             .then(res => res.json())
             .then(list => {
-                console.log(list);
+                if(list.length !== 0) console.log(list);
                 // if no new messages nothing will happen
                 for (let message of list) {
                     this.#addMessage(message);
