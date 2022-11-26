@@ -17,10 +17,34 @@ const chatBox = document.getElementById("chat-display");
 const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
+let login = true;
+
+// Events
+joinRoomButton.onclick = joinRoom;
+createRoomButton.onclick = createRoom;
+sendMessageButton.onclick = sendMessage;
+
+window.addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+
+        if(login)
+            joinRoomButton.click();
+        else
+            sendMessageButton.click();
+    }
+})
+
+// handle disconnect
+socket.on("user-disconnected", id => {
+    console.log("User disconnected " + id);
+    conference.userDisconnected(id);
+});
+
 
 // ========== CALL HANDLERS ==========
 
-joinRoomButton.onclick = e => {
+function joinRoom(e) {
     console.log("Sending request to join");
 
     let username = presenter.getUsername();
@@ -30,6 +54,7 @@ joinRoomButton.onclick = e => {
         presenter.showInputError("Please enter a valid username.");
     }
     else {
+        login = false;
         chat.setUser(username, roomId);
         conference.connect(username, roomId);
     }
@@ -38,9 +63,9 @@ joinRoomButton.onclick = e => {
     // use a lambda for the class context to work
     setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
     e.preventDefault();
-};
+}
 
-createRoomButton.onclick = e => {
+function createRoom(e) {
     // send to socket
     fetch(hostURL + "/room/create", { method: "GET" })
         .then(res => res.json())
@@ -50,19 +75,12 @@ createRoomButton.onclick = e => {
             roomInput.value = response.room;
         });
     e.preventDefault();
-};
-
-// handle disconnect
-socket.on("user-disconnected", id => {
-    console.log("User disconnected " + id);
-    conference.userDisconnected(id);
-});
+}
 
 
 // ========== CHAT HANDLERS ==========
 
-
-sendMessageButton.addEventListener("click", () => {
+function sendMessage() {
     // Send any field that is filled
     let text = presenter.getChatText();
     if (text.trim() !== "") {
@@ -82,8 +100,9 @@ sendMessageButton.addEventListener("click", () => {
     }
 
     presenter.resetChatInputs();
-});
+}
 
+// General functions
 function usernameIsValid(username) {
     // check if is whitespace
     return username.trim().length === 0;
