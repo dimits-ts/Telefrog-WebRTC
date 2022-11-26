@@ -33,12 +33,6 @@ window.addEventListener("keypress", function (event) {
         else
             sendMessageButton.click();
     }
-})
-
-// handle disconnect
-socket.on("user-disconnected", id => {
-    console.log("User disconnected " + id);
-    conference.userDisconnected(id);
 });
 
 

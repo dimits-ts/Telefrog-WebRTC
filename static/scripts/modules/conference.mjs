@@ -33,7 +33,7 @@ export class Conference {
     connect(username, roomId) {
         this.#username = username;
         this.#roomId = roomId;
-        
+
         // must be created here and not in constructor
         this.#myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
 
@@ -49,13 +49,19 @@ export class Conference {
 
             this.#setUpStream(message);
         });
+
+        // handle disconnect
+        this.#socket.on("user-disconnected", id => {
+            console.log("User disconnected " + id);
+            this.#userDisconnected(id);
+        });
     }
 
     /**
      * Remove the display of a disconnected user. 
      * @param {string} userId - The disconnected user's ID 
      */
-    userDisconnected(userId) {
+    #userDisconnected(userId) {
         if (this.#connectedPeers[userId])
             this.#connectedPeers[userId].close();
     }
@@ -64,7 +70,7 @@ export class Conference {
      * Start streaming self and configure the peer server as to receive and send video.
      * @param {any} message - A message object as defined by Docs.md
      */
-    #setUpStream( message) {
+    #setUpStream(message) {
         let myVideo = document.createElement("video");
         myVideo.muted = true;
 
