@@ -74,11 +74,7 @@ app.get("/chat-box/refresh", (req: Request, res: Response) => {
 
     
     getNewMessages(chats, room, last_message)
-        .then(toSend => {
-            console.log(toSend.length);
-            
-            res.status(200).json(toSend)
-        })
+        .then(toSend => res.status(200).json(toSend))
         .catch(err => {
             log.c(err.message);
             res.sendStatus(400);
