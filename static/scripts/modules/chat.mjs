@@ -63,7 +63,7 @@ export class Chat {
 
         url.search = new URLSearchParams({
             roomId: this.#roomId,
-            lastMessage: this.#getLastMessageId()
+            last_message: this.#getLastMessageId()
         });
 
         fetch(url, { method: "GET" })
@@ -85,7 +85,7 @@ export class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.#messages[this.#messages.length - 1].messageId;
+            return this.#messages[this.#messages.length - 1].message_id;
         }
     }
 
@@ -106,7 +106,7 @@ export class Chat {
         }
 
         const data = new FormData();
-        data.append("room_id", this.#roomId);
+        data.append("roomId", this.#roomId);
         data.append("username", this.#username);
         data.append("message_type", type);
         data.append("content", content);
@@ -135,8 +135,8 @@ export class Chat {
      */
     #addMessage(message) {
         let username = message.username;
-        let type = message.messageType;
-        console.log(message.messageId);
+        let type = message.message_type;
+
         this.#messages.push(message);
 
         if (type === "Text") {
@@ -198,7 +198,7 @@ export class Chat {
         let url = new URL(this.#hostURL + "/chat-box/multimedia/");
 
         url.search = new URLSearchParams({
-            room_id: this.#roomId,
+            roomId: this.#roomId,
             multimediaId: fileId
         });
 
