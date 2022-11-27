@@ -33,10 +33,10 @@
 
 - get /room/exit ????? -> status code
 
-- get /chat-box/refresh&room_id=...&last_message=... ->[{username:...,message_id:..., message_type:...,content:...}] empty list if no new messages.
+- get /chat-box/refresh?roomId=...&lastMessage=... ->[{username:...,messageId:..., messageType:...,content:...}] empty list if no new messages.
 
-- post /chat-box/message/new {room_id:...,username:..., message_type:...,content:...} -> status code
+- post /chat-box/message/new {roomId:...,username:..., messageType:...,content:...} -> status code
 
-- get /chat-box/multimedia/:room_id?multimediaId=... {} ->  file
+- get /chat-box/multimedia?:roomId=...&multimediaId=... {} ->  file
 
 - Video Conference: with WebRTC we have the tutorial for one on  one so the challenge is to adjust it to more pc.

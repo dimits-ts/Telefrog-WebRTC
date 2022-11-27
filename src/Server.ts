@@ -5,7 +5,6 @@ import path from "path";
 import * as logging from "./logging";
 import { Message, Multimedia, ErrorData } from "./messages";
 import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
-import body_parser from "body-parser";
 import multer, { FileFilterCallback } from "multer";
 import { randomUUID } from "crypto";
 
@@ -21,8 +20,9 @@ const storage=multer.diskStorage({destination:"./uploads",filename: function (re
     cb(null,randomUUID()+".png");
 }});
 
+
 const upload= multer({storage,fileFilter:(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
-    if(req.body.message_type==="Text"){
+    if(req.body.messageType==="Text"){
         cb(null,false);
     }else{
         cb(null,true);
@@ -34,7 +34,7 @@ app.use(express.urlencoded({extended:true, limit: "10mb" }));
 
 var log: logging.Logging;
 // This is a file logger, if you want to change the path take into account that this will run from out/Server.js
-log = new logging.FileLog(path.join(__dirname, "../logging.txt"))
+log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
 // log=new logging.ConsoleLog();
 var rooms: string[] = [];
@@ -69,8 +69,8 @@ io.on("connection", socket => {
 
 //Callback to refresh the 
 app.get("/chat-box/refresh", (req: Request, res: Response) => {
-    const room = String(req.query.room_id);
-    const last_message = String(req.query.last_message);
+    const room = String(req.query.roomId);
+    const last_message = String(req.query.lastMessage);
     getNewMessages(chats, room, last_message)
         .then(toSend => res.status(200).json(toSend))
         .catch(err => {
@@ -84,27 +84,28 @@ app.get("/chat-box/refresh", (req: Request, res: Response) => {
 app.post("/chat-box/message/new",upload.single("content"), (req: Request, res: Response) => {
     console.log(req.body);
 
-    let roomId = req.body.room_id;
-    if (req.body.message_type==="Text") {
-        var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content, req.body.title);
-        StoreMessage(roomId, multi, res, message);
+    let roomId = req.body.roomId;
+    if (req.body.messageType==="Text") {
+        var [message, multi] = constructMessage(req.body.username, req.body.messageType, req.body.content, req.body.title);
+        console.table(message);
+        storeMessage(roomId, multi, res, message);
     } else {   
         if (req.file===undefined) {
             res.status(400).send("File could not be uploaded");
         }else{
             console.log(req.body);
             console.log(req.file);
-            var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.file,undefined,req.file.filename);
-            StoreMessage(roomId, multi, res, message);
+            var [message, multi] = constructMessage(req.body.username, req.body.messageType, req.file,undefined,req.file.filename);
+            storeMessage(roomId, multi, res, message);
         }
     }
     
 })
 
 // Getter function for multimedia data
-app.get("/chat-box/multimedia/:room", (req: Request, res: Response) => {
+app.get("/chat-box/multimedia", (req: Request, res: Response) => {
     var id = (req.query.multimediaId !== undefined) ? String(req.query.multimediaId) : undefined;
-    var vault = multimedia.get(req.params.room);
+    var vault = multimedia.get(String(req.query.roomId));
     getMultimedia(vault, id).then(result => res.status(200).json(result))
         .catch(er => {
             let err = er as ErrorData;
@@ -130,7 +131,7 @@ http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
 });
 
-function StoreMessage(roomId: any, multi: Multimedia | undefined, res: express.Response<any, Record<string, any>>, message: Message) {
+function storeMessage(roomId: any, multi: Multimedia | undefined, res: express.Response<any, Record<string, any>>, message: Message) {
     let chat = chats.get(roomId);
 
     // Add file content to multimedia folder
@@ -147,7 +148,7 @@ function StoreMessage(roomId: any, multi: Multimedia | undefined, res: express.R
         log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
         res.sendStatus(404);
     } else {
-        log.i(`User ${message.username} submitted text with id ${message.message_id}.`);
+        log.i(`User ${message.username} submitted text with id ${message.messageId}.`);
         chat.push(message);
         res.sendStatus(200);
     }

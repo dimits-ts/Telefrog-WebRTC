@@ -6,29 +6,29 @@ import path from "path"
 
 
 describe('Create Message Object', () => {
-    test('Create a text message file', () => {
+    it('Create a text message file', () => {
         let file_data: string = String(fs.readFileSync(path.join(__dirname, "../Docs/Docs.md"), { encoding: "utf-8" }));
 
         let [msg, multi] = constructMessage("CupcakKe", "File", file_data, "docs.md");
         expect(multi).toBeDefined();
-        expect(msg.message_type).toBe(MessageType.File);
+        expect(msg.messageType).toBe(MessageType.File);
         if (multi !== undefined)
             expect(multi.id).toBe(msg.content);
         expect(msg.title).toBe("docs.md");
     });
-    test('Create an image file', () => {
+    it('Create an image file', () => {
         let file_data: string = String(fs.readFileSync(path.join(__dirname, "../static/resources/frog.PNG")));
         let [msg, multi] = constructMessage("Elfectra", "Image", file_data, path.join(__dirname, "../static/resources/frog.PNG"));
         expect(multi).toBeDefined();
-        expect(msg.message_type).toBe(MessageType.Image);
+        expect(msg.messageType).toEqual(MessageType.Image);
         if (multi !== undefined)
-            expect(multi.id).toBe(msg.content);
+            expect(multi.id).toEqual(msg.content);
         expect(msg).toHaveProperty("messageId")
     });
-    test('Create a md message file', () => {
+    it('Create a md message file', () => {
         let [msg, multi] = constructMessage("Makrigiorgou", "Text", "Dimitry idk what this means, I asked how to make this test disturbing and he said this I am sry");
-        expect(multi).toBe(undefined);
-        expect(msg.username).toBe("Makrigiorgou");
+        expect(multi).not.toBeDefined();
+        expect(msg.username).toEqual("Makrigiorgou");
         expect(msg).toHaveProperty("messageId")
     });
 });
@@ -48,7 +48,7 @@ describe('Get Messages', () => {
     chat.set("ooo1", [constructMessage("Wanda", "Text", "You break the dick and you become daddy...I do it and become the bitch...that doesn't seem fair")[0], constructMessage("dimitrys Gkiwnhs", "Text", "On tonights video we ordered the among us potion from the dark web... and if you drink this among us potion at 3 am you turn into the impostor.")[0], constructMessage("Ma'am", "Text", "How much pussy does this mf get?! We read 0 pussy ma'am. Dear God.")[0], constructMessage("Elfectra", "Image", file_data, path.join(__dirname, "../static/resources/frog.PNG"))[0]]);
     var room = chat.get("ooo1");
     if (room !== undefined) {
-        let messages = room.map(value => value.message_id);
+        let messages = room.map(value => value.messageId);
         it('Should reject if the chat room was not fount ', () => {
             expect(getNewMessages(chat, "sex", "1")).rejects.toBeDefined();
         });

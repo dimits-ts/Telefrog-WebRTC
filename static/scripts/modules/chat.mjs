@@ -62,8 +62,8 @@ export class Chat {
         let url = new URL(this.#hostURL + "/chat-box/refresh");
 
         url.search = new URLSearchParams({
-            room_id: this.#roomId,
-            last_message: this.#getLastMessageId()
+            roomId: this.#roomId,
+            lastMessage: this.#getLastMessageId()
         });
 
         fetch(url, { method: "GET" })
@@ -85,7 +85,7 @@ export class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.#messages[this.#messages.length - 1].message_id;
+            return this.#messages[this.#messages.length - 1].messageId;
         }
     }
 
@@ -135,8 +135,8 @@ export class Chat {
      */
     #addMessage(message) {
         let username = message.username;
-        let type = message.message_type;
-
+        let type = message.messageType;
+        console.log(message.messageId);
         this.#messages.push(message);
 
         if (type === "Text") {
