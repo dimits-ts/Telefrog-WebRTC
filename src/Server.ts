@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import fs from "fs";
 import * as ht from "http";
 import s from "socket.io";
 import path from "path";
@@ -107,7 +108,12 @@ app.post("/chat-box/message/new",upload.single("content"), (req: Request, res: R
 app.get("/chat-box/multimedia", (req: Request, res: Response) => {
     var id = (req.query.multimediaId !== undefined) ? String(req.query.multimediaId) : undefined;
     var vault = multimedia.get(String(req.query.roomId));
-    getMultimedia(vault, id).then(result => res.status(200).json(result))
+    getMultimedia(vault, id).then(result => {
+        console.log(result.contents);
+        fs.readFile(result.contents,(err,data)=>{
+            if (!err)res.status(200).json(data)
+        })
+    })
         .catch(er => {
             let err = er as ErrorData;
             if (err.message === "room_not_found") {
@@ -127,6 +133,18 @@ app.use("/static", express.static(path.join(__dirname, "../static")));
 app.get("/", (req: Request, res: Response) => {
     res.redirect("/static/index.html");
 })
+
+fs.readdir(path.join(__dirname,"../uploads"),(err,files)=>{
+    if(!err){
+        for (const i of files) {
+            fs.unlinkSync(path.join(__dirname,"../uploads",i));
+        }
+    }else{
+        log.c(err.message);
+    }
+    log.i("cleaned the upload folder");
+})
+
 
 http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
