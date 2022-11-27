@@ -71,8 +71,14 @@ io.on("connection", socket => {
 app.get("/chat-box/refresh", (req: Request, res: Response) => {
     const room = String(req.query.roomId);
     const last_message = String(req.query.lastMessage);
+
+    
     getNewMessages(chats, room, last_message)
-        .then(toSend => res.status(200).json(toSend))
+        .then(toSend => {
+            console.log(toSend.length);
+            
+            res.status(200).json(toSend)
+        })
         .catch(err => {
             log.c(err.message);
             res.sendStatus(400);
@@ -87,7 +93,6 @@ app.post("/chat-box/message/new",upload.single("content"), (req: Request, res: R
     let roomId = req.body.roomId;
     if (req.body.messageType==="Text") {
         var [message, multi] = constructMessage(req.body.username, req.body.messageType, req.body.content, req.body.title);
-        console.table(message);
         storeMessage(roomId, multi, res, message);
     } else {   
         if (req.file===undefined) {
