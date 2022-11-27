@@ -69,7 +69,7 @@ export class Chat {
         fetch(url, { method: "GET" })
             .then(res => res.json())
             .then(list => {
-                if(list.length !== 0) console.log(list);
+                if (list.length !== 0) console.log(list);
                 // if no new messages nothing will happen
                 for (let message of list) {
                     this.#addMessage(message);
@@ -157,8 +157,12 @@ export class Chat {
         this.#generateMessage(username, message);
     }
 
-    #addImageToChat(username, image) {
-        console.log(username, image);
+    #addImageToChat(username, imageDetails) {
+        this.#fetchFile(imageDetails.content).then(file => {
+            //const imageElement = document.createElement("img");
+            console.log(imageDetails);
+
+        });
     }
 
     #addFileToChat(username, file) {
@@ -169,7 +173,7 @@ export class Chat {
         const label = document.createElement("h5");
         label.innerText = poster + ":";
         label.classList.add("chat-username-label");
-        if(poster === this.#username){
+        if (poster === this.#username) {
             label.classList.add("chat-own-username-label");
         }
 
@@ -183,5 +187,21 @@ export class Chat {
 
     #appendToChatBox(message) {
         this.#chatboxElement.appendChild(message);
+    }
+
+    /**
+     * Fetches a file from the server.
+     * @param {string} fileId - The id of the file to be retrieved 
+     * @returns a promise that will contain the file
+     */
+    #fetchFile(fileId) {
+        let url = new URL(this.#hostURL + "/chat-box/multimedia/");
+
+        url.search = new URLSearchParams({
+            room_id: this.#roomId,
+            multimediaId: fileId
+        });
+
+        return fetch(url , { method: "GET"}).then(res => res.json());
     }
 }
