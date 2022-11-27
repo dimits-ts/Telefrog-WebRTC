@@ -65,7 +65,7 @@ export class Chat {
             roomId: this.#roomId,
             lastMessage: this.#getLastMessageId()
         });
-
+        console.log(url.search);
         fetch(url, { method: "GET" })
             .then(res => res.json())
             .then(list => {
@@ -106,9 +106,9 @@ export class Chat {
         }
 
         const data = new FormData();
-        data.append("room_id", this.#roomId);
+        data.append("roomId", this.#roomId);
         data.append("username", this.#username);
-        data.append("message_type", type);
+        data.append("messageType", type);
         data.append("content", content);
 
         let chatThis = this; // I love javascript I love javascript
