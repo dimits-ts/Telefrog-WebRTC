@@ -146,7 +146,7 @@ export class Chat {
         } else if (type === "File") {
             this.#addFileToChat(username, message);
         } else {
-            throw ("Invalid message type " + message);
+            throw ("Invalid message type " + message.messageType);
         }
     }
 

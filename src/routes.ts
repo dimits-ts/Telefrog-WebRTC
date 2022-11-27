@@ -7,10 +7,12 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
         if (messages !== undefined) {
             if (messages.filter(value => value.messageId === last_message).length !== 0) {
                 var toSend: Message[] = [];
-                for (const m of messages.reverse()) {
+                messages.reverse()
+                for (const m of messages) {
                     if (m.messageId === last_message) break;
                     toSend.push(m);
                 }
+                messages.reverse();
                 resolve(toSend);
             } else {
                 resolve(messages);
