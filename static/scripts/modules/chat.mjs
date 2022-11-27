@@ -135,7 +135,7 @@ export class Chat {
      */
     #addMessage(message) {
         let username = message.username;
-        let type = message.message_type;
+        let type = message.messageType;
 
         this.#messages.push(message);
 
@@ -146,7 +146,7 @@ export class Chat {
         } else if (type === "File") {
             this.#addFileToChat(username, message);
         } else {
-            throw ("Invalid message type " + message.messageType);
+            throw ("Invalid message type " + message);
         }
     }
 
