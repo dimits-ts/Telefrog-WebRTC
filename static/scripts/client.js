@@ -53,7 +53,7 @@ function joinRoom(e) {
         conference.connect(username, roomId);
     }
 
-    // perioducally refresh chat showing new messages
+    // periodically refresh chat showing new messages
     // use a lambda for the class context to work
     setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
     e.preventDefault();

@@ -119,7 +119,7 @@ export class Chat {
             body: data
         }).then(response => {
             if (!response.ok) {
-                chatThis.#presenter.showGeneralError("An error occured while sending the message to the server");
+                chatThis.#presenter.showGeneralError("An error ocurred while sending the message to the server");
                 console.log("Error while sending message : " + response.text);
             }
         });
