@@ -63,7 +63,7 @@ export class Chat {
 
         url.search = new URLSearchParams({
             roomId: this.#roomId,
-            last_message: this.#getLastMessageId()
+            lastMessage: this.#getLastMessageId()
         });
         console.log(url.search);
         fetch(url, { method: "GET" })
