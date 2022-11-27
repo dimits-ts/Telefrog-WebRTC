@@ -85,7 +85,7 @@ export class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.#messages[this.#messages.length - 1].message_id;
+            return this.#messages[this.#messages.length - 1].messageId;
         }
     }
 
@@ -146,7 +146,7 @@ export class Chat {
         } else if (type === "File") {
             this.#addFileToChat(username, message);
         } else {
-            throw ("Invalid message type " + type);
+            throw ("Invalid message type " + message.messageType);
         }
     }
 
