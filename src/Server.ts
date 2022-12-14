@@ -5,7 +5,7 @@ import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
 import { Message, Multimedia } from "./messages";
-import { constructMessage, getNewMessages, getUniqueRoomId } from "./routes";
+import { constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMessage } from "./routes";
 import multer, { FileFilterCallback } from "multer";
 import { randomUUID } from "crypto";
 
@@ -84,9 +84,7 @@ io.on("connection", socket => {
                 people.set(roomObj.room, person_count + 1)
                 socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
                 socket.on("disconnect", () => {
-                    let person_count = people.get(roomObj.room);
-                    if (person_count != undefined)
-                        people.set(roomObj.room, person_count - 1);
+                    flushUploads(people,roomObj);
                     socket.to(roomObj.room).emit("user-disconnected", roomObj.username, roomObj.peer);
                 });
                 socket.emit("join-status", 200, "OK");
@@ -115,38 +113,17 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
     let roomId = req.body.roomId;
     if (req.body.messageType === "Text") {
         var message = constructMessage(req.body.username, req.body.messageType, req.body.content);
-        storeMessage(roomId, res, message);
+        storeMessage(roomId, res, message,chats,log);
     } else {
         if (req.file === undefined) {
             res.status(400).send("File could not be uploaded");
         } else {
             var message = constructMessage(req.body.username, req.body.messageType, req.file.filename);
-            storeMessage(roomId, res, message);
+            storeMessage(roomId, res, message,chats,log);
         }
     }
 
 })
-
-// Getter function for multimedia data
-// app.get("/chat-box/multimedia", (req: Request, res: Response) => {
-//     var id = (req.query.multimediaId !== undefined) ? String(req.query.multimediaId) : undefined;
-//     var vault = multimedia.get(String(req.query.roomId));
-//     getMultimedia(vault, id).then(result => {
-//         console.log(result.contents);
-//         fs.readFile(result.contents,(err,data)=>{
-//             if (!err)res.status(200).json(data)
-//         })
-//     })
-//         .catch(er => {
-//             let err = er as ErrorData;
-//             if (err.message === "room_not_found") {
-//                 log.c(`Attempt to access multimedia folder that does not exist`);
-//             } else {
-//                 log.c(`Multimedia item of id ${err.args} was not found`);
-//             }
-//             res.sendStatus(404);
-//         });
-// })
 
 
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
@@ -169,14 +146,3 @@ http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
 });
 
-function storeMessage(roomId: any, res: express.Response<any, Record<string, any>>, message: Message) {
-    let chat = chats.get(roomId);
-    if (chat === undefined) {
-        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
-        res.sendStatus(404);
-    } else {
-        log.i(`User ${message.username} submitted text with id ${message.messageId}.`);
-        chat.push(message);
-        res.sendStatus(200);
-    }
-}

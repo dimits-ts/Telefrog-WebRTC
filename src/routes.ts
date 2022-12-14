@@ -1,5 +1,9 @@
-import { Message, MessageType, Multimedia, ErrorData } from "./messages";
+import { Message, MessageType, ErrorData } from "./messages";
 import crypto from "crypto";
+import path from "path";
+import fs from "fs"
+import { Logging } from "./logging";
+import express from "express"
 
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
@@ -54,18 +58,28 @@ export function constructMessage(username: string, message_type: string, content
     return message;
 }
 
-// export function getMultimedia(room: Multimedia[] | undefined, id: string | undefined): Promise<Multimedia> {
-//     return new Promise<Multimedia>((resolve, reject) => {
-//         if (room === undefined || id === undefined) {
-//             reject({ code: 404, message: "item_not_found" } as ErrorData);
-//         } else {
-//             let multi = String(id);
-//             var file = room.filter(value => multi === value.id);
-//             if (file.length === 0) {
-//                 reject({ code: 404, message: "item_not_found", args: multi } as ErrorData);
-//             } else {
-//                 resolve(file[0]);
-//             }
-//         }
-//     })
-// }
+
+export function flushUploads(people:Map<string,number>,roomObj: any) {
+    let person_count = people.get(roomObj.room);
+    if (person_count != undefined)
+        people.set(roomObj.room, person_count - 1);
+    if (person_count == 1) {
+        let p = path.join(__dirname, "../uploads", String(roomObj.room));
+        let contents = fs.readdirSync(p);
+        for (const iterator of contents) {
+            fs.unlinkSync(path.join(p, iterator));
+        }
+    }
+}
+
+export function storeMessage(roomId: any, res: express.Response<any, Record<string, any>>, message: Message,chats:Map<string,Message[]>,log:Logging) {
+    let chat = chats.get(roomId);
+    if (chat === undefined) {
+        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
+        res.sendStatus(404);
+    } else {
+        log.i(`User ${message.username} submitted text with id ${message.messageId}.`);
+        chat.push(message);
+        res.sendStatus(200);
+    }
+}
