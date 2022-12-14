@@ -34,7 +34,7 @@ export function getUniqueRoomId(rooms: string[]): string {
     return room;
 }
 
-export function constructMessage(username: string, message_type: string, contents: any, title?: string,mediaUUID?:string): [Message, Multimedia | undefined] {
+export function constructMessage(username: string, message_type: string, contents: any, title?: string): Message {
     var type: MessageType;
     switch (message_type) {
         case "Image":
@@ -47,33 +47,25 @@ export function constructMessage(username: string, message_type: string, content
             type = MessageType.Text
             break;
     }
-    let multiId = mediaUUID===undefined?crypto.randomUUID():mediaUUID;
     var message: Message;
-    var multi: Multimedia | undefined = undefined
-    if (type !== MessageType.Text) {
-        multi = { id: multiId, type, contents };
-        message = { messageId: crypto.randomUUID(), username: String(username), messageType:type, content: multiId };
-        if (title !== undefined) {
-            message.title = title;
-        }
-    } else {
-        message = { messageId: crypto.randomUUID(), username: String(username), messageType:type, content: contents };
-    }
-    return [message, multi];
+
+    message = { messageId: crypto.randomUUID(), username: String(username), messageType: type, content: contents };
+
+    return message;
 }
 
-export function getMultimedia(room: Multimedia[] | undefined, id: string | undefined): Promise<Multimedia> {
-    return new Promise<Multimedia>((resolve, reject) => {
-        if (room === undefined || id === undefined) {
-            reject({ code: 404, message: "item_not_found" } as ErrorData);
-        } else {
-            let multi = String(id);
-            var file = room.filter(value => multi === value.id);
-            if (file.length === 0) {
-                reject({ code: 404, message: "item_not_found", args: multi } as ErrorData);
-            } else {
-                resolve(file[0]);
-            }
-        }
-    })
-}
+// export function getMultimedia(room: Multimedia[] | undefined, id: string | undefined): Promise<Multimedia> {
+//     return new Promise<Multimedia>((resolve, reject) => {
+//         if (room === undefined || id === undefined) {
+//             reject({ code: 404, message: "item_not_found" } as ErrorData);
+//         } else {
+//             let multi = String(id);
+//             var file = room.filter(value => multi === value.id);
+//             if (file.length === 0) {
+//                 reject({ code: 404, message: "item_not_found", args: multi } as ErrorData);
+//             } else {
+//                 resolve(file[0]);
+//             }
+//         }
+//     })
+// }

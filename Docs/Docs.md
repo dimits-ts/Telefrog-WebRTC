@@ -35,8 +35,8 @@
 
 - get /chat-box/refresh?roomId=...&lastMessage=... ->[{username:...,messageId:..., messageType:...,content:...}] empty list if no new messages.
 
-- post /chat-box/message/new {roomId:...,username:..., messageType:...,content:...} -> status code
+- post /chat-box/message/new {roomId:...,username:..., messageType:...,content:...,title?:...} -> status code
 
-- get /chat-box/multimedia?:roomId=...&multimediaId=... {} ->  file
+- get multimedia by href="<url>/media/:roomId/:contents"
 
 - Video Conference: with WebRTC we have the tutorial for one on  one so the challenge is to adjust it to more pc.
