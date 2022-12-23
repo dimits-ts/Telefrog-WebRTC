@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
         cb(null, paths);
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
         let name=Buffer.from(file.originalname,"latin1").toString(`utf8`)
-        cb(null, `${randomUUID()}_${name}`);
+        cb(null, `${randomUUID()}~${name}`);
     }
 });
 
