@@ -19,15 +19,24 @@
 
     <script id="text-template" type="text/x-handlebars-template">
         <div class="chat-message-container">
-            <h5 class="chat-username-label">{{poster}}</h5>
-            <p>{{contents}}</p>
+            {{#if isSelf}}
+                <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
+            {{else}}
+                <h5 class="chat-username-label" >{{username}}</h5>
+            {{/if}}
+            <p>{{content}}</p>
         </div>
     </script>
 
     <script id="image-template" type="text/x-handlebars-template">
         <div class="chat-message-container">
-            <h5 class="chat-username-label">{{poster}}</h5>
-            <img src="{{contents}}" alt="{{fileName}}">{{contents}}</p>
+            {{#if isSelf}}
+                <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
+            {{else}}
+                <h5 class="chat-username-label" >{{username}}</h5>
+            {{/if}}
+            
+            <img src="{{contents}}" alt="{{fileName}}">{{content}}</p>
         </div>
     </script>
 

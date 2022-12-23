@@ -140,12 +140,13 @@ export class Chat {
      */
     async #addMessage(message) {
         let type = message.messageType
+        message.isSelf = message.username === this.#username
 
         // save the message
         this.#messages.push(message);
 
         // images need to be immediately displayed so we need to request a different object
-        if(type == "Image"){
+        if(type === "Image"){
             message = await this.#fetchFile(message.messageId)
         }
 
