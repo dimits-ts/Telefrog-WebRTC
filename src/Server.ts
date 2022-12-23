@@ -103,7 +103,7 @@ app.get("/chat-box/refresh", async (req: Request, res: Response) => {
         let toSend = await getNewMessages(chats, room, last_message)
         res.status(200).json(toSend)
     } catch (e: any) {
-        log.c(e)
+        log.c(e.message)
     }
 });
 
