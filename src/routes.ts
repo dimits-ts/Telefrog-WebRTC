@@ -68,9 +68,11 @@ export function flushUploads(people: Map<string, number>, roomObj: any) {
         people.set(roomObj.room, person_count - 1);
     if (person_count == 1) {
         let p = path.join(__dirname, "../uploads", String(roomObj.room));
-        let contents = fs.readdirSync(p);
-        for (const iterator of contents) {
-            fs.unlinkSync(path.join(p, iterator));
+        if (fs.existsSync(p)){
+            let contents = fs.readdirSync(p);
+            for (const iterator of contents) {
+                fs.unlinkSync(path.join(p, iterator));
+            }
         }
     }
 }
