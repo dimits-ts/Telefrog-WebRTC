@@ -8,6 +8,7 @@ import {Message, Multimedia} from "./messages";
 import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMessage} from "./routes";
 import multer, {FileFilterCallback} from "multer";
 import {randomUUID} from "crypto";
+import {Buffer} from "buffer";
 
 // Create the server
 const PORT = 8080;
@@ -24,7 +25,8 @@ const storage = multer.diskStorage({
             fs.mkdirSync(paths);
         cb(null, paths);
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
-        cb(null, `${randomUUID()}_${file.originalname}`);
+        let name=Buffer.from(file.originalname,"latin1").toString(`utf8`)
+        cb(null, `${randomUUID()}#${name}`);
     }
 });
 
