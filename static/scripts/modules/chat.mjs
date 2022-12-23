@@ -138,17 +138,14 @@ export class Chat {
      * @param {Message} message - The message to be displayed
      * @throws if the message's type is invalid
      */
-    async #addMessage(message) {
-        let type = message.messageType
-        message.isSelf = message.username === this.#username
-
+    #addMessage(message) {
         // save the message
         this.#messages.push(message);
 
-        // images need to be immediately displayed so we need to request a different object
-        if(type === "Image"){
-            message = await this.#fetchFile(message.messageId)
-        }
+        let type = message.messageType
+        message.isSelf = message.username === this.#username
+        message.hostURL = this.#hostURL
+        message.roomId = this.#roomId
 
         // get HTML representation
         let compiledTemplate = Handlebars.compile(Chat.TEMPLATES[type])
