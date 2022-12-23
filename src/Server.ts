@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
         cb(null, paths);
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
         let name=Buffer.from(file.originalname,"latin1").toString(`utf8`)
-        cb(null, `${randomUUID()}#${name}`);
+        cb(null, `${randomUUID()}_${name}`);
     }
 });
 
@@ -46,7 +46,6 @@ app.use(express.urlencoded({extended: true, limit: "10mb"}));
 //Define where the static html content will be found.
 app.use("/static", express.static(path.join(__dirname, "../static")));
 app.use("/media", express.static(path.join(__dirname, "../uploads")));
-
 //This method redirects you to the html page when you enter localhost:8080
 
 let log: logging.Logging;

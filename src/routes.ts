@@ -7,16 +7,15 @@ import express from "express"
 
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-        var messages = chat.get(room);
+        let messages = chat.get(room);
         if (messages !== undefined) {
             if (messages.filter(value => value.messageId === last_message).length !== 0) {
-                var toSend: Message[] = [];
-                messages.reverse()
-                for (const m of messages) {
+                let toSend: Message[] = [];
+                let stack=messages.slice().reverse()
+                for (const m of stack) {
                     if (m.messageId === last_message) break;
                     toSend.push(m);
                 }
-                messages.reverse();
                 resolve(toSend);
             } else {
                 resolve(messages);
@@ -68,9 +67,11 @@ export function flushUploads(people: Map<string, number>, roomObj: any) {
         people.set(roomObj.room, person_count - 1);
     if (person_count == 1) {
         let p = path.join(__dirname, "../uploads", String(roomObj.room));
-        let contents = fs.readdirSync(p);
-        for (const iterator of contents) {
-            fs.unlinkSync(path.join(p, iterator));
+        if (fs.existsSync(p)){
+            let contents = fs.readdirSync(p);
+            for (const iterator of contents) {
+                fs.unlinkSync(path.join(p, iterator));
+            }
         }
     }
 }
