@@ -4,6 +4,11 @@
  */
 export class Chat {
     static NO_MESSAGES_ID = "";
+    static TEMPLATES = {
+        "Text": document.getElementById("text-template").textContent,
+        "Image": document.getElementById("image-template").textContent,
+        "File": document.getElementById("file-template").textContent
+    }
 
     #username;
     #roomId;
@@ -65,7 +70,7 @@ export class Chat {
             roomId: this.#roomId,
             lastMessage: this.#getLastMessageId()
         });
-        console.log(url.search);
+
         fetch(url, { method: "GET" })
             .then(res => res.json())
             .then(list => {
@@ -133,60 +138,30 @@ export class Chat {
      * @param {Message} message - The message to be displayed
      * @throws if the message's type is invalid
      */
-    #addMessage(message) {
-        let username = message.username;
-        let type = message.messageType;
+    async #addMessage(message) {
+        let type = message.messageType
 
+        // save the message
         this.#messages.push(message);
 
-        if (type === "Text") {
-            this.#addTextToChat(username, message.content);
-        } else if (type === "Image") {
-            this.#addImageToChat(username, message);
-        } else if (type === "File") {
-            this.#addFileToChat(username, message);
-        } else {
-            throw ("Invalid message type " + message.messageType);
-        }
-    }
-
-    #addTextToChat(username, text) {
-        const message = document.createElement("p");
-        message.innerText = text;
-
-        this.#generateMessage(username, message);
-    }
-
-    #addImageToChat(username, imageDetails) {
-        this.#fetchFile(imageDetails.content).then(file => {
-            //const imageElement = document.createElement("img");
-            console.log(imageDetails);
-
-        });
-    }
-
-    #addFileToChat(username, file) {
-        console.log(username, file);
-    }
-
-    #generateMessage(poster, contents) {
-        const label = document.createElement("h5");
-        label.innerText = poster + ":";
-        label.classList.add("chat-username-label");
-        if (poster === this.#username) {
-            label.classList.add("chat-own-username-label");
+        // images need to be immediately displayed so we need to request a different object
+        if(type == "Image"){
+            message = await this.#fetchFile(message.messageId)
         }
 
-        const container = document.createElement("div");
-        container.classList.add("chat-message-container");
-        container.appendChild(label);
-        container.appendChild(contents);
+        // get HTML representation
+        let compiledTemplate = Handlebars.compile(Chat.TEMPLATES[type])
+        let html = compiledTemplate(message)
 
-        this.#appendToChatBox(container);
+        // add HTML to chatbox
+        const container = document.createElement("div")
+        container.innerHTML = html
+        this.#appendToChatBox(container)
+
     }
 
-    #appendToChatBox(message) {
-        this.#chatboxElement.appendChild(message);
+    #appendToChatBox(messageContainer) {
+        this.#chatboxElement.appendChild(messageContainer);
     }
 
     /**
@@ -195,13 +170,8 @@ export class Chat {
      * @returns a promise that will contain the file
      */
     #fetchFile(fileId) {
-        let url = new URL(this.#hostURL + "/chat-box/multimedia/");
-
-        url.search = new URLSearchParams({
-            roomId: this.#roomId,
-            multimediaId: fileId
-        });
-
-        return fetch(url , { method: "GET"}).then(res => res.json());
+        let url = new URL(this.#hostURL + "/chat-box/multimedia/" + this.#roomId
+            + "/" + fileId);
+        return fetch(url, { method: "GET" }).then(res => res.json());
     }
 }
