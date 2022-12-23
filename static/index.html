@@ -24,6 +24,8 @@
             {{else}}
                 <h5 class="chat-username-label" >{{username}}</h5>
             {{/if}}
+            <p class="timestamp">{{timestamp}}</p>
+
             <p>{{content}}</p>
         </div>
     </script>
@@ -35,13 +37,30 @@
             {{else}}
                 <h5 class="chat-username-label" >{{username}}</h5>
             {{/if}}
-            
-            <img src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{hostURL}}/media/{{roomId}}/{{content}}"></img>
+            <p class="timestamp">{{timestamp}}</p>
+
+            <img src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}"></img>
         </div>
     </script>
 
     <script id="file-template" type="text/x-handlebars-template">
+        <div class="chat-message-container">
+            {{#if isSelf}}
+                <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
+            {{else}}
+                <h5 class="chat-username-label" >{{username}}</h5>
+            {{/if}}
+            <p class="timestamp">{{timestamp}}</p>
 
+            <div class="file-preview">
+                <img src="resources/file_icon.png" alt="file">
+                <p>{{fileName}}</p>
+                <button onclick="window.open('{{hostURL}}/media/{{roomId}}/{{content}}', '_blank')">
+                    Open File
+                </button>
+            </div>
+
+        </div>
     </script>
 </head>
 
