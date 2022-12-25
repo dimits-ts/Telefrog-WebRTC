@@ -115,7 +115,7 @@ fieldset>legend {
 }
 
 #chat-display {
-    height: 80%;
+    height: 100%;
     overflow-y: scroll;
 }
 
@@ -127,6 +127,10 @@ fieldset>legend {
     margin-top: 0em;
 }
 
+.chat-message-container>img {
+    width: 100%;
+}
+
 .chat-username-label {
     font-weight: bold;
     font-size: 1.2em;
@@ -136,6 +140,27 @@ fieldset>legend {
 
 .chat-own-username-label {
     color: green;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: grey;
+}
+
+.file-preview {
+    background-color: whitesmoke;
+    width: 75%;
+    border-radius: 2em;
+    border-style: ridge;
+    padding: 5%;
+}
+
+.file-preview>img {
+    width: 50%;
+}
+
+.file-preview>button {
+    background-color: grey;
 }
 
 #text-input-area {

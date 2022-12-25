@@ -146,6 +146,8 @@ export class Chat {
         message.isSelf = message.username === this.#username
         message.hostURL = this.#hostURL
         message.roomId = this.#roomId
+        message.timestamp = new Date().toLocaleTimeString()
+        message.fileName = message.content.split("~")[1]
 
         // get HTML representation
         let compiledTemplate = Handlebars.compile(Chat.TEMPLATES[type])
@@ -155,21 +157,10 @@ export class Chat {
         const container = document.createElement("div")
         container.innerHTML = html
         this.#appendToChatBox(container)
-
     }
 
     #appendToChatBox(messageContainer) {
         this.#chatboxElement.appendChild(messageContainer);
     }
 
-    /**
-     * Fetches a file from the server.
-     * @param {string} fileId - The id of the file to be retrieved 
-     * @returns a promise that will contain the file
-     */
-    #fetchFile(fileId) {
-        let url = new URL(this.#hostURL + "/chat-box/multimedia/" + this.#roomId
-            + "/" + fileId);
-        return fetch(url, { method: "GET" }).then(res => res.json());
-    }
 }
