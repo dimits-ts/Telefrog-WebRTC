@@ -4,7 +4,7 @@ import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import {Message, Multimedia} from "./messages";
+import {Message} from "./messages";
 import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMessage} from "./routes";
 import multer, {FileFilterCallback} from "multer";
 import {randomUUID} from "crypto";
@@ -20,13 +20,26 @@ const io = new s.Server(http, {
 
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
-        let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
-        if (!fs.existsSync(paths))
-            fs.mkdirSync(paths);
-        cb(null, paths);
+        if (req.path === "/user") {
+            let paths = path.join(__dirname, `../uploads/${crypto.randomUUID()}/`)
+            if (!fs.existsSync(paths))
+                fs.mkdirSync(paths);
+            cb(null, paths);
+        } else {
+            let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
+            if (!fs.existsSync(paths))
+                fs.mkdirSync(paths);
+            cb(null, paths);
+        }
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
-        let name=Buffer.from(file.originalname,"latin1").toString(`utf8`)
-        cb(null, `${randomUUID()}~${name}`);
+        if (req.path === "/user") {
+            let name = file.originalname.split(".")
+            let suffix = name[name.length - 1];
+            cb(null, `profile.${suffix}`);
+        } else {
+            let name = Buffer.from(file.originalname, "latin1").toString(`utf8`)
+            cb(null, `${randomUUID()}~${name}`);
+        }
     }
 });
 
@@ -48,15 +61,13 @@ app.use("/static", express.static(path.join(__dirname, "../static")));
 app.use("/media", express.static(path.join(__dirname, "../uploads")));
 //This method redirects you to the html page when you enter localhost:8080
 
-let log: logging.Logging;
 // This is a file logger, if you want to change the path take into account that this will run from out/Server.js
-log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
+export const log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
-// log=new logging.ConsoleLog();
-var rooms: string[] = [];
-var people: Map<string, number> = new Map()
-var chats: Map<string, Message[]> = new Map();
-var multimedia: Map<string, Multimedia[]> = new Map();
+// export const log=new logging.ConsoleLog();
+const rooms: string[] = [];
+const people: Map<string, number> = new Map();
+const chats: Map<string, Message[]> = new Map();
 
 app.get("/", (req: Request, res: Response) => {
     res.redirect("/static/index.html");
@@ -64,10 +75,9 @@ app.get("/", (req: Request, res: Response) => {
 
 app.get("/room/create", (req: Request, res: Response) => {
     // Create room id
-    var room: string = getUniqueRoomId(rooms);
+    const room: string = getUniqueRoomId(rooms);
     people.set(room, 0);
     chats.set(room, []);
-    multimedia.set(room, []);
     log.i("Created room " + room);
     res.status(200).send({room});
 })
@@ -123,8 +133,13 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
             storeMessage(roomId, res, message, chats, log);
         }
     }
-
 })
+
+
+app.post("/user", upload.single("profile"), (req: Request, res: Response) => {
+    log.i(`Request to register user with id ${req.body.username}`);
+    res.sendStatus(200)
+});
 
 
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
