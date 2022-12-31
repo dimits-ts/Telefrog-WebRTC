@@ -40,10 +40,14 @@ export class Presenter {
     /**
     * Add a new video element along with its corresponding media stream to the screen.
     * @param {string} username - The username of the connecting user
-    * @param {HTMLElement} video - The video element
     * @param {MediaSession} stream - The corresponding media stream
+    * @param {boolean} isMuted - Whether the video is muted
+    * @return the stream HTML element that was created
     */
-    addVideoElement(username, video, stream) {
+    addVideoElement(username, stream, isMuted) {
+        const video = document.createElement("video");
+        video.muted = isMuted;
+
         const streamContainer = document.createElement("div");
         streamContainer.classList.add("stream-container");
 
@@ -58,6 +62,8 @@ export class Presenter {
         streamContainer.appendChild(video);
         streamContainer.appendChild(usernameContainer);
         this.#videoGrid.append(streamContainer);
+
+        return video;
     }
 
     /**

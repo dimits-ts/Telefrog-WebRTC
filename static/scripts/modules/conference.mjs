@@ -73,9 +73,6 @@ export class Conference {
      * @param {any} message - A message object as defined by Docs.md
      */
     #setUpStream(message) {
-        const myVideo = document.createElement("video");
-        myVideo.muted = true;
-
         navigator.mediaDevices.getUserMedia(Conference.STREAM_CONSTRAINTS)
             .then(stream => {
                 // request session from server
@@ -87,7 +84,7 @@ export class Conference {
                         this.#presenter.showConnected("Connected to room " + this.#roomId);
 
                         // set up video streams
-                        this.#addVideoStream(this.#username, myVideo, stream);
+                        this.#addVideoStream(this.#username, stream, true);
 
                         // set up call
                         this.#myPeer.on("call", call => {
@@ -95,9 +92,8 @@ export class Conference {
                             call.answer(stream);
 
                             // respond to incoming streams
-                            const video = document.createElement("video");
                             call.on("stream", userVideoStream => {
-                                this.#addVideoStream(this.#username, video, userVideoStream);
+                                this.#addVideoStream(this.#username, userVideoStream);
                             });
                         });
 
@@ -122,34 +118,36 @@ export class Conference {
      * @param {MediaSession} stream the connecting user's stream
      */
     #connectToNewUser(username, peerId, stream) {
+        let streamElement
         console.log(`Attempt to call user ${peerId}`);
         const call = this.#myPeer.call(peerId, stream);
-        const video = document.createElement("video");
 
         call.on("stream", userVideoStream => {
             console.log("Got stream from " + peerId);
-            this.#addVideoStream(username, video, userVideoStream);
+            streamElement = this.#addVideoStream(username, userVideoStream);
         });
 
         call.on("close", () => {
-            video.remove();
+            if(streamElement !== undefined)
+                streamElement.remove();
         });
 
         // update connected users
         this.#connectedPeers[peerId] = call;
     }
 
-    /**
-     * Add a new video element along with its corresponding media stream to the screen.
-     * @param {string} username - The name of the user that connected
-     * @param {HTMLElement} video - The video element
-     * @param {MediaStream} stream - The corresponding media stream
-     */
-    #addVideoStream(username, video, stream) {
+   /**
+    * Add a new video element along with its corresponding media stream to the screen.
+    * @param {string} username - The username of the connecting user
+    * @param {MediaSession} stream - The corresponding media stream
+    * @param {boolean} isMuted - Whether the video is muted
+    * @return the stream HTML element that was created, undefined if not created 
+    */
+    #addVideoStream(username, stream, isMuted = false) {
         // avoid bug with duplicate calls because of peer server call impl
         if(stream.id !== this.#lastStreamId) {
             this.#lastStreamId = stream.id;
-            this.#presenter.addVideoElement(username, video, stream);
+            return this.#presenter.addVideoElement(username, stream, isMuted);
         }
     }
 }
