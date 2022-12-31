@@ -14,6 +14,8 @@ export class Conference {
     #presenter;
     #connectedPeers;
 
+    #lastStreamId
+
     /**
      * Initialize the data structures before establishing connection to remote server.
      * @param {Socket} socket - A socket connected to the server
@@ -71,7 +73,7 @@ export class Conference {
      * @param {any} message - A message object as defined by Docs.md
      */
     #setUpStream(message) {
-        let myVideo = document.createElement("video");
+        const myVideo = document.createElement("video");
         myVideo.muted = true;
 
         navigator.mediaDevices.getUserMedia(Conference.STREAM_CONSTRAINTS)
@@ -85,24 +87,23 @@ export class Conference {
                         this.#presenter.showConnected("Connected to room " + this.#roomId);
 
                         // set up video streams
-                        this.#addVideoStream(myVideo, stream);
+                        this.#addVideoStream(this.#username, myVideo, stream);
 
                         // set up call
                         this.#myPeer.on("call", call => {
                             // listen to incoming streams
-                            console.log("called");
                             call.answer(stream);
 
                             // respond to incoming streams
                             const video = document.createElement("video");
                             call.on("stream", userVideoStream => {
-                                this.#addVideoStream(video, userVideoStream);
+                                this.#addVideoStream(this.#username, video, userVideoStream);
                             });
                         });
 
                         // when other user connects
                         this.#socket.on("user-connected", (username, peer) => {
-                            this.#connectToNewUser(peer, stream);
+                            this.#connectToNewUser(username, peer, stream);
                         });
                     } else {
                         this.#presenter.showInputError("Cannot join room : " + statusMessage);
@@ -116,17 +117,18 @@ export class Conference {
 
     /**
      * Establish a new stream on the user's screen.
+     * @param {string} username - The name of the user that connected
      * @param {string} peerId the connecting user's peer id
      * @param {MediaSession} stream the connecting user's stream
      */
-    #connectToNewUser(peerId, stream) {
+    #connectToNewUser(username, peerId, stream) {
         console.log(`Attempt to call user ${peerId}`);
         const call = this.#myPeer.call(peerId, stream);
         const video = document.createElement("video");
 
         call.on("stream", userVideoStream => {
             console.log("Got stream from " + peerId);
-            this.#addVideoStream(video, userVideoStream);
+            this.#addVideoStream(username, video, userVideoStream);
         });
 
         call.on("close", () => {
@@ -139,10 +141,15 @@ export class Conference {
 
     /**
      * Add a new video element along with its corresponding media stream to the screen.
+     * @param {string} username - The name of the user that connected
      * @param {HTMLElement} video - The video element
-     * @param {MediaSession} stream - The corresponding media stream
+     * @param {MediaStream} stream - The corresponding media stream
      */
-    #addVideoStream(video, stream) {
-        this.#presenter.addVideoElement(video, stream);
+    #addVideoStream(username, video, stream) {
+        // avoid bug with duplicate calls because of peer server call impl
+        if(stream.id !== this.#lastStreamId) {
+            this.#lastStreamId = stream.id;
+            this.#presenter.addVideoElement(username, video, stream);
+        }
     }
 }

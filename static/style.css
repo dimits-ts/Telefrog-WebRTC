@@ -86,14 +86,30 @@ fieldset>legend {
 }
 
 #videoStreams {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
-/* Fixed width to fit more calls in bigger displays */
-#videoStreams>video {
-    width: 25em;
-    margin-right: 2%;
+.stream-container {
+    position: relative;
+    width: 95%;
+    margin-right: 5%;
+}
+
+.stream-container>video {
+    width: 100%;
+}
+
+.stream-container>p {
+    font-size: 2em;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #002e63;
+    color: white;
+    border-radius: 0.2em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0px;
 }
 
 /* Chat Box */

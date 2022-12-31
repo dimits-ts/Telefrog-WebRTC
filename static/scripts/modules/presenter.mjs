@@ -39,15 +39,25 @@ export class Presenter {
 
     /**
     * Add a new video element along with its corresponding media stream to the screen.
+    * @param {string} username - The username of the connecting user
     * @param {HTMLElement} video - The video element
     * @param {MediaSession} stream - The corresponding media stream
     */
-    addVideoElement(video, stream) {
+    addVideoElement(username, video, stream) {
+        const streamContainer = document.createElement("div");
+        streamContainer.classList.add("stream-container");
+
+        const usernameContainer = document.createElement("p");
+        usernameContainer.innerText = username;
+
         video.srcObject = stream;
         video.addEventListener("loadedmetadata", () => {
             video.play();
         });
-        this.#videoGrid.append(video);
+
+        streamContainer.appendChild(video);
+        streamContainer.appendChild(usernameContainer);
+        this.#videoGrid.append(streamContainer);
     }
 
     /**
