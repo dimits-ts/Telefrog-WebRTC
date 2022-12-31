@@ -191,8 +191,8 @@ function isLink(string) {
 }
 
 /**
- * Check whether a file is a video.
- * @param {File} file the file to be examined 
+ * Check whether a file is a video based on its extension.
+ * @param {str} filename the name of the file to be examined 
  * @returns true if the file is a video
  */
 function isVideo(filename) {
@@ -200,12 +200,22 @@ function isVideo(filename) {
     return videoExtensions.includes(getExtension(filename));
 }
 
+/**
+ * Check whether a file is an image based on its extension.
+ * @param {str} filename he name of the file to be examined 
+ * @returns true if the file is an image
+ */
 function isImage(filename) {
     const imageExtensions = ['jpg', 'png' ,'jpeg' , "webp", "tiff", "psd", "raw",
     "bmp", "heif", "indd", "svg"]
     return imageExtensions.includes(getExtension(filename));
 }
 
+/**
+ * Get the extension of a file.
+ * @param {str} filename the name of the file 
+ * @returns the extension (without the dot)
+ */
 function getExtension(filename){
     let parts = filename.toLowerCase().split('.');
     return parts[parts.length - 1];
