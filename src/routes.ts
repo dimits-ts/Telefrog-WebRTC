@@ -1,9 +1,11 @@
-import {Message, MessageType, ErrorData} from "./messages";
+import {ErrorData, Message, MessageType} from "./messages";
 import crypto from "crypto";
 import path from "path";
 import fs from "fs"
 import {Logging} from "./logging";
 import express from "express"
+import {User} from "./model/User"
+import {register, signin} from "./mongussy";
 
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
@@ -11,7 +13,7 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
         if (messages !== undefined) {
             if (messages.filter(value => value.messageId === last_message).length !== 0) {
                 let toSend: Message[] = [];
-                let stack=messages.slice().reverse()
+                let stack = messages.slice().reverse()
                 for (const m of stack) {
                     if (m.messageId === last_message) break;
                     toSend.push(m);
@@ -52,7 +54,7 @@ export function constructMessage(username: string, message_type: string, content
             break;
     }
     let message: Message;
-    if (title!== null){
+    if (title !== null) {
 
     }
     message = {messageId: crypto.randomUUID(), username: String(username), messageType: type, content: contents};
@@ -66,8 +68,9 @@ export function flushUploads(people: Map<string, number>, roomObj: any) {
     if (person_count != undefined)
         people.set(roomObj.room, person_count - 1);
     if (person_count == 1) {
+
         let p = path.join(__dirname, "../uploads", String(roomObj.room));
-        if (fs.existsSync(p)){
+        if (fs.existsSync(p)) {
             let contents = fs.readdirSync(p);
             for (const iterator of contents) {
                 fs.unlinkSync(path.join(p, iterator));
@@ -86,4 +89,15 @@ export function storeMessage(roomId: any, res: express.Response<any, Record<stri
         chat.push(message);
         res.sendStatus(200);
     }
+}
+
+
+export async function creteUser(username: string, pass: string, path: string) {
+    await register(new User(username, pass, path));
+}
+
+export async function login(username: string, pass: string) {
+    let result = await signin(username, pass);
+    if (result === null) return null;
+    return new User(result.name, result.pass, result.urlPath);
 }

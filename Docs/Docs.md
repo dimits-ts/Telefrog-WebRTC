@@ -39,4 +39,8 @@
 
 - get multimedia by href=":url/media/:roomId/:contents" (with : are placeholders )
 
+- post /user{username=...,pass:...profile:...}->status code
+
+- get /user?username=...&pass=...->{name,pass,imgUrl}
+
 - Video Conference: with WebRTC we have the tutorial for one on  one so the challenge is to adjust it to more pc.
