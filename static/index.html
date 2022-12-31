@@ -31,6 +31,10 @@
                 <p>{{content}}</p>
             {{/ifEq}}
 
+            {{#ifEq type "Link"}}
+                <a href="{{content}}" target="_blank">{{content}}</a>
+            {{/ifEq}}
+
             {{#ifEq type "Image"}}
                 <img src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}"></img>
             {{/ifEq}}

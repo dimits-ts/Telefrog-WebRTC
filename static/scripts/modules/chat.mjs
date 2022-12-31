@@ -24,8 +24,8 @@ export class Chat {
         this.#hostURL = hostURL;
         this.#messages = [];
         this.#presenter = presenter;
-        
-        Handlebars.registerHelper('ifEq', function(arg1, arg2, options) {
+
+        Handlebars.registerHelper('ifEq', function (arg1, arg2, options) {
             return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
         });
     }
@@ -139,11 +139,17 @@ export class Chat {
      * @throws if the message's type is invalid
      */
     #addMessage(message) {
-        // save the message
+        // save the original message
         this.#messages.push(message);
 
+        // set message's display type
+        if (message.messageType === "Text" && this.#isLink(message.content)) {
+            message.type = "Link"
+        } else {
+            message.type = message.messageType
+        }
+
         message.isSelf = message.username === this.#username
-        message.type = message.messageType
         message.hostURL = this.#hostURL
         message.roomId = this.#roomId
         message.timestamp = new Date().toLocaleTimeString()
@@ -157,6 +163,21 @@ export class Chat {
         const container = document.createElement("div")
         container.innerHTML = html
         this.#appendToChatBox(container)
+    }
+
+    /**
+     * Return whether or not a string is a valid HTTP URL
+     * @param {str} string the string to be examined 
+     * @returns true if the string repersents a URL
+     */
+    #isLink(string) {
+        let url;
+        try {
+            url = new URL(string);
+        } catch (_) {
+            return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
     }
 
     #appendToChatBox(messageContainer) {
