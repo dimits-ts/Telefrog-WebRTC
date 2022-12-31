@@ -14,7 +14,6 @@ export class Presenter {
 
     #chatInput = document.getElementById("chat-input");
     #fileInput = document.getElementById("file-input");
-    #imageInput = document.getElementById("image-input");
 
     #videoPanel = document.getElementById("videoPanel");
 
@@ -65,8 +64,6 @@ export class Presenter {
 
     getChatText() { return this.#chatInput.value; }
 
-    getChatImages() { return this.#imageInput.files; }
-
     getChatFiles() { return this.#fileInput.files; }
 
     /**
@@ -74,7 +71,6 @@ export class Presenter {
      */
     resetChatInputs() {
         this.#chatInput.value = "";
-        this.#imageInput.value = "";
         this.#fileInput.value = "";
     }
 

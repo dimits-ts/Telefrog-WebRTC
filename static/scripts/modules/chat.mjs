@@ -147,9 +147,11 @@ export class Chat {
             message.type = "Link";
         } else if (message.messageType === "File" && isVideo(message.content)) {
             message.type = "Video";
+        } else if(message.messageType === "File" && isImage(message.content)) {
+            message.type = "Image"
         } else {
             message.type = message.messageType;
-        }
+        } 
 
         message.isSelf = message.username === this.#username
         message.hostURL = this.#hostURL
@@ -195,9 +197,16 @@ function isLink(string) {
  */
 function isVideo(filename) {
     const videoExtensions = ['m4v', 'avi','mpg','mp4', 'webm'];
+    return videoExtensions.includes(getExtension(filename));
+}
 
-    let parts = filename.split('.');
-    let extension = parts[parts.length - 1];
+function isImage(filename) {
+    const imageExtensions = ['jpg', 'png' ,'jpeg' , "webp", "tiff", "psd", "raw",
+    "bmp", "heif", "indd", "svg"]
+    return imageExtensions.includes(getExtension(filename));
+}
 
-    return videoExtensions.includes(extension);
+function getExtension(filename){
+    let parts = filename.toLowerCase().split('.');
+    return parts[parts.length - 1];
 }

@@ -81,12 +81,6 @@ function sendMessage() {
         chat.sendText(text);
     }
 
-    for (let image of presenter.getChatImages()) {
-        if (image) {
-            chat.sendFile(image, "Image");
-        }
-    }
-
     for (let file of presenter.getChatFiles()) {
         if (file) {
             chat.sendFile(file, "File");
