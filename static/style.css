@@ -127,7 +127,7 @@ fieldset>legend {
     margin-top: 0em;
 }
 
-.chat-message-container>img {
+.chat-message-container>* {
     width: 100%;
 }
 

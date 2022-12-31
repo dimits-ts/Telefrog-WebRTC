@@ -38,6 +38,10 @@
             {{#ifEq type "Image"}}
                 <img src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}"></img>
             {{/ifEq}}
+
+            {{#ifEq type "Video"}}
+                <video src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}" controls></img>
+            {{/ifEq}}
                 
             {{#ifEq type "File"}}
                 <div class="file-preview">
@@ -107,8 +111,8 @@
                     <div id="file-controls">
                         <div id="send-image-button" title="Send an Image">
                             <img src="resources/image_icon.gif" alt="send image">
-                            <input type="file" id="image-input" name="image_uploads" accept=".jpg, .jpeg, .png"
-                                multiple>
+                            <input type="file" id="image-input" name="image_uploads" 
+                            accept=".jpg, .jpeg, .png" multiple>
                         </div>
 
                         <div id="send-file-button" title="Send a File">

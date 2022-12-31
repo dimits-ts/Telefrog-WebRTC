@@ -143,10 +143,12 @@ export class Chat {
         this.#messages.push(message);
 
         // set message's display type
-        if (message.messageType === "Text" && this.#isLink(message.content)) {
-            message.type = "Link"
+        if (message.messageType === "Text" && isLink(message.content)) {
+            message.type = "Link";
+        } else if (message.messageType === "File" && isVideo(message.content)) {
+            message.type = "Video";
         } else {
-            message.type = message.messageType
+            message.type = message.messageType;
         }
 
         message.isSelf = message.username === this.#username
@@ -165,23 +167,37 @@ export class Chat {
         this.#appendToChatBox(container)
     }
 
-    /**
-     * Return whether or not a string is a valid HTTP URL
-     * @param {str} string the string to be examined 
-     * @returns true if the string repersents a URL
-     */
-    #isLink(string) {
-        let url;
-        try {
-            url = new URL(string);
-        } catch (_) {
-            return false;
-        }
-        return url.protocol === "http:" || url.protocol === "https:";
-    }
-
     #appendToChatBox(messageContainer) {
         this.#chatboxElement.appendChild(messageContainer);
     }
 
+}
+
+/**
+ * Return whether a string is a valid HTTP URL.
+ * @param {str} string the string to be examined 
+ * @returns true if the string repersents a URL
+ */
+function isLink(string) {
+    let url;
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
+}
+
+/**
+ * Check whether a file is a video.
+ * @param {File} file the file to be examined 
+ * @returns true if the file is a video
+ */
+function isVideo(filename) {
+    const videoExtensions = ['m4v', 'avi','mpg','mp4', 'webm'];
+
+    let parts = filename.split('.');
+    let extension = parts[parts.length - 1];
+
+    return videoExtensions.includes(extension);
 }
