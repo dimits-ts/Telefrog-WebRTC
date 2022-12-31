@@ -4,11 +4,7 @@
  */
 export class Chat {
     static NO_MESSAGES_ID = "";
-    static TEMPLATES = {
-        "Text": document.getElementById("text-template").textContent,
-        "Image": document.getElementById("image-template").textContent,
-        "File": document.getElementById("file-template").textContent
-    }
+    static TEMPLATE = document.getElementById("chat-template");
 
     #username;
     #roomId;
@@ -28,6 +24,10 @@ export class Chat {
         this.#hostURL = hostURL;
         this.#messages = [];
         this.#presenter = presenter;
+        
+        Handlebars.registerHelper('ifEq', function(arg1, arg2, options) {
+            return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+        });
     }
 
     /**
@@ -142,15 +142,15 @@ export class Chat {
         // save the message
         this.#messages.push(message);
 
-        let type = message.messageType
         message.isSelf = message.username === this.#username
+        message.type = message.messageType
         message.hostURL = this.#hostURL
         message.roomId = this.#roomId
         message.timestamp = new Date().toLocaleTimeString()
         message.fileName = message.content.split("~")[1]
 
         // get HTML representation
-        let compiledTemplate = Handlebars.compile(Chat.TEMPLATES[type])
+        let compiledTemplate = Handlebars.compile(Chat.TEMPLATE.textContent, message)
         let html = compiledTemplate(message)
 
         // add HTML to chatbox
