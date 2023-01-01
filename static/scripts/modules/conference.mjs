@@ -144,6 +144,10 @@ export class Conference {
     * @return the stream HTML element that was created, undefined if not created 
     */
     #addVideoStream(username, stream, isMuted = false) {
+        if(username.length > 10){
+            username = username.slice(0, 10) + "..."
+        }
+        
         // avoid bug with duplicate calls because of peer server call impl
         if(stream.id !== this.#lastStreamId) {
             this.#lastStreamId = stream.id;
