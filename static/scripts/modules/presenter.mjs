@@ -14,7 +14,6 @@ export class Presenter {
 
     #chatInput = document.getElementById("chat-input");
     #fileInput = document.getElementById("file-input");
-    #imageInput = document.getElementById("image-input");
 
     #videoPanel = document.getElementById("videoPanel");
 
@@ -40,15 +39,31 @@ export class Presenter {
 
     /**
     * Add a new video element along with its corresponding media stream to the screen.
-    * @param {HTMLElement} video - The video element
+    * @param {string} username - The username of the connecting user
     * @param {MediaSession} stream - The corresponding media stream
+    * @param {boolean} isMuted - Whether the video is muted
+    * @return the stream HTML element that was created
     */
-    addVideoElement(video, stream) {
+    addVideoElement(username, stream, isMuted) {
+        const video = document.createElement("video");
+        video.muted = isMuted;
+
+        const streamContainer = document.createElement("div");
+        streamContainer.classList.add("stream-container");
+
+        const usernameContainer = document.createElement("p");
+        usernameContainer.innerText = username;
+
         video.srcObject = stream;
         video.addEventListener("loadedmetadata", () => {
             video.play();
         });
-        this.#videoGrid.append(video);
+
+        streamContainer.appendChild(video);
+        streamContainer.appendChild(usernameContainer);
+        this.#videoGrid.append(streamContainer);
+
+        return video;
     }
 
     /**
@@ -65,8 +80,6 @@ export class Presenter {
 
     getChatText() { return this.#chatInput.value; }
 
-    getChatImages() { return this.#imageInput.files; }
-
     getChatFiles() { return this.#fileInput.files; }
 
     /**
@@ -74,7 +87,6 @@ export class Presenter {
      */
     resetChatInputs() {
         this.#chatInput.value = "";
-        this.#imageInput.value = "";
         this.#fileInput.value = "";
     }
 

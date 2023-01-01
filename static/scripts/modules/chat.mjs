@@ -4,10 +4,12 @@
  */
 export class Chat {
     static NO_MESSAGES_ID = "";
+    static TEMPLATE = document.getElementById("chat-template");
 
     #username;
     #roomId;
 
+    #chatboxElement;
     #hostURL;
     #presenter;
     #messages;
@@ -17,10 +19,15 @@ export class Chat {
      * @param {string} hostURL - The remote server's URL 
      * @param {Presenter} presenter - The presenter for the HTML page 
      */
-    constructor(hostURL, presenter) {
+    constructor(chatBoxElement, hostURL, presenter) {
+        this.#chatboxElement = chatBoxElement;
         this.#hostURL = hostURL;
         this.#messages = [];
         this.#presenter = presenter;
+
+        Handlebars.registerHelper('ifEq', function (arg1, arg2, options) {
+            return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+        });
     }
 
     /**
@@ -41,7 +48,6 @@ export class Chat {
      */
     sendFile(URI, type) {
         let image = new File([URI], URI.name, { type: URI.type, message_type: type });
-        console.log(URI);
         this.#sendMessage("multipart/form-data", type, image);
     }
 
@@ -61,16 +67,16 @@ export class Chat {
         let url = new URL(this.#hostURL + "/chat-box/refresh");
 
         url.search = new URLSearchParams({
-            room_id: this.#roomId,
-            last_message: this.#getLastMessageId()
+            roomId: this.#roomId,
+            lastMessage: this.#getLastMessageId()
         });
 
         fetch(url, { method: "GET" })
             .then(res => res.json())
             .then(list => {
-                console.log(list);
+                if (list.length !== 0) console.log(list);
                 // if no new messages nothing will happen
-                for (message of list) {
+                for (let message of list) {
                     this.#addMessage(message);
                 }
             });
@@ -84,7 +90,7 @@ export class Chat {
         if (this.#messages.length == 0) {
             return Chat.NO_MESSAGES_ID;
         } else {
-            return this.#messages[this.#messages.length - 1].message_id;
+            return this.#messages[this.#messages.length - 1].messageId;
         }
     }
 
@@ -105,18 +111,20 @@ export class Chat {
         }
 
         const data = new FormData();
-        data.append("room_id", this.#roomId);
+        data.append("roomId", this.#roomId);
         data.append("username", this.#username);
-        data.append("message_type", type);
+        data.append("messageType", type);
         data.append("content", content);
 
-        fetch(this.#hostURL + "/chat-box/message/new", {
+        let chatThis = this; // I love javascript I love javascript
+
+        fetch(chatThis.#hostURL + "/chat-box/message/new", {
             method: "POST",
             headers: headers,
             body: data
         }).then(response => {
             if (!response.ok) {
-                this.#presenter.showGeneralError("An error occured while sending the message to the server");
+                chatThis.#presenter.showGeneralError("An error ocurred while sending the message to the server");
                 console.log("Error while sending message : " + response.text);
             }
         });
@@ -131,31 +139,84 @@ export class Chat {
      * @throws if the message's type is invalid
      */
     #addMessage(message) {
-        let username = message.username;
-        let type = message.message_type;
-
+        // save the original message
         this.#messages.push(message);
 
-        if (type === "Text") {
-            this.#addTextToChat(username, message.content);
-        } else if (type === "Image") {
-            this.#addImageToChat(username, message);
-        } else if (type === "File") {
-            this.#addFileToChat(username, message);
+        // set message's display type
+        if (message.messageType === "Text" && isLink(message.content)) {
+            message.type = "Link";
+        } else if (message.messageType === "File" && isVideo(message.content)) {
+            message.type = "Video";
+        } else if(message.messageType === "File" && isImage(message.content)) {
+            message.type = "Image"
         } else {
-            throw ("Invalid message type " + type);
-        }
+            message.type = message.messageType;
+        } 
+
+        message.isSelf = message.username === this.#username
+        message.hostURL = this.#hostURL
+        message.roomId = this.#roomId
+        message.timestamp = new Date().toLocaleTimeString()
+        message.fileName = message.content.split("~")[1]
+
+        // get HTML representation
+        let compiledTemplate = Handlebars.compile(Chat.TEMPLATE.textContent, message)
+        let html = compiledTemplate(message)
+
+        // add HTML to chatbox
+        const container = document.createElement("div")
+        container.innerHTML = html
+        this.#appendToChatBox(container)
     }
 
-    #addTextToChat(username, text) {
-        console.log(username, text);
+    #appendToChatBox(messageContainer) {
+        this.#chatboxElement.appendChild(messageContainer);
     }
 
-    #addImageToChat(username, image) {
-        console.log(username, image);
-    }
+}
 
-    #addFileToChat(username, file) {
-        console.log(username, file);
+/**
+ * Return whether a string is a valid HTTP URL.
+ * @param {str} string the string to be examined 
+ * @returns true if the string repersents a URL
+ */
+function isLink(string) {
+    let url;
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
     }
+    return url.protocol === "http:" || url.protocol === "https:";
+}
+
+/**
+ * Check whether a file is a video based on its extension.
+ * @param {str} filename the name of the file to be examined 
+ * @returns true if the file is a video
+ */
+function isVideo(filename) {
+    const videoExtensions = ['m4v', 'avi','mpg','mp4', 'webm'];
+    return videoExtensions.includes(getExtension(filename));
+}
+
+/**
+ * Check whether a file is an image based on its extension.
+ * @param {str} filename he name of the file to be examined 
+ * @returns true if the file is an image
+ */
+function isImage(filename) {
+    const imageExtensions = ['jpg', 'png' ,'jpeg' , "webp", "tiff", "psd", "raw",
+    "bmp", "heif", "indd", "svg"]
+    return imageExtensions.includes(getExtension(filename));
+}
+
+/**
+ * Get the extension of a file.
+ * @param {str} filename the name of the file 
+ * @returns the extension (without the dot)
+ */
+function getExtension(filename){
+    let parts = filename.toLowerCase().split('.');
+    return parts[parts.length - 1];
 }

@@ -1,14 +1,21 @@
-import { Message, MessageType, Multimedia, ErrorData } from "./messages";
+import {ErrorData, Message, MessageType} from "./messages";
 import crypto from "crypto";
+import path from "path";
+import fs from "fs"
+import {Logging} from "./logging";
+import express from "express"
+import {User} from "./model/User"
+import {register, signin} from "./mongussy";
 
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
-        var messages = chat.get(room);
+        let messages = chat.get(room);
         if (messages !== undefined) {
-            if (messages.filter(value => value.message_id === last_message).length !== 0) {
-                var toSend: Message[] = [];
-                for (const m of messages.reverse()) {
-                    if (m.message_id === last_message) break;
+            if (messages.filter(value => value.messageId === last_message).length !== 0) {
+                let toSend: Message[] = [];
+                let stack = messages.slice().reverse()
+                for (const m of stack) {
+                    if (m.messageId === last_message) break;
                     toSend.push(m);
                 }
                 resolve(toSend);
@@ -16,14 +23,15 @@ export function getNewMessages(chat: Map<string, Message[]>, room: string, last_
                 resolve(messages);
             }
         } else {
-            reject({ code: 404, message: "attempted to get data from empty room", } as ErrorData);
+            reject({code: 404, message: "attempted to get data from empty room",} as ErrorData);
         }
     })
 }
 
 export function getUniqueRoomId(rooms: string[]): string {
+    let room: string;
     while (true) {
-        var room: string = crypto.randomBytes(8).toString("hex");
+        room = crypto.randomBytes(8).toString("hex");
         if (rooms.filter(value => value == room).length === 0) {
             rooms.push(room);
             break;
@@ -32,8 +40,8 @@ export function getUniqueRoomId(rooms: string[]): string {
     return room;
 }
 
-export function constructMessage(username: string, message_type: string, contents: any, title?: string,mediaUUID?:string): [Message, Multimedia | undefined] {
-    var type: MessageType;
+export function constructMessage(username: string, message_type: string, contents: any, title?: string): Message {
+    let type: MessageType;
     switch (message_type) {
         case "Image":
             type = MessageType.Image
@@ -45,33 +53,51 @@ export function constructMessage(username: string, message_type: string, content
             type = MessageType.Text
             break;
     }
-    let multi_id = mediaUUID===undefined?crypto.randomUUID():mediaUUID;
-    var message: Message;
-    var multi: Multimedia | undefined = undefined
-    if (type !== MessageType.Text) {
-        multi = { id: multi_id, type, contents };
-        message = { message_id: crypto.randomUUID(), username: String(username), message_type:type, content: multi_id };
-        if (title !== undefined) {
-            message.title = title;
-        }
-    } else {
-        message = { message_id: crypto.randomUUID(), username: String(username), message_type:type, content: contents };
+    let message: Message;
+    if (title !== null) {
+
     }
-    return [message, multi];
+    message = {messageId: crypto.randomUUID(), username: String(username), messageType: type, content: contents};
+
+    return message;
 }
 
-export function getMultimedia(room: Multimedia[] | undefined, id: string | undefined): Promise<Multimedia> {
-    return new Promise<Multimedia>((resolve, reject) => {
-        if (room === undefined || id === undefined) {
-            reject({ code: 404, message: "item_not_found" } as ErrorData);
-        } else {
-            let multi = String(id);
-            var file = room.filter(value => multi === value.id);
-            if (file.length === 0) {
-                reject({ code: 404, message: "item_not_found", args: multi } as ErrorData);
-            } else {
-                resolve(file[0]);
+
+export function flushUploads(people: Map<string, number>, roomObj: any) {
+    let person_count = people.get(roomObj.room);
+    if (person_count != undefined)
+        people.set(roomObj.room, person_count - 1);
+    if (person_count == 1) {
+
+        let p = path.join(__dirname, "../uploads", String(roomObj.room));
+        if (fs.existsSync(p)) {
+            let contents = fs.readdirSync(p);
+            for (const iterator of contents) {
+                fs.unlinkSync(path.join(p, iterator));
             }
         }
-    })
+    }
+}
+
+export function storeMessage(roomId: any, res: express.Response<any, Record<string, any>>, message: Message, chats: Map<string, Message[]>, log: Logging) {
+    let chat = chats.get(roomId);
+    if (chat === undefined) {
+        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
+        res.sendStatus(404);
+    } else {
+        log.i(`User ${message.username} submitted text with id ${message.messageId}.`);
+        chat.push(message);
+        res.sendStatus(200);
+    }
+}
+
+
+export async function creteUser(username: string, pass: string, path: string) {
+    await register(new User(username, pass, path));
+}
+
+export async function login(username: string, pass: string) {
+    let result = await signin(username, pass);
+    if (result === null) return null;
+    return new User(result.name, result.pass, result.urlPath);
 }

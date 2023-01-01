@@ -69,10 +69,11 @@ fieldset>legend {
     color: red;
 }
 
-/* Video Panel */
+/* Video and Chat Panel */
 
 #videoPanel {
     visibility: hidden;
+    height: 50em;
 }
 
 #roomBanner {
@@ -85,14 +86,30 @@ fieldset>legend {
 }
 
 #videoStreams {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
-/* Fixed width to fit more calls in bigger displays */
-#videoStreams>video {
-    width: 25em;
-    margin-right: 2%;
+.stream-container {
+    position: relative;
+    width: 95%;
+    margin-right: 5%;
+}
+
+.stream-container>video {
+    width: 100%;
+}
+
+.stream-container>p {
+    font-size: 2em;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #002e63;
+    color: white;
+    border-radius: 0.2em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0px;
 }
 
 /* Chat Box */
@@ -105,15 +122,61 @@ fieldset>legend {
     padding-bottom: 1.5%;
     box-shadow: 0em 0em 0.3em 0.3em rgba(0, 37, 138, 0.1);
     overflow: hidden;
+    height: 100%;
 }
 
-#chatBox {
-    border: 0.2em black solid;
+#chat-box {
     width: 100%;
+    height: 35em;
 }
 
 #chat-display {
-    height: 25em;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.chat-message-container {
+    margin-bottom: 1em;
+}
+
+.chat-message-container>p {
+    margin-top: 0em;
+}
+
+.chat-message-container>* {
+    width: 100%;
+}
+
+.chat-username-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: black;
+    margin-bottom: 0.2em;
+}
+
+.chat-own-username-label {
+    color: green;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: grey;
+}
+
+.file-preview {
+    background-color: whitesmoke;
+    width: 75%;
+    border-radius: 2em;
+    border-style: ridge;
+    padding: 5%;
+}
+
+.file-preview>img {
+    width: 50%;
+}
+
+.file-preview>button {
+    background-color: grey;
 }
 
 #text-input-area {

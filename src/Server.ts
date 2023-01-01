@@ -1,53 +1,85 @@
-import express, { Request, Response } from "express";
+import express, {Request, Response} from "express";
+import fs from "fs";
 import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import { Message, Multimedia, ErrorData } from "./messages";
-import { constructMessage, getMultimedia, getNewMessages, getUniqueRoomId } from "./routes";
-import body_parser from "body-parser";
-import multer, { FileFilterCallback } from "multer";
-import { randomUUID } from "crypto";
+import {Message} from "./messages";
+import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMessage} from "./routes";
+import multer, {FileFilterCallback} from "multer";
+import {randomUUID} from "crypto";
+import {Buffer} from "buffer";
 
 // Create the server
 const PORT = 8080;
 const app = express();
-var http = new ht.Server(app);
-var io = new s.Server(http, {
+const http = new ht.Server(app);
+const io = new s.Server(http, {
     maxHttpBufferSize: 10 * 1024 * 1024
 });
-const storage=multer.diskStorage({destination:"./uploads",filename: function (req:Request,file:Express.Multer.File,cb) {
-    
-    cb(null,randomUUID()+".png");
-}});
 
-const upload= multer({storage,fileFilter:(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
-    if(req.body.message_type==="Text"){
-        cb(null,false);
-    }else{
-        cb(null,true);
+const storage = multer.diskStorage({
+    destination: function (req: Request, file: Express.Multer.File, cb) {
+        if (req.path === "/user") {
+            let paths = path.join(__dirname, `../uploads/${crypto.randomUUID()}/`)
+            if (!fs.existsSync(paths))
+                fs.mkdirSync(paths);
+            cb(null, paths);
+        } else {
+            let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
+            if (!fs.existsSync(paths))
+                fs.mkdirSync(paths);
+            cb(null, paths);
+        }
+    }, filename: function (req: Request, file: Express.Multer.File, cb) {
+        if (req.path === "/user") {
+            let name = file.originalname.split(".")
+            let suffix = name[name.length - 1];
+            cb(null, `profile.${suffix}`);
+        } else {
+            let name = Buffer.from(file.originalname, "latin1").toString(`utf8`)
+            cb(null, `${randomUUID()}~${name}`);
+        }
     }
-}})
+});
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({extended:true, limit: "10mb" }));
 
-var log: logging.Logging;
+const upload = multer({
+    storage, fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+        if (req.body.messageType === "Text") {
+            cb(null, false);
+        } else {
+            cb(null, true);
+        }
+    }
+})
+
+app.use(express.json({limit: "10mb"}));
+app.use(express.urlencoded({extended: true, limit: "10mb"}));
+//Define where the static html content will be found.
+app.use("/static", express.static(path.join(__dirname, "../static")));
+app.use("/media", express.static(path.join(__dirname, "../uploads")));
+//This method redirects you to the html page when you enter localhost:8080
+
 // This is a file logger, if you want to change the path take into account that this will run from out/Server.js
-log = new logging.FileLog(path.join(__dirname, "../logging.txt"))
+export const log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
-// log=new logging.ConsoleLog();
-var rooms: string[] = [];
-var chats: Map<string, Message[]> = new Map();
-var multimedia: Map<string, Multimedia[]> = new Map();
+// export const log=new logging.ConsoleLog();
+const rooms: string[] = [];
+const people: Map<string, number> = new Map();
+const chats: Map<string, Message[]> = new Map();
+
+app.get("/", (req: Request, res: Response) => {
+    res.redirect("/static/index.html");
+})
 
 app.get("/room/create", (req: Request, res: Response) => {
     // Create room id
-    var room: string = getUniqueRoomId(rooms);
+    const room: string = getUniqueRoomId(rooms);
+    people.set(room, 0);
     chats.set(room, []);
-    multimedia.set(room, []);
     log.i("Created room " + room);
-    res.status(200).send({ room });
+    res.status(200).send({room});
 })
 
 //Socket io connections
@@ -58,97 +90,75 @@ io.on("connection", socket => {
         } else {
             log.i(`Attempt from user ${roomObj.username} to join room ${roomObj.room}`);
             socket.join(roomObj.room);
-            socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
-            socket.on("disconnect", () => {
-                socket.to(roomObj.room).emit("user-disconnected", roomObj.username, roomObj.peer);
-            });
-            socket.emit("join-status", 200, "OK");
+            let person_count = people.get(roomObj.room);
+            if (person_count != undefined) {
+                people.set(roomObj.room, person_count + 1)
+                socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
+                socket.on("disconnect", () => {
+                    flushUploads(people, roomObj);
+                    socket.to(roomObj.room).emit("user-disconnected", roomObj.username, roomObj.peer);
+                });
+                socket.emit("join-status", 200, "OK");
+            }
         }
     });
 })
 
 //Callback to refresh the 
-app.get("/chat-box/refresh", (req: Request, res: Response) => {
-    const room = String(req.query.room_id);
-    const last_message = String(req.query.last_message);
-    getNewMessages(chats, room, last_message)
-        .then(toSend => res.status(200).json(toSend))
-        .catch(err => {
-            log.c(err.message);
-            res.sendStatus(400);
-        });
+app.get("/chat-box/refresh", async (req: Request, res: Response) => {
+    const room = String(req.query.roomId);
+    const last_message = String(req.query.lastMessage);
+
+    try {
+        let toSend = await getNewMessages(chats, room, last_message)
+        res.status(200).json(toSend)
+    } catch (e: any) {
+        log.c(e.message)
+    }
 });
 
 
 //Route for reading new Data
-app.post("/chat-box/message/new",upload.single("content"), (req: Request, res: Response) => {
-    console.log(req.body);
-
-    let roomId = req.body.room_id;
-    if (req.body.message_type==="Text") {
-        var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.body.content, req.body.title);
-        StoreMessage(roomId, multi, res, message);
-    } else {   
-        if (req.file===undefined) {
+app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: Response) => {
+    let message;
+    let roomId = req.body.roomId;
+    if (req.body.messageType === "Text") {
+        message = constructMessage(req.body.username, req.body.messageType, req.body.content);
+        storeMessage(roomId, res, message, chats, log);
+    } else {
+        if (req.file === undefined) {
             res.status(400).send("File could not be uploaded");
-        }else{
-            console.log(req.body);
-            console.log(req.file);
-            var [message, multi] = constructMessage(req.body.username, req.body.message_type, req.file,undefined,req.file.filename);
-            StoreMessage(roomId, multi, res, message);
+        } else {
+            message = constructMessage(req.body.username, req.body.messageType, req.file.filename);
+            storeMessage(roomId, res, message, chats, log);
         }
     }
-    
 })
 
-// Getter function for multimedia data
-app.get("/chat-box/multimedia/:room", (req: Request, res: Response) => {
-    var id = (req.query.multimediaId !== undefined) ? String(req.query.multimediaId) : undefined;
-    var vault = multimedia.get(req.params.room);
-    getMultimedia(vault, id).then(result => res.status(200).json(result))
-        .catch(er => {
-            let err = er as ErrorData;
-            if (err.message === "room_not_found") {
-                log.c(`Attempt to access multimedia folder that does not exist`);
+
+app.post("/user", upload.single("profile"), (req: Request, res: Response) => {
+    log.i(`Request to register user with id ${req.body.username}`);
+    res.sendStatus(200)
+});
+
+
+fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
+    if (!err) {
+        for (const i of files) {
+            if (fs.lstatSync(path.join(__dirname, "../uploads", i)).isDirectory()) {
+                fs.rmSync(path.join(__dirname, "../uploads", i), {recursive: true, force: true});
             } else {
-                log.c(`Multimedia item of id ${err.args} was not found`);
+                fs.unlinkSync(path.join(__dirname, "../uploads", i));
             }
-            res.sendStatus(404);
-        });
+        }
+    } else {
+        log.c(err.message);
+    }
+    log.i("cleaned the upload folder");
 })
 
-
-//Define where the static html content will be found.
-app.use("/static", express.static(path.join(__dirname, "../static")));
-
-//This method redirects you to the html page when you enter localhost:8080
-app.get("/", (req: Request, res: Response) => {
-    res.redirect("/static/index.html");
-})
 
 http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
 });
 
-function StoreMessage(roomId: any, multi: Multimedia | undefined, res: express.Response<any, Record<string, any>>, message: Message) {
-    let chat = chats.get(roomId);
-
-    // Add file content to multimedia folder
-    if (multi !== undefined) {
-        let vault: Multimedia[] | undefined = multimedia.get(roomId);
-        if (vault !== undefined) {
-            vault.push(multi);
-        } else {
-            log.c("multimedia channel not found");
-            res.sendStatus(404);
-        }
-    }
-    if (chat === undefined) {
-        log.c(`Attempt to submit chat message in room ${roomId} which doesn't exist, by user ${message.username}.`);
-        res.sendStatus(404);
-    } else {
-        log.i(`User ${message.username} submitted text with id ${message.message_id}.`);
-        chat.push(message);
-        res.sendStatus(200);
-    }
-}

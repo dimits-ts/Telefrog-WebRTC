@@ -8,10 +8,13 @@ export class Conference {
 
     #username; // useful to keep around
     #roomId;
+    #myPeer;
 
     #socket;
     #presenter;
     #connectedPeers;
+
+    #lastStreamId
 
     /**
      * Initialize the data structures before establishing connection to remote server.
@@ -33,11 +36,12 @@ export class Conference {
         this.#username = username;
         this.#roomId = roomId;
 
-        let myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
+        // must be created here and not in constructor
+        this.#myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
 
         // Could have extracted the parameters from the presenter but its clearer to 
         // explicitly ask for them in the method
-        myPeer.on("open", peerId => {
+        this.#myPeer.on("open", peerId => {
             console.log("Opened on peer server, sending join request to server");
             let message = {
                 username: username,
@@ -45,7 +49,13 @@ export class Conference {
                 peer: peerId
             };
 
-            this.#setUpStream(myPeer, message);
+            this.#setUpStream(message);
+        });
+
+        // handle disconnect
+        this.#socket.on("user-disconnected", id => {
+            console.log("User disconnected " + id);
+            this.#userDisconnected(id);
         });
     }
 
@@ -53,20 +63,16 @@ export class Conference {
      * Remove the display of a disconnected user. 
      * @param {string} userId - The disconnected user's ID 
      */
-    userDisconnected(userId) {
+    #userDisconnected(userId) {
         if (this.#connectedPeers[userId])
             this.#connectedPeers[userId].close();
     }
 
     /**
      * Start streaming self and configure the peer server as to receive and send video.
-     * @param {Peer} myPeer - The user's peer server
      * @param {any} message - A message object as defined by Docs.md
      */
-    #setUpStream(myPeer, message) {
-        let myVideo = document.createElement("video");
-        myVideo.muted = true;
-
+    #setUpStream(message) {
         navigator.mediaDevices.getUserMedia(Conference.STREAM_CONSTRAINTS)
             .then(stream => {
                 // request session from server
@@ -78,24 +84,22 @@ export class Conference {
                         this.#presenter.showConnected("Connected to room " + this.#roomId);
 
                         // set up video streams
-                        this.#addVideoStream(myVideo, stream);
+                        this.#addVideoStream(this.#username, stream, true);
 
                         // set up call
-                        myPeer.on("call", call => {
+                        this.#myPeer.on("call", call => {
                             // listen to incoming streams
-                            console.log("called");
                             call.answer(stream);
 
                             // respond to incoming streams
-                            const video = document.createElement("video");
                             call.on("stream", userVideoStream => {
-                                this.#addVideoStream(video, userVideoStream);
+                                this.#addVideoStream(this.#username, userVideoStream);
                             });
                         });
 
                         // when other user connects
                         this.#socket.on("user-connected", (username, peer) => {
-                            this.#connectToNewUser(peer, stream);
+                            this.#connectToNewUser(username, peer, stream);
                         });
                     } else {
                         this.#presenter.showInputError("Cannot join room : " + statusMessage);
@@ -109,34 +113,45 @@ export class Conference {
 
     /**
      * Establish a new stream on the user's screen.
-     * @param {Peer} newPeer the connecting peer server
-     * @param {string} userId the connecting user's id
+     * @param {string} username - The name of the user that connected
+     * @param {string} peerId the connecting user's peer id
      * @param {MediaSession} stream the connecting user's stream
      */
-    #connectToNewUser(newPeer, userId, stream) {
-        console.log(`Attempt to call user ${userId}`);
-        const call = newPeer.call(userId, stream);
-        const video = document.createElement("video");
+    #connectToNewUser(username, peerId, stream) {
+        let streamElement
+        console.log(`Attempt to call user ${peerId}`);
+        const call = this.#myPeer.call(peerId, stream);
 
         call.on("stream", userVideoStream => {
-            console.log("Got stream from " + userId);
-            this.#addVideoStream(video, userVideoStream);
+            console.log("Got stream from " + peerId);
+            streamElement = this.#addVideoStream(username, userVideoStream);
         });
 
         call.on("close", () => {
-            video.remove();
+            if(streamElement !== undefined)
+                streamElement.remove();
         });
 
         // update connected users
-        this.#connectedPeers[userId] = call;
+        this.#connectedPeers[peerId] = call;
     }
 
-    /**
-     * Add a new video element along with its corresponding media stream to the screen.
-     * @param {HTMLElement} video - The video element
-     * @param {MediaSession} stream - The corresponding media stream
-     */
-    #addVideoStream(video, stream) {
-        this.#presenter.addVideoElement(video, stream);
+   /**
+    * Add a new video element along with its corresponding media stream to the screen.
+    * @param {string} username - The username of the connecting user
+    * @param {MediaSession} stream - The corresponding media stream
+    * @param {boolean} isMuted - Whether the video is muted
+    * @return the stream HTML element that was created, undefined if not created 
+    */
+    #addVideoStream(username, stream, isMuted = false) {
+        if(username.length > 10){
+            username = username.slice(0, 10) + "..."
+        }
+        
+        // avoid bug with duplicate calls because of peer server call impl
+        if(stream.id !== this.#lastStreamId) {
+            this.#lastStreamId = stream.id;
+            return this.#presenter.addVideoElement(username, stream, isMuted);
+        }
     }
 }
