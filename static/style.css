@@ -1,0 +1,210 @@
+header>img {
+    width: 6rem;
+    float: left;
+}
+
+header>h1 {
+    font-size: 5rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Increase the width of the input fields*/
+fieldset>input {
+    width: 50%;
+}
+
+/* Make the fieldset container visually distinct from other page elements */
+fieldset {
+    background-color: lightgray;
+    border-style: solid;
+    border-color: #00258a;
+    padding: 3%;
+    border-radius: 1.5em;
+    margin-bottom: 5%;
+}
+
+/* Place fieldset elements vertically */
+fieldset * {
+    display: block;
+    text-align: left;
+}
+
+/* Center fieldset headers */
+fieldset>h3 {
+    text-align: center;
+}
+
+/* Give vertical space between fieldsets */
+fieldset>label {
+    margin-top: 1em;
+}
+
+/* Enlarge fieldset title */
+fieldset>legend {
+    font-size: 150%;
+    font-weight: 400;
+}
+
+/* Center buttions below the textarea */
+#button-group {
+    margin: 2em;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Customize button appearance */
+#button-group>button {
+    font-size: 1.5rem;
+    border-radius: 1em;
+    border-color: #00258a;
+}
+
+/* Enlarge and change button color when hovered */
+#button-group button:hover {
+    background-color: grey;
+}
+
+#errorMessage {
+    color: red;
+}
+
+/* Video and Chat Panel */
+
+#videoPanel {
+    visibility: hidden;
+    height: 50em;
+}
+
+#roomBanner {
+    background-color: goldenrod;
+}
+
+#videoMain {
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+}
+
+#videoStreams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.stream-container {
+    position: relative;
+    width: 95%;
+    margin-right: 5%;
+}
+
+.stream-container>video {
+    width: 100%;
+}
+
+.stream-container>p {
+    font-size: 2em;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #002e63;
+    color: white;
+    border-radius: 0.2em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0px;
+}
+
+/* Chat Box */
+
+#chatArea {
+    background-color: azure;
+    border-style: outset;
+    border-width: 0.1em;
+    padding-left: 1%;
+    padding-bottom: 1.5%;
+    box-shadow: 0em 0em 0.3em 0.3em rgba(0, 37, 138, 0.1);
+    overflow: hidden;
+    height: 100%;
+}
+
+#chat-box {
+    width: 100%;
+    height: 35em;
+}
+
+#chat-display {
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.chat-message-container {
+    margin-bottom: 1em;
+}
+
+.chat-message-container>p {
+    margin-top: 0em;
+}
+
+.chat-message-container>* {
+    width: 100%;
+}
+
+.chat-username-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: black;
+    margin-bottom: 0.2em;
+}
+
+.chat-own-username-label {
+    color: green;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: grey;
+}
+
+.file-preview {
+    background-color: whitesmoke;
+    width: 75%;
+    border-radius: 2em;
+    border-style: ridge;
+    padding: 5%;
+}
+
+.file-preview>img {
+    width: 50%;
+}
+
+.file-preview>button {
+    background-color: grey;
+}
+
+#text-input-area {
+    display: flex;
+    align-items: center;
+    height: 2em;
+    width: 100%;
+    vertical-align: middle;
+    margin-bottom: 0.2em;
+}
+
+#text-input-area>input {
+    height: 2.3em;
+    width: 80%;
+    margin-right: 0.2em;
+}
+
+#file-controls img,
+button>img {
+    width: 2em;
+    height: 2em;
+}
+
+#file-controls>* {
+    background-color: #7F9CCB;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px ridge black;
+    font-size: 0.8rem;
+    height: auto;
+}
