@@ -46,19 +46,17 @@
 
 <body>
     <header>
-        <img src="resources/frog.PNG" alt="frogge">
+        <a href="index.html"> <img src="resources/frog.PNG" alt="frogge"></a>
         <h1>TeleFrog Conferencing</h1>
     </header>
 
     <main>
         <article class="textbox">
-            <h2>
+            <h1>
                 Sign up
-            </h2>
+            </h1>
+
             <form>
-                <p>
-                    Create a free private or corporate account.
-                </p>
                 <form method="POST" action="/register-user" id="sign-up">
                     <fieldset>
                         <legend>
@@ -106,7 +104,9 @@
                             title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
                             type="password" />
                     </fieldset>
-                    
+
+                    <h3>Already have an account? <a href="login.html">Log-in here!</a></h3>
+
                     <div id="optiongroup">
                         <div>
                             <input id="spam-option1" required type="checkbox" />
