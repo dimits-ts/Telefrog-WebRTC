@@ -153,6 +153,21 @@ form>h3 {
     overflow-y: scroll;
 }
 
+.message-header {
+    display: flex;
+}
+
+.message-header>img {
+    width: 15%;
+    height: 15%;
+    margin-top: 5%;
+    margin-right: 5%;
+}
+
+.message-header h5 {
+    margin-top: 5%;
+}
+
 .chat-message-container {
     margin-bottom: 1em;
 }
