@@ -45,6 +45,11 @@ fieldset>legend {
     font-weight: 400;
 }
 
+/* Slightly shrink explanation text */
+fieldset>details>p{
+    font-size: 0.9rem;
+}
+
 /* Center buttions below the textarea */
 #button-group {
     margin: 2em;
@@ -55,7 +60,7 @@ fieldset>legend {
 
 /* Customize button appearance */
 #button-group>button {
-    font-size: 1.5rem;
+    font-size: 2rem;
     border-radius: 1em;
     border-color: #00258a;
 }
@@ -63,6 +68,10 @@ fieldset>legend {
 /* Enlarge and change button color when hovered */
 #button-group button:hover {
     background-color: grey;
+}
+
+#optiongroup {
+    text-align: center;
 }
 
 #errorMessage {
