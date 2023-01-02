@@ -16,29 +16,92 @@ let userObj = null;
 
 // Attempt to load the listeners every time the window changes
 window.onload = () => {
-    if(signUpButton !== null){
-        console.log("loaded sign up");
+    if (signUpButton !== null) {
         signUpButton.onclick = e => {
             e.preventDefault();
-        
+
             checkPasswords();
             checkBirthDate();
-        
+
             if (registerForm.checkValidity()) {
                 registerRequest();
             }
         }
     }
-    
-    if(loginButton !== null) {
-        console.log("loaded login");
+
+    if (loginButton !== null) {
         loginButton.onclick = e => {
             e.preventDefault();
             loginRequest();
         }
     }
+
+    if (signUpButton === null && loginButton === null) {
+        
+        createProfilePage(userObj);
+
+        
+    }
 }
 
+async function displayProfile(sessionId) {
+    let response = await getProfileRequest(sessionId);
+    if(!response.ok) {
+        createEmptyProfilePage();
+    } else {
+        createProfilePage(response.body);
+        const updateButton = document.getElementById("update-button");
+
+        updateButton.onclick = e => {
+            e.preventDefault();
+            updateRequest();
+        }
+    }
+}
+
+function getProfileRequest(sessionId) {
+    const formData = { sessionId: sessionId }
+
+    return fetch(hostURL + "/user/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+    }).then(res => res.json())
+}
+
+function createEmptyProfilePage() {
+    const nonAuthContainer = document.getElementById("failed-auth");
+    const authContainer = document.getElementById("successful-auth");
+    
+    nonAuthContainer.style.visibility = "visible";
+    authContainer.style.visibility = "hidden";
+}
+
+function createProfilePage(userObj) {
+    const TEMPLATE = document.getElementById("profile-template");
+    let compiledTemplate = Handlebars.compile(TEMPLATE.textContent);
+    let html = compiledTemplate(userObj);
+
+    const CONTAINER = document.getElementById("profile-container");
+    CONTAINER.innerHTML = html;
+}
+
+function updateRequest() {
+    const updateEmailField = document.getElementById("update-email");
+    const updateAboutField = document.getElementById("update-about-me");
+    const updateProfilePicField = document.getElementById("update-profile-pic");
+
+    const formData = new FormData();
+    formData.append("email", updateEmailField.value);
+    formData.append("aboutMe", updateAboutField.value);
+    formData.append("profilePic", updateProfilePicField.files[0])
+
+    return fetch(hostURL + "/user/update", {
+        method: "POST", // do not expicitly set content type 
+        body: formData
+    }).then(res => res.json())
+
+}
 
 
 function registerRequest() {
@@ -48,15 +111,15 @@ function registerRequest() {
         email: registerEmailField.value
     }
 
-    fetch(hostURL + "/user/register", { //TODO: get URL
+    fetch(hostURL + "/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
     }).then(res => res.json()).then(res => {
-        if(!res.ok) {
+        if (!res.ok) {
             alert("Error while signing-up: " + res.body)
         } else {
-            userObj = res.body; //TODO: see what object is returned by the server
+            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
         }
     })
 }
@@ -68,15 +131,15 @@ function loginRequest() {
         email: registerEmailField.value
     }
 
-    fetch(hostURL + "/user/login", { //TODO: get URL
+    fetch(hostURL + "/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
     }).then(res => res.json()).then(res => {
-        if(!res.ok) {
+        if (!res.ok) {
             alert("Error while logging-in: " + res.body)
         } else {
-            userObj = res.body; //TODO: see what object is returned by the server
+            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
         }
     })
 }
