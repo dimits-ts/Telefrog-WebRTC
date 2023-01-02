@@ -1,3 +1,5 @@
+const { register } = require("ts-node");
+
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
 const registerForm = document.getElementById("signup-form");
@@ -12,53 +14,83 @@ const loginNameField = document.getElementById("login-username");
 const loginPassField = document.getElementById("login-password");
 const loginButton = document.getElementById("login-button");
 
-let userObj = null;
 
 // Attempt to load the listeners every time the window changes
 window.onload = () => {
     if (signUpButton !== null) {
         signUpButton.onclick = e => {
             e.preventDefault();
-
-            checkPasswords();
-            checkBirthDate();
-
-            if (registerForm.checkValidity()) {
-                registerRequest();
-            }
+            register();
         }
     }
 
     if (loginButton !== null) {
         loginButton.onclick = e => {
             e.preventDefault();
-            loginRequest();
+            login();
         }
     }
 
     if (signUpButton === null && loginButton === null) {
-        
-        createProfilePage(userObj);
-
-        
+        displayProfile(window.localStorage.getItem("sessionId"));
     }
 }
 
+/**
+ * Display the page showing the uesr's profile details and allowing their editing.
+ * @param {string} sessionId the last session ID
+ */
 async function displayProfile(sessionId) {
     let response = await getProfileRequest(sessionId);
-    if(!response.ok) {
+
+    if (!response.ok) {
         createEmptyProfilePage();
     } else {
         createProfilePage(response.body);
-        const updateButton = document.getElementById("update-button");
 
-        updateButton.onclick = e => {
+        const updateButton = document.getElementById("update-button");
+        updateButton.onclick = e => async function(res) {
             e.preventDefault();
-            updateRequest();
+            let res = await updateRequest();
+
         }
     }
 }
 
+/**
+ * Implements the registration procedure for a user.
+ */
+async function register() {
+    checkPasswords();
+    checkBirthDate();
+
+    if (registerForm.checkValidity()) {
+        let res = await registerRequest();
+
+        if (!res.ok)
+            alert("Error while signing-up: " + res.body)
+        else
+            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
+    }
+}
+
+/**
+ * Implements the login procedure for a user.
+ */
+async function login() {
+    let res = await loginRequest();
+
+    if (!res.ok) 
+        alert("Error while logging-in: " + res.body)
+    else 
+        window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
+}
+
+/**
+ * Query the server for the user's profile details.
+ * @param {string} sessionId the last session ID 
+ * @returns a promise containing the profile details or an error when resolved
+ */
 function getProfileRequest(sessionId) {
     const formData = { sessionId: sessionId }
 
@@ -69,14 +101,23 @@ function getProfileRequest(sessionId) {
     }).then(res => res.json())
 }
 
+
+/**
+ * Display a HTML page prompting the user to register or log in.
+ */
 function createEmptyProfilePage() {
     const nonAuthContainer = document.getElementById("failed-auth");
     const authContainer = document.getElementById("successful-auth");
-    
+
     nonAuthContainer.style.visibility = "visible";
     authContainer.style.visibility = "hidden";
 }
 
+
+/**
+ * Display a HTML page displaying the user's profile details.
+ * @param {obj} userObj the profile's details 
+ */
 function createProfilePage(userObj) {
     const TEMPLATE = document.getElementById("profile-template");
     let compiledTemplate = Handlebars.compile(TEMPLATE.textContent);
@@ -86,6 +127,11 @@ function createProfilePage(userObj) {
     CONTAINER.innerHTML = html;
 }
 
+
+/**
+ * Send a POST request to the server that updates the user's profile details.
+ * @returns a promise containing a response, indicating whether the update was succesfull
+ */
 function updateRequest() {
     const updateEmailField = document.getElementById("update-email");
     const updateAboutField = document.getElementById("update-about-me");
@@ -103,7 +149,10 @@ function updateRequest() {
 
 }
 
-
+/**
+ * Send a request to the server that signs a user in.
+ * @returns a promise that contains a sessionId or a error when resolved
+ */
 function registerRequest() {
     const formData = {
         username: registerNameField.value,
@@ -111,37 +160,28 @@ function registerRequest() {
         email: registerEmailField.value
     }
 
-    fetch(hostURL + "/user/register", {
+    return fetch(hostURL + "/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
-    }).then(res => res.json()).then(res => {
-        if (!res.ok) {
-            alert("Error while signing-up: " + res.body)
-        } else {
-            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
-        }
-    })
+    }).then(res => res.json());
 }
 
+/**
+ * Send a request to the server to authenticate an existing user.
+ * @returns a promise that contains a sessionId or a error when resolved
+ */
 function loginRequest() {
     const formData = {
-        username: registerNameField.value,
-        password: registerPassField.value,
-        email: registerEmailField.value
+        username: loginNameField.value,
+        password: loginPassField.value,
     }
 
-    fetch(hostURL + "/user/login", {
+    return fetch(hostURL + "/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
-    }).then(res => res.json()).then(res => {
-        if (!res.ok) {
-            alert("Error while logging-in: " + res.body)
-        } else {
-            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
-        }
-    })
+    }).then(res => res.json());
 }
 
 /**
@@ -150,12 +190,12 @@ function loginRequest() {
 function checkPasswords() {
     let errorMsg = "";
 
-    if (passwordField.value !== passwordConfirmField.value) {
+    if (registerPassField.value !== registerPassConfirmField.value) {
         errorMsg = "Passwords must match";
     }
 
-    passwordField.setCustomValidity(errorMsg);
-    passwordConfirmField.setCustomValidity(errorMsg);
+    registerPassField.setCustomValidity(errorMsg);
+    registerPassConfirmField.setCustomValidity(errorMsg);
 }
 
 /**
