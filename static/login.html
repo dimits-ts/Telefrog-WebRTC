@@ -25,14 +25,14 @@
                 Login to your Telefrog account
             </h1>
             <form>
-                <form method="POST" action="/login-user" id="login">
+                <form id="login">
                     <fieldset>
                         <legend>
                             Account Information
                         </legend>
 
-                        <label for="signup-username">
-                            Username (at least 8 characters long):
+                        <label for="login-username">
+                            Username:
                         </label>
                         <input autocomplete="username" id="login-username" name="username"
                             pattern="^[a-zA-Z0-9._-]{8,}$" placeholder="aNormalUsername" required
@@ -56,7 +56,7 @@
                     <h3>Don't have an account? <a href="signup.html">Sign up here!</a></h3>
 
 
-                    <button id="sign-up-button" type="submit">
+                    <button id="login-button" type="submit">
                         Login
                     </button>
 
