@@ -9,6 +9,7 @@ const registerEmailField = document.getElementById("signup-email");
 const registerErrorLabel = document.getElementById("signup-error-label");
 const registerButton = document.getElementById("signup-button");
 
+const loginForm = document.getElementById("login-form");
 const loginNameField = document.getElementById("login-username");
 const loginPassField = document.getElementById("login-password");
 const loginErrorLabel = document.getElementById("login-error-label");
@@ -34,9 +35,9 @@ window.onload = () => {
     }
 
     if (loginButton !== null) {
-        loginButton.onclick = e => {
+        loginButton.onclick = async e => {
             e.preventDefault();
-            login();
+            await login();
         }
     }
 
@@ -84,7 +85,7 @@ async function register() {
             window.localStorage.setItem("sessionId", sessionId);
 
             hideLabel(registerErrorLabel);
-            window.location = "index.html"
+            window.location = "index.html";
         }
     } else {
         registerForm.reportValidity();
@@ -107,6 +108,7 @@ async function login() {
 
             hideLabel(loginErrorLabel);
             window.localStorage.setItem("sessionId", res.body);
+            window.location = "index.html";
         }
 
     }

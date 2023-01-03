@@ -24,45 +24,44 @@
             <h1>
                 Login to your Telefrog account
             </h1>
-            <form>
-                <form id="login">
-                    <fieldset>
-                        <legend>
-                            Account Information
-                        </legend>
 
-                        <label for="login-username">
-                            Username:
-                        </label>
-                        <input autocomplete="username" id="login-username" name="username"
-                            pattern="^[a-zA-Z0-9._-]{8,}$" placeholder="aNormalUsername" required
-                            title="Any letter from a-z, can use underscores, points and dashes, at least 8 characters long"
-                            type="text" />
+            <form id="login-form">
+                <fieldset>
+                    <legend>
+                        Account Information
+                    </legend>
 
-                        <label for="signup-password">
-                            Password:
-                        </label>
-                        <input id="login-password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                            required
-                            title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-                            type="password" />
+                    <label for="login-username">
+                        Username:
+                    </label>
+                    <input autocomplete="username" id="login-username" name="username" pattern="^[a-zA-Z0-9._-]{8,}$"
+                        placeholder="aNormalUsername" required
+                        title="Any letter from a-z, can use underscores, points and dashes, at least 8 characters long"
+                        type="text" />
 
-                        <details>
-                            <summary>Forgot your password?⬇</summary>
-                            Fuck you
-                        </details>
-                    </fieldset>
+                    <label for="signup-password">
+                        Password:
+                    </label>
+                    <input id="login-password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required
+                        title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                        type="password" />
 
-                    <h3>Don't have an account? <a href="signup.html">Sign up here!</a></h3>
+                    <details>
+                        <summary>Forgot your password?⬇</summary>
+                        Fuck you
+                    </details>
+                </fieldset>
+
+                <h3>Don't have an account? <a href="signup.html">Sign up here!</a></h3>
 
 
-                    <button id="login-button" type="submit">
-                        Login
-                    </button>
+                <button id="login-button" type="submit">
+                    Login
+                </button>
 
-                    <p id="login-error-label" class="error-label"></p>
+                <p id="login-error-label" class="error-label"></p>
 
-                </form>
+            </form>
         </article>
     </main>
 
