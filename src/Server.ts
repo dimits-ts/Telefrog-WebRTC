@@ -168,17 +168,17 @@ app.post("/user/update", upload.single("profilePic"), async (req: Request, res: 
                     await updateUser(new User(username, "", req.body.email, filename, req.body.aboutMe));
                     res.sendStatus(200)
                 } else {
-                    log.c(`username ${req.body.username} already exists`)
-                    res.sendStatus(409)
+                    log.c(`Username ${req.body.username} doesn't exists`)
+                    res.status(404).send(`Username ${req.body.username} doesn't exists`)
                 }
             } else {
-                log.c(`username ${req.body.username} already exists`)
-                res.sendStatus(409)
+                log.c(`Session id is not valid.`)
+                res.status(400).send(`Session id is not valid.`)
             }
         }
     } catch (e) {
         log.c(String(e));
-        res.sendStatus(400)
+        res.sendStatus(400).send(`Username ${req.body.username} doesn't exists`)
     }
 });
 
@@ -210,12 +210,12 @@ app.post("/user/login", async (req, res) => {
             res.status(200).json(uuid)
         } else {
             log.c("Cannot get User username");
-            res.sendStatus(400);
+            res.status(400).send("The session id is not valid");
 
         }
     } catch (e) {
-        log.c(String(e))
-        res.sendStatus(400);
+        log.c("the session id is not valid")
+        res.status(400).send("the session id is not valid");
     }
 });
 
@@ -253,13 +253,13 @@ app.get("/user/:sessionId", async (req, res) => {
                     res.status(200).json(results)
                 } else {
                     log.c("User could not be found");
-                    res.sendStatus(400);
+                    res.status(400).send("User could not be found.");
                 }
             }
         }
     } catch (e) {
         log.c(String(e))
-        res.sendStatus(400);
+        res.status(400).send("Session id is not valid.");
     }
 })
 
