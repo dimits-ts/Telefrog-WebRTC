@@ -1,5 +1,3 @@
-const { register } = require("ts-node");
-
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
 const registerForm = document.getElementById("signup-form");
