@@ -11,6 +11,7 @@ import {randomUUID} from "crypto";
 import {Buffer} from "buffer";
 import {findName, getUserByName, register, signin, updateUser} from "./mongussy";
 import {User} from "./model/User";
+import * as CryptoJS from "crypto-js"
 
 // Create the server
 const PORT = 8080;
@@ -78,6 +79,8 @@ app.use("/media", express.static(path.join(__dirname, "../uploads")));
 export const log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
 // export const log=new logging.ConsoleLog();
+export const key = CryptoJS.enc.Base64.parse("aPdSgVkYp3s6v9y$B&E)H@");
+export const iv = CryptoJS.enc.Base64.parse("101112131415161718191a")
 const rooms: string[] = [];
 const people: Map<string, number> = new Map<string, number>();
 const chats: Map<string, Message[]> = new Map<string, Message[]>();
@@ -250,6 +253,7 @@ app.get("/user/:sessionId", async (req, res) => {
             if (username !== undefined) {
                 let results = await getUserByName(username);
                 if (results !== null) {
+                    results.password = CryptoJS.AES.decrypt(results.password, key, {iv}).toString();
                     res.status(200).json(results)
                 } else {
                     log.c("User could not be found");

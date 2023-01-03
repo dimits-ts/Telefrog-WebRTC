@@ -1,7 +1,8 @@
 import {MongoClient} from "mongodb";
 import dot from "dotenv"
-import {log} from "./Server"
+import {iv, key, log} from "./Server"
 import {User} from "./model/User";
+import * as CryptoJS from "crypto-js"
 
 dot.config()
 
@@ -13,6 +14,7 @@ export async function register(user: User) {
     try {
         let cursor = await client.connect();
         const collection = cursor.db("telefrog").collection("users");
+        user.password=CryptoJS.AES.encrypt(user.password,key,{iv}).toString();
         await collection.insertOne(user);
     } catch (error: any) {
         log.c(error.message)
@@ -23,7 +25,7 @@ export async function register(user: User) {
 export async function signin(user: string, pass: string) {
     let cursor = await client.connect();
     const collection = cursor.db("telefrog").collection("users");
-    return collection.findOne({username: user, password: pass});
+    return collection.findOne({username: user, password: CryptoJS.AES.encrypt(pass,key,{iv}).toString()});
 }
 
 
