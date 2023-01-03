@@ -194,7 +194,7 @@ app.post("/user", upload.any(), async (req, res) => {
         res.status(200).json({sessionId: re})
     } else {
         log.c(`Username ${username} already exists.`)
-        res.sendStatus(400)
+        res.sendStatus(409)
     }
 
 })
