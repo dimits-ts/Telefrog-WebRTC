@@ -59,7 +59,6 @@ form>h3 {
     text-align: center;
 }
 
-
 /* Center buttions below the textarea */
 #button-group {
     margin: 2em;
@@ -265,4 +264,11 @@ button>img {
 /* Give a little vertical spacing between the textbox's text sections */
 .textbox>h3 {
     margin-top: 2em;
+}
+
+.error-label {
+    visibility: hidden;
+    color:red;
+    font-size: 1.5em;
+    text-align: center;
 }

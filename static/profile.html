@@ -11,38 +11,6 @@
     <link rel="icon" type="image/x-icon" href="resources/frog.ico">
     <link href="style.css" rel="stylesheet" />
     <script src="scripts/profile.js" defer></script>
-
-    <script id="profile-template" type="text/x-handlebars-template">
-        <h3>{{username}}</h3>
-        <img src="{{profilePic}}" alt="profile picture">
-
-        <form>
-            <fieldset>
-                <label for="update-email">
-                    Email:
-                </label>
-                <!--Email inputs automatically check for correct regex-->
-                <input autocomplete="email" id="update-email" name="email" placeholder="example@gmail.com"
-                title="Personal Email" type="email" value="{{email}}"/>
-
-                <label for="update-about-me">
-                    About Me:
-                </label>
-                <!--Email inputs automatically check for correct regex-->
-                <textarea id="update-about-me" name="aboutMe" rows="4" cols="50" value="{{aboutMe}}"/>
-
-                <label for="update-profile-pic">
-                    Profile Picture:
-                </label>
-                <input id="update-profile-pic" name="profilePic" type="file" accept="image/*">
-
-                <button id="update-button" type="submit">
-                    Update
-                </button>
-
-            </fieldset>
-        </form>
-    </script>
 </head>
 
 <body>
@@ -63,9 +31,39 @@
             <h1>
                 Update your Account Details
             </h1>
-            <article id="profile-container">
-                <!-- Handlebars content goes here -->
-            </article>
+
+            <h3 id="profile-username"></h3>
+            <img id="profile-picture" src="resources/profile_icon.png" alt="profile picture">
+
+            <form>
+                <fieldset>
+                    <label for="update-email">
+                        Email:
+                    </label>
+                    <!--Email inputs automatically check for correct regex-->
+                    <input autocomplete="email" id="update-email" name="email" placeholder="example@gmail.com"
+                        title="Personal Email" type="email" value="{{email}}" />
+
+                    <label for="update-about-me">
+                        About Me:
+                    </label>
+                    <!--Email inputs automatically check for correct regex-->
+                    <textarea id="update-about-me" name="aboutMe" rows="4" cols="50" value="{{aboutMe}}" />
+
+                    <label for="update-profile-pic">
+                        Profile Picture:
+                    </label>
+                    <input id="update-profile-pic" name="profilePic" type="file" accept="image/*">
+
+                    <button id="update-button" type="submit">
+                        Update
+                    </button>
+
+                    <p id="update-error-label" class="error-label"></p>
+
+                </fieldset>
+            </form>
+
         </article>
     </main>
 

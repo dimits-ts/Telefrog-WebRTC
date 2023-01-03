@@ -8,17 +8,27 @@ const registerPassField = document.getElementById("signup-password");
 const registerPassConfirmField = document.getElementById("signup-password-2nd");
 const registerBirthdateField = document.getElementById("signup-birthdate");
 const registerEmailField = document.getElementById("signup-email");
-const signUpButton = document.getElementById("signup-button");
+const registerErrorLabel = document.getElementById("signup-error-label");
+const registerButton = document.getElementById("signup-button");
 
 const loginNameField = document.getElementById("login-username");
 const loginPassField = document.getElementById("login-password");
+const loginErrorLabel = document.getElementById("login-error-label");
 const loginButton = document.getElementById("login-button");
+
+const usernameLabel = document.getElementById("profile-username");
+const profilePicture = document.getElementById("profile-username");
+const updateEmailField = document.getElementById("update-email");
+const updateAboutField = document.getElementById("update-about-me");
+const updateProfilePicField = document.getElementById("update-profile-pic");
+const updateNonupdateAuthContainer = document.getElementById("failed-auth");
+const updateAuthContainer = document.getElementById("successful-auth");
 
 
 // Attempt to load the listeners every time the window changes
 window.onload = () => {
-    if (signUpButton !== null) {
-        signUpButton.onclick = e => {
+    if (registerButton !== null) {
+        registerButton.onclick = e => {
             e.preventDefault();
             register();
         }
@@ -31,7 +41,7 @@ window.onload = () => {
         }
     }
 
-    if (signUpButton === null && loginButton === null) {
+    if (registerButton === null && loginButton === null) {
         displayProfile(window.localStorage.getItem("sessionId"));
     }
 }
@@ -49,7 +59,7 @@ async function displayProfile(sessionId) {
         createProfilePage(response.body);
 
         const updateButton = document.getElementById("update-button");
-        updateButton.onclick = e => async function(res) {
+        updateButton.onclick = async function (e) {
             e.preventDefault();
             let res = await updateRequest();
 
@@ -67,10 +77,13 @@ async function register() {
     if (registerForm.checkValidity()) {
         let res = await registerRequest();
 
-        if (!res.ok)
-            alert("Error while signing-up: " + res.body)
-        else
-            window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
+        if (!res.ok) {
+            showLabel(registerErrorLabel, "Error while signing-up: " + res.body);
+        } else {
+            hideLabel(registerErrorLabel);
+            window.localStorage.setItem("sessionId", res.body);
+        }
+
     }
 }
 
@@ -80,10 +93,12 @@ async function register() {
 async function login() {
     let res = await loginRequest();
 
-    if (!res.ok) 
-        alert("Error while logging-in: " + res.body)
-    else 
-        window.localStorage.setItem("sessionId", res.body); //TODO: see what object is returned by the server
+    if (!res.ok) {
+        showLabel(loginErrorLabel, "Error while logging-in: " + res.body);
+    } else {
+        hideLabel(loginErrorLabel);
+        window.localStorage.setItem("sessionId", res.body);
+    }
 }
 
 /**
@@ -106,11 +121,8 @@ function getProfileRequest(sessionId) {
  * Display a HTML page prompting the user to register or log in.
  */
 function createEmptyProfilePage() {
-    const nonAuthContainer = document.getElementById("failed-auth");
-    const authContainer = document.getElementById("successful-auth");
-
-    nonAuthContainer.style.visibility = "visible";
-    authContainer.style.visibility = "hidden";
+    showLabel(updateNonupdateAuthContainer);
+    hideLabel(updateAuthContainer);
 }
 
 
@@ -119,12 +131,13 @@ function createEmptyProfilePage() {
  * @param {obj} userObj the profile's details 
  */
 function createProfilePage(userObj) {
-    const TEMPLATE = document.getElementById("profile-template");
-    let compiledTemplate = Handlebars.compile(TEMPLATE.textContent);
-    let html = compiledTemplate(userObj);
+    profilePicture.src = userObj.profilePic;
+    usernameLabel.innerText = userObj.username;
+    updateEmailField.value = userObj.email;
+    updateAboutField.value = userObj.aboutMe;
 
-    const CONTAINER = document.getElementById("profile-container");
-    CONTAINER.innerHTML = html;
+    showLabel(updateAuthContainer);
+    hideLabel(updateNonupdateAuthContainer);
 }
 
 
@@ -133,10 +146,6 @@ function createProfilePage(userObj) {
  * @returns a promise containing a response, indicating whether the update was succesfull
  */
 function updateRequest() {
-    const updateEmailField = document.getElementById("update-email");
-    const updateAboutField = document.getElementById("update-about-me");
-    const updateProfilePicField = document.getElementById("update-profile-pic");
-
     const formData = new FormData();
     formData.append("email", updateEmailField.value);
     formData.append("aboutMe", updateAboutField.value);
@@ -182,6 +191,26 @@ function loginRequest() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
     }).then(res => res.json());
+}
+
+/**
+ * Display a hidden HTML element.
+ * @param {HTMLElement} label the HTML element to be displayed 
+ * @param {string} message an optional message to be displayed in the element 
+ */
+function showLabel(label, message = null) {
+    if (message !== null)
+        label.innerText = message;
+
+    label.style.visibility = "visible";
+}
+
+/**
+ * Hide a visible HTML element.
+ * @param {HTMLElement} label the HTML element to be hidden
+ */
+function hideLabel(label) {
+    label.stlye.visibility = "hidden";
 }
 
 /**
