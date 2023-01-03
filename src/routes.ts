@@ -5,7 +5,7 @@ import fs from "fs"
 import {Logging} from "./logging";
 import express from "express"
 import {User} from "./model/User"
-import {register, signin} from "./mongussy";
+import {signin} from "./mongussy";
 
 export function getNewMessages(chat: Map<string, Message[]>, room: string, last_message: string): Promise<Message[]> {
     return new Promise<Message[]>((resolve, reject) => {
@@ -92,9 +92,7 @@ export function storeMessage(roomId: any, res: express.Response<any, Record<stri
 }
 
 
-export async function creteUser(username: string, pass: string, path: string) {
-    await register(new User(username, pass, path));
-}
+
 
 export async function login(username: string, pass: string) {
     let result = await signin(username, pass);

@@ -9,6 +9,8 @@ import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMe
 import multer, {FileFilterCallback} from "multer";
 import {randomUUID} from "crypto";
 import {Buffer} from "buffer";
+import {findName, getUserByName, register, signin, updateUser} from "./mongussy";
+import {User} from "./model/User";
 
 // Create the server
 const PORT = 8080;
@@ -18,13 +20,24 @@ const io = new s.Server(http, {
     maxHttpBufferSize: 10 * 1024 * 1024
 });
 
+const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
-        if (req.path === "/user") {
-            let paths = path.join(__dirname, `../uploads/${crypto.randomUUID()}/`)
-            if (!fs.existsSync(paths))
-                fs.mkdirSync(paths);
-            cb(null, paths);
+        if (req.path === "/user/update") {
+            let session = req.body.sessionId;
+            if (sessions.has(session)) {
+                let username = sessions.get(session);
+                if (username !== undefined) {
+                    let paths = path.join(__dirname, `../uploads/${username}/`)
+                    if (!fs.existsSync(paths))
+                        fs.mkdirSync(paths);
+                    cb(null, paths);
+                } else {
+                    cb(new Error("Username could not be resolved"), "../uploads");
+                }
+            } else {
+                cb(new Error("Session id does not exist"), "../uploads")
+            }
         } else {
             let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
             if (!fs.existsSync(paths))
@@ -66,8 +79,8 @@ export const log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
 // export const log=new logging.ConsoleLog();
 const rooms: string[] = [];
-const people: Map<string, number> = new Map();
-const chats: Map<string, Message[]> = new Map();
+const people: Map<string, number> = new Map<string, number>();
+const chats: Map<string, Message[]> = new Map<string, Message[]>();
 
 app.get("/", (req: Request, res: Response) => {
     res.redirect("/static/index.html");
@@ -108,7 +121,6 @@ io.on("connection", socket => {
 app.get("/chat-box/refresh", async (req: Request, res: Response) => {
     const room = String(req.query.roomId);
     const last_message = String(req.query.lastMessage);
-
     try {
         let toSend = await getNewMessages(chats, room, last_message)
         res.status(200).json(toSend)
@@ -136,10 +148,83 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
 })
 
 
-app.post("/user", upload.single("profile"), (req: Request, res: Response) => {
+app.post("/user/update", upload.single("profilePic"), async (req: Request, res: Response) => {
     log.i(`Request to register user with id ${req.body.username}`);
-    res.sendStatus(200)
+    try {
+        let session = req.body.sessionId;
+        if (sessions.has(session)) {
+            const username = sessions.get(session);
+            let exists: number = 0;
+            if (username !== undefined) {
+                exists = await findName(username);
+                if (exists === 1) {
+                    let filename: string;
+                    if (req.file === undefined) {
+                        filename = "";
+                    } else {
+                        let name = req.file.path.split("\\");
+                        filename = name[name.length - 2] + "\\" + name[name.length - 1];
+                    }
+                    await updateUser(new User(username, "", req.body.email, filename, req.body.aboutMe));
+                    res.sendStatus(200)
+                } else {
+                    log.c(`username ${req.body.username} already exists`)
+                    res.sendStatus(409)
+                }
+            } else {
+                log.c(`username ${req.body.username} already exists`)
+                res.sendStatus(409)
+            }
+        }
+    } catch (e) {
+        log.c(String(e));
+        res.sendStatus(400)
+    }
 });
+
+app.post("/user", upload.any(), async (req, res) => {
+    let pass = req.body.password;
+    let username = req.body.username;
+    let email = req.body.email;
+    let exist = await findName(username);
+    if (exist < 1) {
+        await register(new User(username, pass, email))
+        const re = randomUUID()
+        sessions.set(re, username)
+        res.status(200).json({sessionId: re})
+    } else {
+        log.c(`Username ${username} already exists.`)
+        res.sendStatus(400)
+    }
+
+})
+
+app.post("/user/login", async (req, res) => {
+    let pass = req.body.password;
+    let username = req.body.username;
+    try {
+        let results = await signin(username, pass);
+        const uuid = randomUUID();
+        if (results !== null && results.length !== 0) {
+            sessions.set(uuid, results.username);
+            res.status(200).json(uuid)
+        } else {
+            log.c("Cannot get User username");
+            res.sendStatus(400);
+
+        }
+    } catch (e) {
+        log.c(String(e))
+        res.sendStatus(400);
+    }
+});
+
+
+app.post("user/logout", (req, res) => {
+    let session = req.body.sessionId;
+    sessions.delete(session);
+    res.sendStatus(200)
+})
 
 
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
@@ -157,8 +242,33 @@ fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
     log.i("cleaned the upload folder");
 })
 
+app.get("/user/:sessionId", async (req, res) => {
+    let session = req.params.sessionId;
+    try {
+        if (sessions.has(session)) {
+            let username = sessions.get(session);
+            if (username !== undefined) {
+                let results = await getUserByName(username);
+                if (results !== null) {
+                    res.status(200).json(results)
+                } else {
+                    log.c("User could not be found");
+                    res.sendStatus(400);
+                }
+            }
+        }
+    } catch (e) {
+        log.c(String(e))
+        res.sendStatus(400);
+    }
+})
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+});
 
 http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
+    console.log(`Server initialization at port ${PORT}`)
 });
 
