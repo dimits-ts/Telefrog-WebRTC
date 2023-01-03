@@ -21,6 +21,7 @@ const updateAboutField = document.getElementById("update-about-me");
 const updateProfilePicField = document.getElementById("update-profile-pic");
 const updateNonupdateAuthContainer = document.getElementById("failed-auth");
 const updateAuthContainer = document.getElementById("successful-auth");
+const updateButton = document.getElementById("update-button");
 
 
 // Attempt to load the listeners every time the window changes
@@ -39,7 +40,7 @@ window.onload = () => {
         }
     }
 
-    if (registerButton === null && loginButton === null) {
+    if (updateButton !== null) {
         displayProfile(window.localStorage.getItem("sessionId"));
     }
 }
@@ -56,7 +57,6 @@ async function displayProfile(sessionId) {
     } else {
         createProfilePage(response.body);
 
-        const updateButton = document.getElementById("update-button");
         updateButton.onclick = async function (e) {
             e.preventDefault();
             let res = await updateRequest();
@@ -84,8 +84,10 @@ async function register() {
             window.localStorage.setItem("sessionId", sessionId);
 
             hideLabel(registerErrorLabel);
+            window.location = "index.html"
         }
-
+    } else {
+        registerForm.reportValidity();
     }
 }
 
@@ -93,13 +95,20 @@ async function register() {
  * Implements the login procedure for a user.
  */
 async function login() {
-    let res = await loginRequest();
+    if (checkValidity(loginForm.id)) {
+        let res = await loginRequest();
 
-    if (!res.ok) {
-        showLabel(loginErrorLabel, "Error while logging-in: " + res.body);
-    } else {
-        hideLabel(loginErrorLabel);
-        window.localStorage.setItem("sessionId", res.body);
+        if (!res.ok) {
+            let errorMsg = await res.text();
+            showLabel(loginErrorLabel, "Error while logging-in: " + errorMsg);
+        } else {
+            let sessionId = await res.json();
+            console.log(sessionId);
+
+            hideLabel(loginErrorLabel);
+            window.localStorage.setItem("sessionId", res.body);
+        }
+
     }
 }
 
@@ -119,6 +128,7 @@ function checkValidity(formId) {
 
     for (let input of inputs) {
         if (!input.checkValidity()) {
+            input.reportValidity();
             return false;
         }
     }
@@ -229,7 +239,13 @@ function hideLabel(label) {
 function checkPasswords() {
     let errorMsg = "";
 
-    if (registerPassField.value !== registerPassConfirmField.value) {
+    let password = registerPassField.value;
+
+    if(password.length < 8) {
+        errorMsg = "Passwords must be at least 8 characters long";
+    }
+
+    if (password !== registerPassConfirmField.value) {
         errorMsg = "Passwords must match";
     }
 
