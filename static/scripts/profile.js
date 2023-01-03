@@ -77,7 +77,7 @@ async function register() {
         console.log(res);
 
         if (!res.ok) {
-            showLabel(registerErrorLabel, "Error while signing-up: " + res.body);
+            showLabel(registerErrorLabel, "Error while signing-up: " + res.statusText);
         } else {
             hideLabel(registerErrorLabel);
             console.log(res.body);
@@ -179,7 +179,7 @@ async function registerRequest() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
-    }).then(res => res.json());
+    });
 
     return res;
 }
@@ -218,7 +218,7 @@ function showLabel(label, message = null) {
  * @param {HTMLElement} label the HTML element to be hidden
  */
 function hideLabel(label) {
-    label.stlye.visibility = "hidden";
+    label.style.visibility = "hidden";
 }
 
 /**
