@@ -14,6 +14,7 @@ export function getProfilePic(url) {
 
 /**
  * Get the user's data based on the user's current session ID.
+ * @param {string | URL} hostURL the server URL
  * @param {string} sessionId the current session ID
  * @returns an object containing the user's data or null if the sessionId is invalid
  */

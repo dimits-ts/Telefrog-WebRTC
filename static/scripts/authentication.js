@@ -82,9 +82,8 @@ async function register() {
             let errorMsg = await res.text();
             showLabel(registerErrorLabel, "Error while signing-up: " + errorMsg);
         } else {
-            let sessionId = await res.json();
-            console.log(sessionId);
-            window.localStorage.setItem("sessionId", sessionId);
+            let resObj = await res.json();
+            window.localStorage.setItem("sessionId", resObj);
 
             hideLabel(registerErrorLabel);
             window.location = "index.html";
@@ -105,11 +104,11 @@ async function login() {
             let errorMsg = await res.text();
             showLabel(loginErrorLabel, "Error while logging-in: " + errorMsg);
         } else {
-            let sessionId = await res.json();
-            console.log(sessionId);
+            let resObj = await res.json();
+            console.log(resObj);
+            window.localStorage.setItem("sessionId", resObj);
 
             hideLabel(loginErrorLabel);
-            window.localStorage.setItem("sessionId", res.body);
             window.location = "index.html";
         }
 

@@ -1,6 +1,7 @@
 import { Presenter } from "./modules/presenter.mjs"
 import { Conference } from "./modules/conference.mjs";
 import { Chat } from "./modules/chat.mjs";
+import { getUserData } from "./modules/profile.mjs";
 
 // Configurations
 const hostURL = "http://localhost:8080"
@@ -38,16 +39,21 @@ window.addEventListener("keypress", function (event) {
 
 // ========== CALL HANDLERS ==========
 
-function joinRoom(e) {
+async function joinRoom(e) {
     console.log("Sending request to join");
 
     let username = presenter.getUsername();
+    let user = await getUserData(hostURL, window.localStorage.getItem("sessionId"));
+
+    if (user !== null) {
+        username = user.username;
+    }
+
     let roomId = presenter.getRoomId();
 
     if (usernameIsValid(username)) {
         presenter.showInputError("Please enter a valid username.");
-    }
-    else {
+    } else {
         login = false;
         chat.setUser(username, roomId);
         conference.connect(username, roomId);
