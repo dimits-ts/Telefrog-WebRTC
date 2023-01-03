@@ -74,6 +74,7 @@ async function register() {
 
     if (registerForm.checkValidity()) {
         let res = await registerRequest();
+        console.log(res);
 
         if (!res.ok) {
             showLabel(registerErrorLabel, "Error while signing-up: " + res.body);
@@ -105,12 +106,8 @@ async function login() {
  * @returns a promise containing the profile details or an error when resolved
  */
 function getProfileRequest(sessionId) {
-    const formData = { sessionId: sessionId }
-
-    return fetch(hostURL + "/user/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+    return fetch(hostURL + "/user/" + sessionId, {
+        method: "GET",
     }).then(res => res.json())
 }
 

@@ -55,88 +55,87 @@
                 Sign up
             </h1>
 
-            <form>
-                <form method="POST" action="/register-user" id="signup-form">
-                    <fieldset>
-                        <legend>
-                            Account Information
-                        </legend>
+            <form id="signup-form">
+                <fieldset>
+                    <legend>
+                        Account Information
+                    </legend>
 
-                        <label for="signup-username">
-                            Username (at least 8 characters long):
+                    <label for="signup-username">
+                        Username (at least 8 characters long):
+                    </label>
+                    <input autocomplete="username" id="signup-username" name="username" pattern="^[a-zA-Z0-9._-]{8,}$"
+                        placeholder="aNormalUsername" required
+                        title="Any letter from a-z, can use underscores, points and dashes, at least 8 characters long"
+                        type="text" />
+
+                    <label for="signup-email">
+                        Email:
+                    </label>
+                    <!--Email inputs automatically check for correct regex-->
+                    <input autocomplete="email" id="signup-email" name="email" placeholder="example@gmail.com" required
+                        title="Personal Email" type="email" />
+
+                    <label for="signup-birthdate">
+                        Date of Birth:
+                    </label>
+                    <input autocomplete="bday" id="signup-birthdate" min="1900-01-01" placeholder="2022-11-03" required
+                        title="Birthdate" type="date" />
+
+                    <p>
+                        Your birthdate information will not be stored anywhere and is only required as to
+                        prove you are legally allowed to use our services.
+                    </p>
+
+                    <label for="signup-password">
+                        Password:
+                    </label>
+                    <input autocomplete="new-password" id="signup-password" name="password"
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required
+                        title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                        type="password" />
+
+                    <label for="signup-password-2nd">
+                        Confirm password:
+                    </label>
+                    <input id="signup-password-2nd" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required
+                        title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                        type="password" />
+                </fieldset>
+
+                <h3>Already have an account? <a href="login.html">Log-in here!</a></h3>
+
+                <div id="optiongroup">
+                    <div>
+                        <input id="spam-option1" required type="checkbox" />
+                        <label for="spam-option">
+                            <small>
+                                I understand and agree with the TeleFrog® Terms of Service (ToS).
+                            </small>
                         </label>
-                        <input autocomplete="username" id="signup-username" name="username"
-                            pattern="^[a-zA-Z0-9._-]{8,}$" placeholder="aNormalUsername" required
-                            title="Any letter from a-z, can use underscores, points and dashes, at least 8 characters long"
-                            type="text" />
-
-                        <label for="signup-email">
-                            Email:
-                        </label>
-                        <!--Email inputs automatically check for correct regex-->
-                        <input autocomplete="email" id="signup-email" name="email" placeholder="example@gmail.com"
-                            required title="Personal Email" type="email" />
-
-                        <label for="signup-birthdate">
-                            Date of Birth:
-                        </label>
-                        <input autocomplete="bday" id="signup-birthdate" min="1900-01-01" placeholder="2022-11-03"
-                            required title="Birthdate" type="date" />
-
-                        <p>
-                            Your birthdate information will not be stored anywhere and is only required as to
-                            prove you are legally allowed to use our services.
-                        </p>
-
-                        <label for="signup-password">
-                            Password:
-                        </label>
-                        <input autocomplete="new-password" id="signup-password" name="password"
-                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required
-                            title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-                            type="password" />
-
-                        <label for="signup-password-2nd">
-                            Confirm password:
-                        </label>
-                        <input id="signup-password-2nd" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required
-                            title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-                            type="password" />
-                    </fieldset>
-
-                    <h3>Already have an account? <a href="login.html">Log-in here!</a></h3>
-
-                    <div id="optiongroup">
-                        <div>
-                            <input id="spam-option1" required type="checkbox" />
-                            <label for="spam-option">
-                                <small>
-                                    I understand and agree with the TeleFrog® Terms of Service (ToS).
-                                </small>
-                            </label>
-                        </div>
-    
-                        <div>
-                            <input id="spam-option2" required type="checkbox" />
-                            <label for="spam-option">
-                                <small>
-                                    I consent with the TeleFrog® cookie and personal data policy.
-                                </small>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div id="button-group">
-                        <button id="signup-button" type="submit">
-                            Sign Up
-                        </button>
-                        <button type="reset">
-                            Reset
-                        </button>
                     </div>
 
-                    <p id="signup-error-label" class="error-label"></p>
-                </form>
+                    <div>
+                        <input id="spam-option2" required type="checkbox" />
+                        <label for="spam-option">
+                            <small>
+                                I consent with the TeleFrog® cookie and personal data policy.
+                            </small>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="button-group">
+                    <button id="signup-button" type="submit">
+                        Sign Up
+                    </button>
+                    <button type="reset">
+                        Reset
+                    </button>
+                </div>
+
+                <p id="signup-error-label" class="error-label"></p>
+            </form>
         </article>
     </main>
 

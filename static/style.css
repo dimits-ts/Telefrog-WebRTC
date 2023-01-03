@@ -68,10 +68,11 @@ form>h3 {
 }
 
 /* Customize button appearance */
-#button-group>button {
+button {
     font-size: 2rem;
     border-radius: 1em;
     border-color: #00258a;
+    margin: 1em;
 }
 
 /* Enlarge and change button color when hovered */
@@ -271,4 +272,8 @@ button>img {
     color:red;
     font-size: 1.5em;
     text-align: center;
+}
+
+#profile-picture {
+    max-width: 30%;
 }
