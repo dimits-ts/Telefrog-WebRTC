@@ -26,9 +26,9 @@ const updateAuthContainer = document.getElementById("successful-auth");
 // Attempt to load the listeners every time the window changes
 window.onload = () => {
     if (registerButton !== null) {
-        registerButton.onclick = e => {
+        registerButton.onclick = async e => {
             e.preventDefault();
-            register();
+            await register();
         }
     }
 
@@ -72,7 +72,7 @@ async function register() {
     checkPasswords();
     checkBirthDate();
 
-    if (registerForm.checkValidity()) {
+    if (checkValidity(registerForm.id)) {
         let res = await registerRequest();
         console.log(res);
 
@@ -80,6 +80,7 @@ async function register() {
             showLabel(registerErrorLabel, "Error while signing-up: " + res.body);
         } else {
             hideLabel(registerErrorLabel);
+            console.log(res.body);
             window.localStorage.setItem("sessionId", res.body);
         }
 
@@ -111,6 +112,16 @@ function getProfileRequest(sessionId) {
     }).then(res => res.json())
 }
 
+function checkValidity(formId) {
+    let inputs = document.querySelectorAll(`#${formId} input`);
+
+    for (let input of inputs) {
+        if (!input.checkValidity()) {
+            return false;
+        }
+    }
+    return true;
+}
 
 /**
  * Display a HTML page prompting the user to register or log in.
@@ -144,7 +155,7 @@ function updateRequest() {
     const formData = new FormData();
     formData.append("email", updateEmailField.value);
     formData.append("aboutMe", updateAboutField.value);
-    formData.append("profilePic", updateProfilePicField.files[0])
+    formData.append("profilePic", updateProfilePicField.files[0]);
 
     return fetch(hostURL + "/user/update", {
         method: "POST", // do not expicitly set content type 
@@ -157,18 +168,20 @@ function updateRequest() {
  * Send a request to the server that signs a user in.
  * @returns a promise that contains a sessionId or a error when resolved
  */
-function registerRequest() {
+async function registerRequest() {
     const formData = {
         username: registerNameField.value,
         password: registerPassField.value,
         email: registerEmailField.value
     }
 
-    return fetch(hostURL + "/user/register", {
+    let res = await fetch(hostURL + "/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
     }).then(res => res.json());
+
+    return res;
 }
 
 /**
@@ -220,6 +233,8 @@ function checkPasswords() {
 
     registerPassField.setCustomValidity(errorMsg);
     registerPassConfirmField.setCustomValidity(errorMsg);
+
+    return errorMsg === "";
 }
 
 /**
@@ -237,6 +252,8 @@ function checkBirthDate() {
     }
 
     registerBirthdateField.setCustomValidity(errorMsg);
+
+    return errorMsg === "";
 }
 
 /**
