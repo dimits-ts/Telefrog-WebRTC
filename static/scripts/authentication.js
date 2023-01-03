@@ -1,3 +1,5 @@
+import { getUserData } from "./modules/profile.mjs";
+
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
 const registerForm = document.getElementById("signup-form");
@@ -51,7 +53,7 @@ window.onload = () => {
  * @param {string} sessionId the last session ID
  */
 async function displayProfile(sessionId) {
-    let response = await getProfileRequest(sessionId);
+    let response = await getUserData(hostURL, sessionId);
 
     if (!response.ok) {
         createEmptyProfilePage();
@@ -114,17 +116,6 @@ async function login() {
     }
 }
 
-/**
- * Query the server for the user's profile details.
- * @param {string} sessionId the last session ID 
- * @returns a promise containing the profile details or an error when resolved
- */
-function getProfileRequest(sessionId) {
-    return fetch(hostURL + "/user/" + sessionId, {
-        method: "GET",
-    }).then(res => res.json())
-}
-
 function checkValidity(formId) {
     let inputs = document.querySelectorAll(`#${formId} input`);
 
@@ -145,7 +136,6 @@ function createEmptyProfilePage() {
     hideLabel(updateAuthContainer);
 }
 
-
 /**
  * Display a HTML page displaying the user's profile details.
  * @param {obj} userObj the profile's details 
@@ -159,7 +149,6 @@ function createProfilePage(userObj) {
     showLabel(updateAuthContainer);
     hideLabel(updateNonupdateAuthContainer);
 }
-
 
 /**
  * Send a POST request to the server that updates the user's profile details.

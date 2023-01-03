@@ -28,7 +28,7 @@ window.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
         event.preventDefault();
 
-        if(login)
+        if (login)
             joinRoomButton.click();
         else
             sendMessageButton.click();
