@@ -74,14 +74,16 @@ async function register() {
 
     if (checkValidity(registerForm.id)) {
         let res = await registerRequest();
-        console.log(res);
 
         if (!res.ok) {
-            showLabel(registerErrorLabel, "Error while signing-up: " + res.statusText);
+            let errorMsg = await res.text();
+            showLabel(registerErrorLabel, "Error while signing-up: " + errorMsg);
         } else {
+            let sessionId = await res.json();
+            console.log(sessionId);
+            window.localStorage.setItem("sessionId", sessionId);
+
             hideLabel(registerErrorLabel);
-            console.log(res.body);
-            window.localStorage.setItem("sessionId", res.body);
         }
 
     }
@@ -188,7 +190,7 @@ async function registerRequest() {
  * Send a request to the server to authenticate an existing user.
  * @returns a promise that contains a sessionId or a error when resolved
  */
-function loginRequest() {
+async function loginRequest() {
     const formData = {
         username: loginNameField.value,
         password: loginPassField.value,
@@ -198,7 +200,7 @@ function loginRequest() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
-    }).then(res => res.json());
+    });
 }
 
 /**
