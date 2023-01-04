@@ -1,3 +1,4 @@
+import { swapPasswordType } from "./modules/presenter.mjs";
 import { getUserData, getSessionId, saveSessionId } from "./modules/profile.mjs";
 
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
@@ -10,12 +11,14 @@ const registerBirthdateField = document.getElementById("signup-birthdate");
 const registerEmailField = document.getElementById("signup-email");
 const registerErrorLabel = document.getElementById("signup-error-label");
 const registerButton = document.getElementById("signup-button");
+const registerShowPassButton = document.getElementById("signup-show-pass");
 
 const loginForm = document.getElementById("login-form");
 const loginNameField = document.getElementById("login-username");
 const loginPassField = document.getElementById("login-password");
 const loginErrorLabel = document.getElementById("login-error-label");
 const loginButton = document.getElementById("login-button");
+const loginShowPassButton = document.getElementById("login-show-pass");
 
 const usernameLabel = document.getElementById("profile-username");
 const profilePicture = document.getElementById("profile-username");
@@ -30,6 +33,11 @@ const updateButton = document.getElementById("update-button");
 // Attempt to load the listeners every time the window changes
 window.onload = async () => {
     if (registerButton !== null) {
+        registerShowPassButton.onclick = e => {
+            swapPasswordType(registerPassField);
+            e.preventDefault();
+        }
+
         registerButton.onclick = async e => {
             e.preventDefault();
             await register();
@@ -37,6 +45,11 @@ window.onload = async () => {
     }
 
     if (loginButton !== null) {
+        loginShowPassButton.onclick = e => {
+            e.preventDefault();
+            swapPasswordType(loginPassField);
+        }
+        
         loginButton.onclick = async e => {
             e.preventDefault();
             await login();
@@ -144,7 +157,7 @@ function createProfilePage(userObj) {
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
 
-    if(userObj.aboutMe === undefined) 
+    if (userObj.aboutMe === undefined)
         updateAboutField.value = "";
     else
         updateAboutField.value = userObj.aboutMe;

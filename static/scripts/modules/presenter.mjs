@@ -91,3 +91,14 @@ export class Presenter {
     }
 
 }
+
+/**
+ * Switch a password field's text between hidden and visible.
+ * @param {HTMLElement} passwordField the password field
+ */
+export function swapPasswordType(passwordField) {
+    if (passwordField.type === "password")
+        passwordField.type = "text";
+    else
+        passwordField.type = "password";
+}
