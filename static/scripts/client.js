@@ -26,9 +26,9 @@ let login = true;
 let userObj = null;
 
 userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
-if (userObj === null) 
+if (userObj === null)
     createStandardLoginContainer();
-else 
+else
     createLoggedInContainer(userObj.username);
 
 
@@ -111,6 +111,20 @@ function sendMessage() {
 function usernameIsValid(username) {
     // check if is whitespace
     return username.trim().length === 0;
+}
+
+async function createLogin() {
+    console.log("sex");
+    let userObj = null
+    userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
+    console.log("sex2");
+    if (userObj === null) {
+        console.log("sex");
+        createStandardLoginContainer();
+    } else {
+        console.log("very sex");
+        createLoggedInContainer(userObj.username);
+    }
 }
 
 function createStandardLoginContainer() {

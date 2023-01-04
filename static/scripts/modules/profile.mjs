@@ -20,9 +20,8 @@ export function getProfilePic(url) {
  */
 export async function getUserData(hostURL, sessionId) {
     let res = await fetch(hostURL + "/user/" + sessionId, {method: "GET"});
-
     if (res.ok) {
-        return await res.json();
+        return res.json()
     } else {
         return null;
     }
@@ -30,15 +29,12 @@ export async function getUserData(hostURL, sessionId) {
 
 /**
  * Check if a URL exists
- * @param {URL} url the url to be checked 
+ * @param {URL} url the url to be checked
  * @returns true if the url exists
  */
 function urlExists(url) {
     let http = new XMLHttpRequest();
     http.open('HEAD', url, false);
     http.send();
-    if (http.status != 404)
-        return true;
-    else
-        return false;
+    if (http.status != 404) return true; else return false;
 }

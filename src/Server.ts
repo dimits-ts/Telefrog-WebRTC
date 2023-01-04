@@ -193,6 +193,12 @@ app.post("/user", upload.any(), async (req, res) => {
     if (exist < 1) {
         await register(new User(username, pass, email))
         const re = randomUUID()
+        const items = sessions.entries();
+        for (const entry of items) {
+            if (entry[1] == username) {
+                sessions.delete(entry[0])
+            }
+        }
         sessions.set(re, username)
         res.status(200).json({sessionId: re})
     } else {
@@ -209,6 +215,12 @@ app.post("/user/login", async (req, res) => {
         let results = await signin(username, pass);
         const uuid = randomUUID();
         if (results !== null && results.length !== 0) {
+            const items = sessions.entries();
+            for (const entry of items) {
+                if (entry[1] == username) {
+                    sessions.delete(entry[0])
+                }
+            }
             sessions.set(uuid, results.username);
             res.status(200).json(uuid)
         } else {
@@ -247,6 +259,7 @@ fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
 
 app.get("/user/:sessionId", async (req, res) => {
     let session = req.params.sessionId;
+    console.log(session)
     try {
         if (sessions.has(session)) {
             let username = sessions.get(session);
