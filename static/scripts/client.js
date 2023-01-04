@@ -30,6 +30,7 @@ let userObj = await getUserData(hostURL, getSessionId()) // how could this possi
 if (userObj === null)
     createStandardLoginContainer();
 else
+else
     createLoggedInContainer(userObj.username);
 
 // Events

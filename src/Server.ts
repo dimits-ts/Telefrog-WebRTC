@@ -150,6 +150,25 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
     }
 })
 
+app.get("/user/profile/:username", async (req, res) => {
+    try {
+        let results = await getUserByName(req.params.username);
+        if (results !== null) {
+            if (results.hasOwnProperty("profilePic")) {
+                res.status(200).json(results.profilePic)
+            } else {
+                log.c("Could not get profile pic.")
+                res.status(400).send("Could not get profile pic.");
+            }
+        } else {
+            log.c("User could not be found");
+            res.status(404).send("User could not be found.");
+        }
+    } catch (e) {
+        log.c("Could not get profile pic.")
+        res.status(400).send("Could not get profile pic.");
+    }
+})
 
 app.post("/user/update", upload.single("profilePic"), async (req: Request, res: Response) => {
     log.i(`Request to register user with id ${req.body.username}`);
@@ -193,6 +212,12 @@ app.post("/user", upload.any(), async (req, res) => {
     if (exist < 1) {
         await register(new User(username, pass, email))
         const re = randomUUID()
+        const items = sessions.entries();
+        for (const entry of items) {
+            if (entry[1] == username) {
+                sessions.delete(entry[0])
+            }
+        }
         sessions.set(re, username)
         res.status(200).json({sessionId: re})
     } else {
@@ -209,6 +234,12 @@ app.post("/user/login", async (req, res) => {
         let results = await signin(username, pass);
         const uuid = randomUUID();
         if (results !== null && results.length !== 0) {
+            const items = sessions.entries();
+            for (const entry of items) {
+                if (entry[1] == username) {
+                    sessions.delete(entry[0])
+                }
+            }
             sessions.set(uuid, results.username);
             res.status(200).json(uuid)
         } else {
@@ -225,8 +256,12 @@ app.post("/user/login", async (req, res) => {
 
 app.post("user/logout", (req, res) => {
     let session = req.body.sessionId;
-    sessions.delete(session);
-    res.sendStatus(200)
+    if (sessions.has(session)) {
+        sessions.delete(session);
+        res.sendStatus(200)
+    } else {
+        res.status(400).send("Session id is not valid")
+    }
 })
 
 
