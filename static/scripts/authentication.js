@@ -28,7 +28,7 @@ const updateButton = document.getElementById("update-button");
 
 
 // Attempt to load the listeners every time the window changes
-window.onload = () => {
+window.onload = async () => {
     if (registerButton !== null) {
         registerButton.onclick = async e => {
             e.preventDefault();
@@ -44,23 +44,23 @@ window.onload = () => {
     }
 
     if (updateButton !== null) {
-        displayProfile(window.localStorage.getItem("sessionId"));
+        await displayProfile();
     }
 }
 
 /**
  * Display the page showing the uesr's profile details and allowing their editing.
- * @param {string} sessionId the last session ID
  */
-async function displayProfile(sessionId) {
-    let response = await getUserData(hostURL, sessionId);
+async function displayProfile() {
+    let sessionId = window.localStorage.getItem("sessionId");
+    let userObj = await getUserData(hostURL, sessionId);
 
-    if (!response.ok) {
+    if (userObj === null) {
         createEmptyProfilePage();
     } else {
-        createProfilePage(response.body);
+        createProfilePage(userObj);
 
-        updateButton.onclick = async function (e) {
+        updateButton.onclick = async e => {
             e.preventDefault();
             let res = await updateRequest();
 
@@ -143,7 +143,11 @@ function createProfilePage(userObj) {
     profilePicture.src = userObj.profilePic;
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
-    updateAboutField.value = userObj.aboutMe;
+    
+    if(userObj.aboutMe === undefined) 
+        updateAboutField.value = "";
+    else
+        updateAboutField.value = userObj.aboutMe;
 
     showLabel(updateAuthContainer);
     hideLabel(updateNonupdateAuthContainer);
@@ -212,7 +216,7 @@ function showLabel(label, message = null) {
     if (message !== null)
         label.innerText = message;
 
-    label.style.visibility = "visible";
+    label.style.display = "block";
 }
 
 /**
@@ -220,7 +224,7 @@ function showLabel(label, message = null) {
  * @param {HTMLElement} label the HTML element to be hidden
  */
 function hideLabel(label) {
-    label.style.visibility = "hidden";
+    label.style.display = "none";
 }
 
 /**
@@ -230,10 +234,6 @@ function checkPasswords() {
     let errorMsg = "";
 
     let password = registerPassField.value;
-
-    if(password.length < 8) {
-        errorMsg = "Passwords must be at least 8 characters long";
-    }
 
     if (password !== registerPassConfirmField.value) {
         errorMsg = "Passwords must match";
