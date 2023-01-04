@@ -262,6 +262,17 @@ button>img {
     /* Crop images if they expand beyond their container */
 }
 
+#logged-in {
+    display: flex;
+    flex-direction: column;
+}
+
+#logged-in>a {
+    margin-top: 1rem;
+    font-size: 2em;
+
+}
+
 /* Give a little vertical spacing between the textbox's text sections */
 .textbox>h3 {
     margin-top: 2em;
@@ -276,4 +287,15 @@ button>img {
 
 #profile-picture {
     max-width: 30%;
+}
+
+.hidden {
+    visibility: none;
+}
+
+.username {
+    display: inline;
+    color: green;
+    font-size: 1.5em;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }

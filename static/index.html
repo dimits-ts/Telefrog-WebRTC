@@ -62,6 +62,13 @@
         </div>
     </script>
 
+    <script id="profile-template" type="text/x-handlebars-template">
+        <h2>Logged in as <p class="username">{{username}}</p></h2>
+        <a href="profile.html">My Account</a>
+        <a href="login.html">Switch accounts</a>
+        <a href="signup.html">Create a new account</a>
+    </script>
+
 </head>
 
 <body>
@@ -74,13 +81,20 @@
         <article id="login">
 
             <article class="textbox">
-                <h2><a href="login.html">Log in your Telefrog Account</a></h2>
-                <p>or</p>
-                <h2><a href="signup.html">Sign up Today</a></h2>
+                <section id="logged-in" class="hidden">
+                    <!-- profile-template content-->
+                </section>
+
+                <section id="standard-login" class="hidden">
+                    <h2><a href="login.html">Log in your Telefrog Account</a></h2>
+                    <p>or</p>
+                    <h2><a href="signup.html">Sign up Today</a></h2>
+                </section>
+               
                 <p>or</p>
                 <h2>Sign in as a guest</h2>
                 <label for="username_input">Username:</label>
-                <input type="text" id="username_input" name="username" required>
+                <input type="text" id="username_input" name="username">
             </article>
 
             <fieldset>
