@@ -1,3 +1,4 @@
+import { getProfilePic } from "./profile.mjs";
 /**
  *  A class containing the chat messages and displaying new ones to
  *  the HTML chatbox.
