@@ -1,7 +1,7 @@
 import { Presenter } from "./modules/presenter.mjs"
 import { Conference } from "./modules/conference.mjs";
 import { Chat } from "./modules/chat.mjs";
-import { getUserData } from "./modules/profile.mjs";
+import { getUserData, resetSessionId, getSessionId } from "./modules/profile.mjs";
 
 // Configurations
 const hostURL = "http://localhost:8080"
@@ -25,10 +25,10 @@ let login = true;
 // define as global because its also used in #joinRoom()
 let userObj = null;
 
-userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
-if (userObj === null) 
+userObj = await getUserData(hostURL, getSessionId()) // how could this possibly go wrong
+if (userObj === null)
     createStandardLoginContainer();
-else 
+else
     createLoggedInContainer(userObj.username);
 
 
@@ -107,10 +107,17 @@ function sendMessage() {
     presenter.resetChatInputs();
 }
 
-// General functions
-function usernameIsValid(username) {
-    // check if is whitespace
-    return username.trim().length === 0;
+// ========== GENERAL HANDLERS ==========
+
+/**
+ * Used in link HTML element used in loggedinContainer.  
+ */
+async function logout() {
+    await fetch(this.hostURL + "/user/logout", {
+        method: "POST",
+        body: getSessionId()
+    });
+    resetSessionId("sessionId");
 }
 
 function createStandardLoginContainer() {
@@ -120,9 +127,14 @@ function createStandardLoginContainer() {
 
 function createLoggedInContainer(username) {
     let compiledTemplate = Handlebars.compile(profileTemplate.textContent);
-    let html = compiledTemplate({username: username});
+    let html = compiledTemplate({ username: username });
     loggedInContainer.innerHTML = html;
 
     standardLoginContainer.style.display = "none";
     loggedInContainer.style.display = "visible";
+}
+
+function usernameIsValid(username) {
+    // check if is whitespace
+    return username.trim().length === 0;
 }

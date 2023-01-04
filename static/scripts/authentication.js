@@ -1,4 +1,4 @@
-import { getUserData } from "./modules/profile.mjs";
+import { getUserData, getSessionId, saveSessionId } from "./modules/profile.mjs";
 
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
@@ -52,7 +52,7 @@ window.onload = async () => {
  * Display the page showing the uesr's profile details and allowing their editing.
  */
 async function displayProfile() {
-    let sessionId = window.localStorage.getItem("sessionId");
+    let sessionId = getSessionId("sessionId");
     let userObj = await getUserData(hostURL, sessionId);
 
     if (userObj === null) {
@@ -83,7 +83,7 @@ async function register() {
             showLabel(registerErrorLabel, "Error while signing-up: " + errorMsg);
         } else {
             let resObj = await res.json();
-            window.localStorage.setItem("sessionId", resObj);
+            saveSessionId(resObj);
 
             hideLabel(registerErrorLabel);
             window.location = "index.html";
@@ -106,7 +106,7 @@ async function login() {
         } else {
             let resObj = await res.json();
             console.log(resObj);
-            window.localStorage.setItem("sessionId", resObj);
+            saveSessionId(resObj);
 
             hideLabel(loginErrorLabel);
             window.location = "index.html";
@@ -143,7 +143,7 @@ function createProfilePage(userObj) {
     profilePicture.src = userObj.profilePic;
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
-    
+
     if(userObj.aboutMe === undefined) 
         updateAboutField.value = "";
     else

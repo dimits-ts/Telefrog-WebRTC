@@ -1,3 +1,5 @@
+ const STORAGE_ID = "sessionId";
+
 /**
  * Get the user's profile picture from the server, or the default if no such picture
  * was uploaded.
@@ -26,6 +28,29 @@ export async function getUserData(hostURL, sessionId) {
     } else {
         return null;
     }
+}
+
+/**
+ * Save the current session ID.
+ * @param {string} sessionId the newly acquired session ID
+ */
+export function saveSessionId(sessionId) {
+    window.sessionStorage.setItem(STORAGE_ID, sessionId);
+}
+
+/**
+ * Get the last saved session ID.
+ * @returns the last session ID
+ */
+export function getSessionId() {
+    return window.sessionStorage.getItem(STORAGE_ID);
+}
+
+/**
+ * Delete the last session ID.
+ */
+export function resetSessionId() {
+    window.sessionStorage.removeItem(STORAGE_ID);
 }
 
 /**
