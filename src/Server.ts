@@ -150,6 +150,25 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
     }
 })
 
+app.get("/user/profile/:username", async (req, res) => {
+    try {
+        let results = await getUserByName(req.params.username);
+        if (results !== null) {
+            if (results.hasOwnProperty("profilePic")) {
+                res.status(200).json(results.profilePic)
+            } else {
+                log.c("Could not get profile pic.")
+                res.status(400).send("Could not get profile pic.");
+            }
+        } else {
+            log.c("User could not be found");
+            res.status(404).send("User could not be found.");
+        }
+    } catch (e) {
+        log.c("Could not get profile pic.")
+        res.status(400).send("Could not get profile pic.");
+    }
+})
 
 app.post("/user/update", upload.single("profilePic"), async (req: Request, res: Response) => {
     log.i(`Request to register user with id ${req.body.username}`);
