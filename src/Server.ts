@@ -213,12 +213,12 @@ app.post("/user/login", async (req, res) => {
             res.status(200).json(uuid)
         } else {
             log.c("Cannot get User username");
-            res.status(400).send("The session id is not valid");
+            res.status(400).send("The login information were not correct");
 
         }
     } catch (e) {
-        log.c("the session id is not valid")
-        res.status(400).send("the session id is not valid");
+        log.c("Connection with the database was not successful...")
+        res.status(400).send("Connection with the database was not successful...");
     }
 });
 
