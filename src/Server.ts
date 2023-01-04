@@ -237,8 +237,12 @@ app.post("/user/login", async (req, res) => {
 
 app.post("user/logout", (req, res) => {
     let session = req.body.sessionId;
-    sessions.delete(session);
-    res.sendStatus(200)
+    if (sessions.has(session)) {
+        sessions.delete(session);
+        res.sendStatus(200)
+    } else {
+        res.status(400).send("Session id is not valid")
+    }
 })
 
 
@@ -259,7 +263,6 @@ fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
 
 app.get("/user/:sessionId", async (req, res) => {
     let session = req.params.sessionId;
-    console.log(session)
     try {
         if (sessions.has(session)) {
             let username = sessions.get(session);
