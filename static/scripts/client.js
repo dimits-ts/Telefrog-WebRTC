@@ -13,6 +13,9 @@ const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 const sendMessageButton = document.getElementById("sendMessage");
 const chatBox = document.getElementById("chat-display");
+const loggedInContainer = document.getElementById("logged-in");
+const standardLoginContainer = document.getElementById("standard-login");
+const profileTemplate = document.getElementById("profile-template");
 
 // Globals
 const presenter = new Presenter();
@@ -20,12 +23,14 @@ const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
 let login = true;
 
+window.onload = async () => await createLogin();
+
 // Events
 joinRoomButton.onclick = joinRoom;
 createRoomButton.onclick = createRoom;
 sendMessageButton.onclick = sendMessage;
 
-window.addEventListener("keypress", function (event) {
+window.addEventListener("keypress", event => {
     if (event.key === "Enter") {
         event.preventDefault();
 
@@ -43,10 +48,9 @@ async function joinRoom(e) {
     console.log("Sending request to join");
 
     let username = presenter.getUsername();
-    let user = await getUserData(hostURL, window.localStorage.getItem("sessionId"));
 
-    if (user !== null) {
-        username = user.username;
+    if (userObj !== null) {
+        username = userObj.username;
     }
 
     let roomId = presenter.getRoomId();
@@ -100,4 +104,32 @@ function sendMessage() {
 function usernameIsValid(username) {
     // check if is whitespace
     return username.trim().length === 0;
+}
+
+async function createLogin() {
+    console.log("sex");
+    let userObj = null
+    userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
+    console.log("sex2");
+    if (userObj === null) {
+        console.log("sex");
+        createStandardLoginContainer();
+    } else {
+        console.log("very sex");
+        createLoggedInContainer(userObj.username);
+    }
+}
+
+function createStandardLoginContainer() {
+    standardLoginContainer.style.display = "visible";
+    loggedInContainer.style.display = "none";
+}
+
+function createLoggedInContainer(username) {
+    let compiledTemplate = Handlebars.compile(profileTemplate.textContent);
+    let html = compiledTemplate({username: username});
+    loggedInContainer.innerHTML = html;
+
+    standardLoginContainer.style.display = "none";
+    loggedInContainer.style.display = "visible";
 }
