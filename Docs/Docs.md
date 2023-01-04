@@ -61,6 +61,8 @@
 
 - get /user/:sessionId->{username,password,email,profilePic,aboutMe}
 
+- profilePic href=/media/:username/profilePic
+
 
 - Video Conference: with WebRTC we have the tutorial for one on one so the challenge is to adjust it to more pc.
 

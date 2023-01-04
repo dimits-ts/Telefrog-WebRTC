@@ -46,10 +46,8 @@ const storage = multer.diskStorage({
             cb(null, paths);
         }
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
-        if (req.path === "/user") {
-            let name = file.originalname.split(".")
-            let suffix = name[name.length - 1];
-            cb(null, `profile.${suffix}`);
+        if (req.path === "/user/update") {
+            cb(null, `profilePic`);
         } else {
             let name = Buffer.from(file.originalname, "latin1").toString(`utf8`)
             cb(null, `${randomUUID()}~${name}`);
