@@ -22,8 +22,15 @@ const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
 let login = true;
+// define as global because its also used in #joinRoom()
+let userObj = null;
 
-window.onload = async () => await createLogin();
+userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
+if (userObj === null) 
+    createStandardLoginContainer();
+else 
+    createLoggedInContainer(userObj.username);
+
 
 // Events
 joinRoomButton.onclick = joinRoom;
@@ -104,20 +111,6 @@ function sendMessage() {
 function usernameIsValid(username) {
     // check if is whitespace
     return username.trim().length === 0;
-}
-
-async function createLogin() {
-    console.log("sex");
-    let userObj = null
-    userObj = await getUserData(hostURL, window.localStorage.getItem("sessionId")) // how could this possibly go wrong
-    console.log("sex2");
-    if (userObj === null) {
-        console.log("sex");
-        createStandardLoginContainer();
-    } else {
-        console.log("very sex");
-        createLoggedInContainer(userObj.username);
-    }
 }
 
 function createStandardLoginContainer() {
