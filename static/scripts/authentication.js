@@ -1,3 +1,5 @@
+import { getUserData } from "./modules/profile.mjs";
+
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
 const registerForm = document.getElementById("signup-form");
@@ -9,6 +11,7 @@ const registerEmailField = document.getElementById("signup-email");
 const registerErrorLabel = document.getElementById("signup-error-label");
 const registerButton = document.getElementById("signup-button");
 
+const loginForm = document.getElementById("login-form");
 const loginNameField = document.getElementById("login-username");
 const loginPassField = document.getElementById("login-password");
 const loginErrorLabel = document.getElementById("login-error-label");
@@ -34,9 +37,9 @@ window.onload = () => {
     }
 
     if (loginButton !== null) {
-        loginButton.onclick = e => {
+        loginButton.onclick = async e => {
             e.preventDefault();
-            login();
+            await login();
         }
     }
 
@@ -50,7 +53,7 @@ window.onload = () => {
  * @param {string} sessionId the last session ID
  */
 async function displayProfile(sessionId) {
-    let response = await getProfileRequest(sessionId);
+    let response = await getUserData(hostURL, sessionId);
 
     if (!response.ok) {
         createEmptyProfilePage();
@@ -79,12 +82,11 @@ async function register() {
             let errorMsg = await res.text();
             showLabel(registerErrorLabel, "Error while signing-up: " + errorMsg);
         } else {
-            let sessionId = await res.json();
-            console.log(sessionId);
-            window.localStorage.setItem("sessionId", sessionId);
+            let resObj = await res.json();
+            window.localStorage.setItem("sessionId", resObj);
 
             hideLabel(registerErrorLabel);
-            window.location = "index.html"
+            window.location = "index.html";
         }
     } else {
         registerForm.reportValidity();
@@ -102,25 +104,15 @@ async function login() {
             let errorMsg = await res.text();
             showLabel(loginErrorLabel, "Error while logging-in: " + errorMsg);
         } else {
-            let sessionId = await res.json();
-            console.log(sessionId);
+            let resObj = await res.json();
+            console.log(resObj);
+            window.localStorage.setItem("sessionId", resObj);
 
             hideLabel(loginErrorLabel);
-            window.localStorage.setItem("sessionId", res.body);
+            window.location = "index.html";
         }
 
     }
-}
-
-/**
- * Query the server for the user's profile details.
- * @param {string} sessionId the last session ID 
- * @returns a promise containing the profile details or an error when resolved
- */
-function getProfileRequest(sessionId) {
-    return fetch(hostURL + "/user/" + sessionId, {
-        method: "GET",
-    }).then(res => res.json())
 }
 
 function checkValidity(formId) {
@@ -143,7 +135,6 @@ function createEmptyProfilePage() {
     hideLabel(updateAuthContainer);
 }
 
-
 /**
  * Display a HTML page displaying the user's profile details.
  * @param {obj} userObj the profile's details 
@@ -157,7 +148,6 @@ function createProfilePage(userObj) {
     showLabel(updateAuthContainer);
     hideLabel(updateNonupdateAuthContainer);
 }
-
 
 /**
  * Send a POST request to the server that updates the user's profile details.

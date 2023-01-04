@@ -155,11 +155,7 @@ export class Chat {
 
         // set profile pic
         let profilePicUrl = this.#hostURL + "/user/profile/" + this.#username;
-        if(urlExists(profilePicUrl)) {
-            message.profilePic = profilePicUrl;
-        } else {
-            message.profilePic = "resources/profile_icon.png"
-        }
+        message.profilePic = getProfilePic(profilePicUrl);
 
         message.isSelf = message.username === this.#username
         message.hostURL = this.#hostURL
@@ -227,19 +223,4 @@ function isImage(filename) {
 function getExtension(filename){
     let parts = filename.toLowerCase().split('.');
     return parts[parts.length - 1];
-}
-
-/**
- * Check if a URL exists
- * @param {URL} url the url to be checked 
- * @returns true if the url exists
- */
-function urlExists(url) {
-    let http = new XMLHttpRequest();
-    http.open('HEAD', url, false);
-    http.send();
-    if (http.status != 404)
-        return true;
-    else
-        return false;
 }

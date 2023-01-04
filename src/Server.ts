@@ -218,7 +218,6 @@ app.post("/user/login", async (req, res) => {
         }
     } catch (e) {
         log.c("Connection with the database was not successful...")
-        log.c(e)
         res.status(400).send("Connection with the database was not successful...");
     }
 });
