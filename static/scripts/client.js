@@ -55,24 +55,25 @@ async function joinRoom(e) {
     console.log("Sending request to join");
 
     let username = presenter.getUsername();
-
     if (userObj !== null) {
         username = userObj.username;
     }
 
     let roomId = presenter.getRoomId();
+    let successCallback = () => {
+        chat.setUser(username, roomId);
+        // periodically refresh chat showing new messages
+        // use a lambda for the class context to work
+        setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS); 
+    }
 
     if (usernameIsValid(username)) {
         presenter.showInputError("Please enter a valid username.");
     } else {
         login = false;
-        chat.setUser(username, roomId);
-        conference.connect(username, roomId);
+        conference.connect(username, roomId, successCallback);
     }
 
-    // periodically refresh chat showing new messages
-    // use a lambda for the class context to work
-    setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
     e.preventDefault();
 }
 

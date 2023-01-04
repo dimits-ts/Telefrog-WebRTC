@@ -31,8 +31,9 @@ export class Conference {
      * Starts a stream with the user himself, and receives the streams of all other people in the room.
      * @param {string} username - The name of the user attempting the connection 
      * @param {string} roomId - The ID of the room to be connected to
+     * @param {Function} successCallback - A function to be called if the connection is successful
      */
-    connect(username, roomId) {
+    connect(username, roomId, successCallback = null) {
         this.#username = username;
         this.#roomId = roomId;
 
@@ -81,6 +82,10 @@ export class Conference {
                 // receive session status from server
                 this.#socket.on("join-status", (statusCode, statusMessage) => {
                     if (statusCode === 200) {
+                        
+                        if(successCallback !== null)
+                            successCallback();
+                        
                         this.#presenter.showConnected("Connected to room " + this.#roomId);
 
                         // set up video streams
@@ -128,7 +133,7 @@ export class Conference {
         });
 
         call.on("close", () => {
-            if(streamElement !== undefined)
+            if (streamElement !== undefined)
                 streamElement.remove();
         });
 
@@ -136,20 +141,20 @@ export class Conference {
         this.#connectedPeers[peerId] = call;
     }
 
-   /**
-    * Add a new video element along with its corresponding media stream to the screen.
-    * @param {string} username - The username of the connecting user
-    * @param {MediaSession} stream - The corresponding media stream
-    * @param {boolean} isMuted - Whether the video is muted
-    * @return the stream HTML element that was created, undefined if not created 
-    */
+    /**
+     * Add a new video element along with its corresponding media stream to the screen.
+     * @param {string} username - The username of the connecting user
+     * @param {MediaSession} stream - The corresponding media stream
+     * @param {boolean} isMuted - Whether the video is muted
+     * @return the stream HTML element that was created, undefined if not created 
+     */
     #addVideoStream(username, stream, isMuted = false) {
-        if(username.length > 10){
+        if (username.length > 10) {
             username = username.slice(0, 10) + "..."
         }
-        
+
         // avoid bug with duplicate calls because of peer server call impl
-        if(stream.id !== this.#lastStreamId) {
+        if (stream.id !== this.#lastStreamId) {
             this.#lastStreamId = stream.id;
             return this.#presenter.addVideoElement(username, stream, isMuted);
         }
