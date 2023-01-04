@@ -257,13 +257,19 @@ app.get("/user/:sessionId", async (req, res) => {
                     res.status(200).json(results)
                 } else {
                     log.c("User could not be found");
-                    res.status(400).send("User could not be found.");
+                    res.status(404).send("User could not be found.");
                 }
+            } else {
+                log.c("User could not be found")
+                res.status(404).send("User could not be found");
             }
+        } else {
+            log.c("Session id is not valid.")
+            res.status(404).send("Session id is not valid.");
         }
     } catch (e) {
-        log.c(String(e))
-        res.status(400).send("Session id is not valid.");
+        log.c("Session id is not valid.")
+        res.status(404).send("Session id is not valid.");
     }
 })
 
