@@ -56,6 +56,8 @@
 
 - post /user/login{username=...,pass:...}->{sessionId:...}
 
+- post /user/logout{sessionId}
+
 
 - get /user/:sessionId->{username,password,email,profilePic,aboutMe}
 

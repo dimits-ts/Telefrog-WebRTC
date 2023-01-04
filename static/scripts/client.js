@@ -22,15 +22,15 @@ const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
 let login = true;
-// define as global because its also used in #joinRoom()
-let userObj = null;
 
-userObj = await getUserData(hostURL, getSessionId()) // how could this possibly go wrong
+// define as global because its also used in #joinRoom()
+let userObj = await getUserData(hostURL, getSessionId()) // how could this possibly go wrong
+
+// UI
 if (userObj === null)
     createStandardLoginContainer();
 else
     createLoggedInContainer(userObj.username);
-
 
 // Events
 joinRoomButton.onclick = joinRoom;
@@ -113,11 +113,13 @@ function sendMessage() {
  * Used in link HTML element used in loggedinContainer.  
  */
 async function logout() {
+    let sessionId = getSessionId();
+    resetSessionId();
+
     await fetch(this.hostURL + "/user/logout", {
         method: "POST",
-        body: getSessionId()
+        body: sessionId
     });
-    resetSessionId("sessionId");
 }
 
 function createStandardLoginContainer() {
@@ -132,6 +134,9 @@ function createLoggedInContainer(username) {
 
     standardLoginContainer.style.display = "none";
     loggedInContainer.style.display = "visible";
+
+    const signOutButton = document.getElementById("sign-out");
+    signOutButton.onclick = logout;
 }
 
 function usernameIsValid(username) {
