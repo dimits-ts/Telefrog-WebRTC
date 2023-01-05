@@ -155,7 +155,7 @@ export class Chat {
         } 
 
         // set profile pic
-        let profilePicUrl = this.#hostURL + "/user/profile/" + this.#username;
+        let profilePicUrl = this.#hostURL + "/media/" + this.#username+"/profile";
         message.profilePic = getProfilePic(profilePicUrl);
 
         message.isSelf = message.username === this.#username

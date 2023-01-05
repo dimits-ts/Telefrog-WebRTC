@@ -14,7 +14,7 @@ export async function register(user: User) {
     try {
         let cursor = await client.connect();
         const collection = cursor.db("telefrog").collection("users");
-        user.password=CryptoJS.AES.encrypt(user.password,key,{iv}).toString();
+        user.password = CryptoJS.AES.encrypt(user.password, key, {iv}).toString();
         await collection.insertOne(user);
     } catch (error: any) {
         log.c(error.message)
@@ -25,7 +25,7 @@ export async function register(user: User) {
 export async function signin(user: string, pass: string) {
     let cursor = await client.connect();
     const collection = cursor.db("telefrog").collection("users");
-    return collection.findOne({username: user, password: CryptoJS.AES.encrypt(pass,key,{iv}).toString()});
+    return collection.findOne({username: user, password: CryptoJS.AES.encrypt(pass, key, {iv}).toString()});
 }
 
 
@@ -50,9 +50,15 @@ export async function getUserByName(username: string) {
 export async function updateUser(user: User) {
     let cursor = await client.connect();
     const collection = cursor.db("telefrog").collection("users");
-    return collection.findOneAndUpdate({username: user.username}, {
-        $set: {
-            email: user.email, profilePic: user.profilePic, aboutMe: user.aboutMe
-        }
-    })
+    let set = {} as set
+    if (user.email !== undefined) set.email = user.email;
+    if (user.profilePic !== "") set.profilePic = user.profilePic;
+    if (user.aboutMe !== undefined) set.aboutMe = user.aboutMe;
+    return collection.findOneAndUpdate({username: user.username}, {$set: set})
+}
+
+type set = {
+    email?: string;
+    profilePic?: string;
+    aboutMe?: string;
 }

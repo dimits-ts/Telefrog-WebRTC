@@ -25,19 +25,23 @@ const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
         if (req.path === "/user/update") {
+            if (!fs.existsSync(path.join(__dirname, `../uploads/profiles/`))) {
+                fs.mkdirSync("../uploads/profiles/")
+            }
             let session = req.body.sessionId;
             if (sessions.has(session)) {
                 let username = sessions.get(session);
+                console.log(username)
                 if (username !== undefined) {
-                    let paths = path.join(__dirname, `../uploads/${username}/`)
+                    let paths = path.join(__dirname, `../uploads/profiles/${username}/`)
                     if (!fs.existsSync(paths))
                         fs.mkdirSync(paths);
                     cb(null, paths);
                 } else {
-                    cb(new Error("Username could not be resolved"), "../uploads");
+                    cb(new Error("Username could not be resolved"), "../uploads/profiles");
                 }
             } else {
-                cb(new Error("Session id does not exist"), "../uploads")
+                cb(new Error("Session id does not exist"), "../uploads/profiles/")
             }
         } else {
             let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
@@ -266,6 +270,7 @@ app.post("user/logout", (req, res) => {
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
     if (!err) {
         for (const i of files) {
+            if(i==="profiles")continue
             if (fs.lstatSync(path.join(__dirname, "../uploads", i)).isDirectory()) {
                 fs.rmSync(path.join(__dirname, "../uploads", i), {recursive: true, force: true});
             } else {
