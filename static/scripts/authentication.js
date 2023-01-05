@@ -1,5 +1,5 @@
-import { swapPasswordType } from "./modules/presenter.mjs";
-import { getUserData, getSessionId, saveSessionId } from "./modules/profile.mjs";
+import {swapPasswordType} from "./modules/presenter.mjs";
+import {getSessionId, getUserData, saveSessionId} from "./modules/profile.mjs";
 
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
@@ -49,7 +49,7 @@ window.onload = async () => {
             e.preventDefault();
             swapPasswordType(loginPassField);
         }
-        
+
         loginButton.onclick = async e => {
             e.preventDefault();
             await login();
@@ -75,7 +75,8 @@ async function displayProfile() {
 
         updateButton.onclick = async e => {
             e.preventDefault();
-            let res = await updateRequest();
+            console.log(sessionId)
+            let res = await updateRequest(sessionId);
 
         }
     }
@@ -141,7 +142,7 @@ function checkValidity(formId) {
 }
 
 /**
- * Display a HTML page prompting the user to register or log in.
+ * Display an HTML page prompting the user to register or log in.
  */
 function createEmptyProfilePage() {
     showLabel(updateNonupdateAuthContainer);
@@ -150,17 +151,14 @@ function createEmptyProfilePage() {
 
 /**
  * Display a HTML page displaying the user's profile details.
- * @param {obj} userObj the profile's details 
+ * @param {obj} userObj the profile's details
  */
 function createProfilePage(userObj) {
     profilePicture.src = userObj.profilePic;
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
 
-    if (userObj.aboutMe === undefined)
-        updateAboutField.value = "";
-    else
-        updateAboutField.value = userObj.aboutMe;
+    if (userObj.aboutMe === undefined) updateAboutField.value = ""; else updateAboutField.value = userObj.aboutMe;
 
     showLabel(updateAuthContainer);
     hideLabel(updateNonupdateAuthContainer);
@@ -170,8 +168,10 @@ function createProfilePage(userObj) {
  * Send a POST request to the server that updates the user's profile details.
  * @returns a promise containing a response, indicating whether the update was succesfull
  */
-function updateRequest() {
+function updateRequest(sessionId) {
     const formData = new FormData();
+    console.log("heyyyy")
+    formData.append("sessionId", sessionId);
     formData.append("email", updateEmailField.value);
     formData.append("aboutMe", updateAboutField.value);
     formData.append("profilePic", updateProfilePicField.files[0]);
@@ -189,15 +189,11 @@ function updateRequest() {
  */
 async function registerRequest() {
     const formData = {
-        username: registerNameField.value,
-        password: registerPassField.value,
-        email: registerEmailField.value
+        username: registerNameField.value, password: registerPassField.value, email: registerEmailField.value
     }
 
     let res = await fetch(hostURL + "/user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(formData)
     });
 
     return res;
@@ -209,25 +205,21 @@ async function registerRequest() {
  */
 async function loginRequest() {
     const formData = {
-        username: loginNameField.value,
-        password: loginPassField.value,
+        username: loginNameField.value, password: loginPassField.value,
     }
 
     return fetch(hostURL + "/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(formData)
     });
 }
 
 /**
  * Display a hidden HTML element.
- * @param {HTMLElement} label the HTML element to be displayed 
- * @param {string} message an optional message to be displayed in the element 
+ * @param {HTMLElement} label the HTML element to be displayed
+ * @param {string} message an optional message to be displayed in the element
  */
 function showLabel(label, message = null) {
-    if (message !== null)
-        label.innerText = message;
+    if (message !== null) label.innerText = message;
 
     label.style.display = "block";
 }
@@ -279,7 +271,7 @@ function checkBirthDate() {
 
 /**
  * Calculate the age of a person based on their birthday.
- * @param {Date} birthday the person's birthday  
+ * @param {Date} birthday the person's birthday
  * @returns the age of the person in years
  */
 function calculateAge(birthday) {

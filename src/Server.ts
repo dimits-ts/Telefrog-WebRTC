@@ -176,6 +176,7 @@ app.post("/user/update", upload.single("profilePic"), async (req: Request, res: 
     log.i(`Request to register user with id ${req.body.username}`);
     try {
         let session = req.body.sessionId;
+        console.log(req.body)
         if (sessions.has(session)) {
             const username = sessions.get(session);
             let exists: number = 0;

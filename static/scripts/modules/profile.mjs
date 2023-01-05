@@ -1,4 +1,4 @@
- const STORAGE_ID = "sessionId";
+const STORAGE_ID = "sessionId";
 
 /**
  * Get the user's profile picture from the server, or the default if no such picture
@@ -61,5 +61,5 @@ function urlExists(url) {
     let http = new XMLHttpRequest();
     http.open('HEAD', url, false);
     http.send();
-    return http.status != 404
+    return http.status !== 404
 }
