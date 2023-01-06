@@ -1,5 +1,5 @@
 import {swapPasswordType} from "./modules/presenter.mjs";
-import {getSessionId, getUserData, saveSessionId} from "./modules/profile.mjs";
+import {getProfilePic, getSessionId, getUserData, saveSessionId} from "./modules/profile.mjs";
 
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
@@ -28,7 +28,7 @@ const updateProfilePicField = document.getElementById("update-profile-pic");
 const updateNonupdateAuthContainer = document.getElementById("failed-auth");
 const updateAuthContainer = document.getElementById("successful-auth");
 const updateButton = document.getElementById("update-button");
-const updateErrorLabel = document.getElementById("update-erro-label");
+const updateErrorLabel = document.getElementById("update-error-label");
 
 
 // Attempt to load the listeners every time the window changes
@@ -163,7 +163,7 @@ function createEmptyProfilePage() {
  * @param {obj} userObj the profile's details
  */
 function createProfilePage(userObj) {
-    profilePicture.src = userObj.profilePic;
+    profilePicture.src = getProfilePic(`${hostURL}/uploads/profiles/${userObj.username}/profilePic.png`);
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
 
