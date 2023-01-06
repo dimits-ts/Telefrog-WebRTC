@@ -154,10 +154,10 @@ function createEmptyProfilePage() {
  * @param {obj} userObj the profile's details
  */
 function createProfilePage(userObj) {
-    profilePicture.src = userObj.profilePic;
+    profilePicture.src = hostURL + "/media/profiles/" + userObj.username + "/profilePic.png";
+    console.log(hostURL + "/media/profiles/" + userObj.username + "/profilePic.png")
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
-
     if (userObj.aboutMe === undefined) updateAboutField.value = ""; else updateAboutField.value = userObj.aboutMe;
 
     showLabel(updateAuthContainer);
@@ -166,11 +166,10 @@ function createProfilePage(userObj) {
 
 /**
  * Send a POST request to the server that updates the user's profile details.
- * @returns a promise containing a response, indicating whether the update was succesfull
+ * @returns a promise containing a response, indicating whether the update was succesful
  */
 function updateRequest(sessionId) {
     const formData = new FormData();
-    console.log("heyyyy")
     formData.append("sessionId", sessionId);
     formData.append("email", updateEmailField.value);
     formData.append("aboutMe", updateAboutField.value);
