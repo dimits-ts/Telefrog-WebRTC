@@ -21,7 +21,7 @@ const loginButton = document.getElementById("login-button");
 const loginShowPassButton = document.getElementById("login-show-pass");
 
 const usernameLabel = document.getElementById("profile-username");
-const profilePicture = document.getElementById("profile-username");
+const profilePicture = document.getElementById("profile-picture");
 const updateEmailField = document.getElementById("update-email");
 const updateAboutField = document.getElementById("update-about-me");
 const updateProfilePicField = document.getElementById("update-profile-pic");
@@ -163,8 +163,9 @@ function createEmptyProfilePage() {
  * @param {obj} userObj the profile's details
  */
 function createProfilePage(userObj) {
-    profilePicture.src = hostURL + "/media/profiles/" + userObj.username + "/profilePic.png";
-    console.log(hostURL + "/media/profiles/" + userObj.username + "/profilePic.png")
+    const profilePic = getProfilePic(`${hostURL}/media/profiles/${userObj.username}/profilePic.png`);
+    profilePicture.src = profilePic;
+    console.log(profilePic);
     usernameLabel.innerText = userObj.username;
     updateEmailField.value = userObj.email;
     if (userObj.aboutMe === undefined) updateAboutField.value = ""; else updateAboutField.value = userObj.aboutMe;
