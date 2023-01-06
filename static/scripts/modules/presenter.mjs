@@ -63,7 +63,7 @@ export class Presenter {
         streamContainer.appendChild(usernameContainer);
         this.#videoGrid.append(streamContainer);
 
-        return video;
+        return streamContainer;
     }
 
     /**
