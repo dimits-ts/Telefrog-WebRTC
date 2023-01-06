@@ -25,8 +25,8 @@ const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
         if (req.path === "/user/update") {
-            if (!fs.existsSync(path.join(__dirname, `../uploads/profiles/`))) {
-                fs.mkdirSync("../uploads/profiles/")
+            if (!fs.existsSync(path.join(__dirname, `../uploads/profiles`))) {
+                fs.mkdirSync(path.join(__dirname,"../uploads/profiles"))
             }
             let session = req.body.sessionId;
             if (sessions.has(session)) {
@@ -51,7 +51,7 @@ const storage = multer.diskStorage({
         }
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
         if (req.path === "/user/update") {
-            cb(null, `profilePic`);
+            cb(null, `profilePic.png`);
         } else {
             let name = Buffer.from(file.originalname, "latin1").toString(`utf8`)
             cb(null, `${randomUUID()}~${name}`);
@@ -271,7 +271,7 @@ app.post("user/logout", (req, res) => {
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
     if (!err) {
         for (const i of files) {
-            if(i==="profiles")continue
+            if (i === "profiles") continue
             if (fs.lstatSync(path.join(__dirname, "../uploads", i)).isDirectory()) {
                 fs.rmSync(path.join(__dirname, "../uploads", i), {recursive: true, force: true});
             } else {
