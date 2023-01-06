@@ -28,6 +28,7 @@ const updateProfilePicField = document.getElementById("update-profile-pic");
 const updateNonupdateAuthContainer = document.getElementById("failed-auth");
 const updateAuthContainer = document.getElementById("successful-auth");
 const updateButton = document.getElementById("update-button");
+const updateErrorLabel = document.getElementById("update-erro-label");
 
 
 // Attempt to load the listeners every time the window changes
@@ -65,8 +66,8 @@ window.onload = async () => {
  * Display the page showing the uesr's profile details and allowing their editing.
  */
 async function displayProfile() {
-    let sessionId = getSessionId("sessionId");
-    let userObj = await getUserData(hostURL, sessionId);
+    const sessionId = getSessionId();
+    const userObj = await getUserData(hostURL, sessionId);
 
     if (userObj === null) {
         createEmptyProfilePage();
@@ -75,9 +76,17 @@ async function displayProfile() {
 
         updateButton.onclick = async e => {
             e.preventDefault();
-            console.log(sessionId)
-            let res = await updateRequest(sessionId);
 
+            const res = await updateRequest(sessionId);
+            console.log(res);
+
+            if(res.ok) {
+                hideLabel(updateErrorLabel);
+                window.location.reload();
+            } else {
+                const errorMsg = await res.text();
+                showLabel(updateErrorLabel, errorMsg);
+            }
         }
     }
 }
@@ -168,18 +177,17 @@ function createProfilePage(userObj) {
  * Send a POST request to the server that updates the user's profile details.
  * @returns a promise containing a response, indicating whether the update was succesfull
  */
-function updateRequest(sessionId) {
+async function updateRequest(sessionId) {
     const formData = new FormData();
-    console.log("heyyyy")
     formData.append("sessionId", sessionId);
     formData.append("email", updateEmailField.value);
     formData.append("aboutMe", updateAboutField.value);
     formData.append("profilePic", updateProfilePicField.files[0]);
 
-    return fetch(hostURL + "/user/update", {
+    return await fetch(hostURL + "/user/update", {
         method: "POST", // do not expicitly set content type 
         body: formData
-    }).then(res => res.json())
+    });
 
 }
 
