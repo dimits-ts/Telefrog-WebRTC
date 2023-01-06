@@ -52,8 +52,16 @@ fieldset>legend {
 }
 
 /* Slightly shrink explanation text */
-fieldset>details>p{
-    font-size: 0.9rem;
+fieldset>details{
+    font-size: 0.8rem;
+}
+
+fieldset>details>summary {
+    font-size: 1rem;
+}
+
+fieldset>details:hover {
+    cursor: pointer;
 }
 
 form>h3 {
@@ -309,4 +317,8 @@ button>img {
 .showPassword>button {
     width: 2.7em;
     height: 2.7em;
+}
+
+.text-button {
+    font-size: 2em;
 }
