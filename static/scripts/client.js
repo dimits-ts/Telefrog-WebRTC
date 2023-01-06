@@ -1,11 +1,47 @@
 import { Presenter } from "./modules/presenter.mjs"
 import { Conference } from "./modules/conference.mjs";
 import { Chat } from "./modules/chat.mjs";
-import { getUserData, resetSessionId, getSessionId } from "./modules/profile.mjs";
+import { getUserData, resetSessionId, getSessionId, getProfilePic } from "./modules/profile.mjs";
+
+
+class ParticipantList {
+    #participants = [];
+
+    updateParticipants(participantsList) {
+        if(!this.#participantsChanged(participantsList)){
+            this.#participants = participantsList;
+            this.#displayParticipants();
+        }
+    }
+
+    #buildUserObject() {
+        const participants = []
+
+        for(let username of this.#participants) {
+            const profilePic = getProfilePic(hostURL + "/media/profiles/" + username + "/profilePic.png")
+            participants.push({username: username, profilePic: profilePic});
+        }
+        
+        return {participants: participants}
+    }
+
+    #displayParticipants() {
+        const compiledTemplate = Handlebars.compile(participantsTemplate.textContent);
+        const html = compiledTemplate(this.#buildUserObject());
+        participantsContainer.innerHTML = html;
+    }
+
+    #participantsChanged(newParticipants) {
+        return Array.isArray(newParticipants) &&
+        newParticipants.length === this.#participants.length &&
+        newParticipants.every((val, index) => val === this.#participants[index]);
+    }
+}
 
 // Configurations
 const hostURL = "http://localhost:8080"
 const CHAT_REFRESH_MS = 500;
+const PARTICIPANT_REFRESH_MS = 500;
 const socket = io(hostURL);
 
 // Elements
@@ -16,11 +52,15 @@ const chatBox = document.getElementById("chat-display");
 const loggedInContainer = document.getElementById("logged-in");
 const standardLoginContainer = document.getElementById("standard-login");
 const profileTemplate = document.getElementById("profile-template");
+const participantsContainer = document.getElementById("participants-container");
+const participantsTemplate = document.getElementById("participants-template");
 
 // Globals
+const participantList = new ParticipantList();
 const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
+
 let login = true;
 
 // define as global because its also used in #joinRoom()
@@ -64,10 +104,17 @@ async function joinRoom(e) {
         chat.setUser(username, roomId);
         // periodically refresh chat showing new messages
         // use a lambda for the class context to work
-        setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS); 
+        setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
+
+        /* 
+         * Unfortunately the libraries we used and our media server don't 
+         * carry custom information so we needed to implement this separately.
+         * Also arrow function because else something internal breaks.
+         */
+        setInterval(() => getParticipants(roomId), PARTICIPANT_REFRESH_MS);
     }
 
-    if (usernameIsValid(username)) {
+    if (!usernameIsValid(username)) {
         presenter.showInputError("Please enter a valid username.");
     } else {
         login = false;
@@ -89,6 +136,14 @@ function createRoom(e) {
     e.preventDefault();
 }
 
+async function getParticipants(roomId) {
+    const res = await fetch(`${hostURL}/participants/${roomId}`);
+    if(res.ok) {
+        const participants = await res.json();
+        console.log(participants);
+        participantList.updateParticipants(participants);
+    }
+}
 
 // ========== CHAT HANDLERS ==========
 
@@ -142,5 +197,5 @@ function createLoggedInContainer(username) {
 
 function usernameIsValid(username) {
     // check if is whitespace
-    return username.trim().length === 0;
+    return username.trim().length !== 0;
 }

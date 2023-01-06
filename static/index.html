@@ -70,6 +70,18 @@
         <a href="index.html" id="sign-out">Sign out</a>
     </script>
 
+    <script id="participants-template" type="text/x-handlebars-template">
+        <h3>Participants:</h3>
+        <section id="participants-list">
+            {{#each participants}}
+            <span>
+                <img src="{{profilePic}}" alt="profile picture">
+                <p>{{username}}</p>
+            </span>
+        {{/each}}
+        </section>
+    </script>
+
 </head>
 
 <body>
@@ -121,11 +133,14 @@
         <article id="videoPanel">
             <h3>To be released seek the frog above ↑</h3>
             <h2 id="roomBanner"></h2>
+            <section id="participants-container"></section>
 
             <div id="videoMain">
                 <section id="videoStreams">
 
                 </section>
+
+                
 
                 <section id="chatArea">
                     <div id="chat-box">
