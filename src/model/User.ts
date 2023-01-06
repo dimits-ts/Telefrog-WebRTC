@@ -1,11 +1,17 @@
 export class User {
-    name: string;
-    pass: string;
-    urlPath: string;
+    username: string;
+    password: string;
+    email?: string;
+    profilePic?: string;
+    aboutMe?: string;
 
-    constructor(name: string, pass: string, urlPath: string) {
-        this.name = name;
-        this.pass = pass;
-        this.urlPath = urlPath;
+    constructor(username: string, password: string, email?: string, profilePic?: string, aboutMe?: string) {
+        this.username = username;
+        this.password = password;
+        if (aboutMe !== undefined) this.aboutMe = aboutMe;
+        if (email !== undefined) this.email = email;
+        if (profilePic !== undefined) this.profilePic = profilePic;
     }
+
+
 }

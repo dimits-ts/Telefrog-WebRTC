@@ -1,3 +1,5 @@
+import {getProfilePic} from "./profile.mjs";
+
 /**
  *  A class containing the chat messages and displaying new ones to
  *  the HTML chatbox.
@@ -16,8 +18,8 @@ export class Chat {
 
     /**
      * Constructs an object that posts and receives posts from the server.
-     * @param {string} hostURL - The remote server's URL 
-     * @param {Presenter} presenter - The presenter for the HTML page 
+     * @param {string} hostURL - The remote server's URL
+     * @param {Presenter} presenter - The presenter for the HTML page
      */
     constructor(chatBoxElement, hostURL, presenter) {
         this.#chatboxElement = chatBoxElement;
@@ -31,9 +33,9 @@ export class Chat {
     }
 
     /**
-     * Set the details of the user representing the client, in order to 
+     * Set the details of the user representing the client, in order to
      * @param {string} username - The username of the client
-     * @param {string} roomId - The current room's Id 
+     * @param {string} roomId - The current room's Id
      */
     setUser(username, roomId) {
         this.#username = username;
@@ -47,13 +49,13 @@ export class Chat {
      * @throws {Error} if the posting user hasn't been set
      */
     sendFile(URI, type) {
-        let image = new File([URI], URI.name, { type: URI.type, message_type: type });
+        let image = new File([URI], URI.name, {type: URI.type, message_type: type});
         this.#sendMessage("multipart/form-data", type, image);
     }
 
     /**
      * Send a text message to the server.
-     * @param {string} text - The text to be sent 
+     * @param {string} text - The text to be sent
      * @throws {Error} if the posting user hasn't been set
      */
     sendText(text) {
@@ -67,11 +69,10 @@ export class Chat {
         let url = new URL(this.#hostURL + "/chat-box/refresh");
 
         url.search = new URLSearchParams({
-            roomId: this.#roomId,
-            lastMessage: this.#getLastMessageId()
+            roomId: this.#roomId, lastMessage: this.#getLastMessageId()
         });
 
-        fetch(url, { method: "GET" })
+        fetch(url, {method: "GET"})
             .then(res => res.json())
             .then(list => {
                 if (list.length !== 0) console.log(list);
@@ -96,10 +97,10 @@ export class Chat {
 
     /**
      * Send a new message to the server.
-     * @param {string} encoding - The fetch's POST encoding type (multimedia for files/images or 
-     * text/simple for text) 
-     * @param {string} type - One of the TEXT/IMAGE/FILE types 
-     * @param {any} content - The contents of the message 
+     * @param {string} encoding - The fetch's POST encoding type (multimedia for files/images or
+     * text/simple for text)
+     * @param {string} type - One of the TEXT/IMAGE/FILE types
+     * @param {any} content - The contents of the message
      */
     #sendMessage(encoding, type, content) {
         if (this.#username === undefined || this.#roomId === undefined) {
@@ -119,9 +120,7 @@ export class Chat {
         let chatThis = this; // I love javascript I love javascript
 
         fetch(chatThis.#hostURL + "/chat-box/message/new", {
-            method: "POST",
-            headers: headers,
-            body: data
+            method: "POST", headers: headers, body: data
         }).then(response => {
             if (!response.ok) {
                 chatThis.#presenter.showGeneralError("An error ocurred while sending the message to the server");
@@ -147,11 +146,15 @@ export class Chat {
             message.type = "Link";
         } else if (message.messageType === "File" && isVideo(message.content)) {
             message.type = "Video";
-        } else if(message.messageType === "File" && isImage(message.content)) {
-            message.type = "Image"
+        } else if (message.messageType === "File" && isImage(message.content)) {
+            message.type = "Image";
         } else {
             message.type = message.messageType;
-        } 
+        }
+
+        // set profile pic
+        let profilePicUrl = this.#hostURL + "/media/profiles/" + message.username + "/profilePic.png";
+        message.profilePic = getProfilePic(profilePicUrl);
 
         message.isSelf = message.username === this.#username
         message.hostURL = this.#hostURL
@@ -177,7 +180,7 @@ export class Chat {
 
 /**
  * Return whether a string is a valid HTTP URL.
- * @param {str} string the string to be examined 
+ * @param {str} string the string to be examined
  * @returns true if the string repersents a URL
  */
 function isLink(string) {
@@ -192,31 +195,30 @@ function isLink(string) {
 
 /**
  * Check whether a file is a video based on its extension.
- * @param {str} filename the name of the file to be examined 
+ * @param {str} filename the name of the file to be examined
  * @returns true if the file is a video
  */
 function isVideo(filename) {
-    const videoExtensions = ['m4v', 'avi','mpg','mp4', 'webm'];
+    const videoExtensions = ['m4v', 'avi', 'mpg', 'mp4', 'webm'];
     return videoExtensions.includes(getExtension(filename));
 }
 
 /**
  * Check whether a file is an image based on its extension.
- * @param {str} filename he name of the file to be examined 
+ * @param {str} filename he name of the file to be examined
  * @returns true if the file is an image
  */
 function isImage(filename) {
-    const imageExtensions = ['jpg', 'png' ,'jpeg' , "webp", "tiff", "psd", "raw",
-    "bmp", "heif", "indd", "svg"]
+    const imageExtensions = ['jpg', 'png', 'jpeg', "webp", "tiff", "psd", "raw", "bmp", "heif", "indd", "svg"]
     return imageExtensions.includes(getExtension(filename));
 }
 
 /**
  * Get the extension of a file.
- * @param {str} filename the name of the file 
+ * @param {str} filename the name of the file
  * @returns the extension (without the dot)
  */
-function getExtension(filename){
+function getExtension(filename) {
     let parts = filename.toLowerCase().split('.');
     return parts[parts.length - 1];
 }

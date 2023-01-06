@@ -1,6 +1,7 @@
 import { Presenter } from "./modules/presenter.mjs"
 import { Conference } from "./modules/conference.mjs";
 import { Chat } from "./modules/chat.mjs";
+import { getUserData, resetSessionId, getSessionId } from "./modules/profile.mjs";
 
 // Configurations
 const hostURL = "http://localhost:8080"
@@ -12,6 +13,9 @@ const joinRoomButton = document.getElementById("join_room_button");
 const createRoomButton = document.getElementById("create_room_button");
 const sendMessageButton = document.getElementById("sendMessage");
 const chatBox = document.getElementById("chat-display");
+const loggedInContainer = document.getElementById("logged-in");
+const standardLoginContainer = document.getElementById("standard-login");
+const profileTemplate = document.getElementById("profile-template");
 
 // Globals
 const presenter = new Presenter();
@@ -19,16 +23,25 @@ const conference = new Conference(socket, presenter);
 const chat = new Chat(chatBox, hostURL, presenter);
 let login = true;
 
+// define as global because its also used in #joinRoom()
+let userObj = await getUserData(hostURL, getSessionId()) // how could this possibly go wrong
+
+// UI
+if (userObj === null)
+    createStandardLoginContainer();
+else
+    createLoggedInContainer(userObj.username);
+
 // Events
 joinRoomButton.onclick = joinRoom;
 createRoomButton.onclick = createRoom;
 sendMessageButton.onclick = sendMessage;
 
-window.addEventListener("keypress", function (event) {
+window.addEventListener("keypress", event => {
     if (event.key === "Enter") {
         event.preventDefault();
 
-        if(login)
+        if (login)
             joinRoomButton.click();
         else
             sendMessageButton.click();
@@ -38,24 +51,29 @@ window.addEventListener("keypress", function (event) {
 
 // ========== CALL HANDLERS ==========
 
-function joinRoom(e) {
+async function joinRoom(e) {
     console.log("Sending request to join");
 
     let username = presenter.getUsername();
+    if (userObj !== null) {
+        username = userObj.username;
+    }
+
     let roomId = presenter.getRoomId();
+    let successCallback = () => {
+        chat.setUser(username, roomId);
+        // periodically refresh chat showing new messages
+        // use a lambda for the class context to work
+        setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS); 
+    }
 
     if (usernameIsValid(username)) {
         presenter.showInputError("Please enter a valid username.");
-    }
-    else {
+    } else {
         login = false;
-        chat.setUser(username, roomId);
-        conference.connect(username, roomId);
+        conference.connect(username, roomId, successCallback);
     }
 
-    // periodically refresh chat showing new messages
-    // use a lambda for the class context to work
-    setInterval(() => chat.refreshChat(), CHAT_REFRESH_MS);
     e.preventDefault();
 }
 
@@ -90,7 +108,38 @@ function sendMessage() {
     presenter.resetChatInputs();
 }
 
-// General functions
+// ========== GENERAL HANDLERS ==========
+
+/**
+ * Used in link HTML element used in loggedinContainer.  
+ */
+async function logout() {
+    let sessionId = getSessionId();
+    resetSessionId();
+
+    await fetch(this.hostURL + "/user/logout", {
+        method: "POST",
+        body: sessionId
+    });
+}
+
+function createStandardLoginContainer() {
+    standardLoginContainer.style.display = "visible";
+    loggedInContainer.style.display = "none";
+}
+
+function createLoggedInContainer(username) {
+    let compiledTemplate = Handlebars.compile(profileTemplate.textContent);
+    let html = compiledTemplate({ username: username });
+    loggedInContainer.innerHTML = html;
+
+    standardLoginContainer.style.display = "none";
+    loggedInContainer.style.display = "visible";
+
+    const signOutButton = document.getElementById("sign-out");
+    signOutButton.onclick = logout;
+}
+
 function usernameIsValid(username) {
     // check if is whitespace
     return username.trim().length === 0;

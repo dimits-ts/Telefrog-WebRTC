@@ -1,7 +1,8 @@
 import {MongoClient} from "mongodb";
 import dot from "dotenv"
-import {log} from "./Server"
+import {iv, key, log} from "./Server"
 import {User} from "./model/User";
+import * as CryptoJS from "crypto-js"
 
 dot.config()
 
@@ -13,10 +14,10 @@ export async function register(user: User) {
     try {
         let cursor = await client.connect();
         const collection = cursor.db("telefrog").collection("users");
+        user.password = CryptoJS.AES.encrypt(user.password, key, {iv}).toString();
         await collection.insertOne(user);
     } catch (error: any) {
         log.c(error.message)
-        log.c("no connection???");
     }
     await client.close();
 }
@@ -24,7 +25,40 @@ export async function register(user: User) {
 export async function signin(user: string, pass: string) {
     let cursor = await client.connect();
     const collection = cursor.db("telefrog").collection("users");
-    return await collection.findOne({user,pass});
+    return collection.findOne({username: user, password: CryptoJS.AES.encrypt(pass, key, {iv}).toString()});
 }
 
 
+export async function findName(username: string) {
+    let cursor = await client.connect();
+    const collection = cursor.db("telefrog").collection("users");
+    return collection.countDocuments({username})
+}
+
+export async function getProfilePic(username: string) {
+    let cursor = await client.connect();
+    const collection = cursor.db("telefrog").collection("users");
+    return collection.find({username}).project({_id: 0, urlPath: 1}).toArray();
+}
+
+export async function getUserByName(username: string) {
+    let cursor = await client.connect();
+    const collection = cursor.db("telefrog").collection("users");
+    return collection.findOne({username});
+}
+
+export async function updateUser(user: User) {
+    let cursor = await client.connect();
+    const collection = cursor.db("telefrog").collection("users");
+    let set = {} as set
+    if (user.email !== undefined) set.email = user.email;
+    if (user.profilePic !== "") set.profilePic = user.profilePic;
+    if (user.aboutMe !== undefined) set.aboutMe = user.aboutMe;
+    return collection.findOneAndUpdate({username: user.username}, {$set: set})
+}
+
+type set = {
+    email?: string;
+    profilePic?: string;
+    aboutMe?: string;
+}

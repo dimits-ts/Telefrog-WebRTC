@@ -3,8 +3,8 @@
  * on the client side.
  */
 export class Conference {
-    static STREAM_CONSTRAINTS = { audio: true, video: true };
-    static PEER_SERVER_CONFIG = { host: "/", port: "3001" };
+    static STREAM_CONSTRAINTS = {audio: true, video: true};
+    static PEER_SERVER_CONFIG = {host: "/", port: "3001"};
 
     #username; // useful to keep around
     #roomId;
@@ -15,11 +15,12 @@ export class Conference {
     #connectedPeers;
 
     #lastStreamId
+    #successCallback;
 
     /**
      * Initialize the data structures before establishing connection to remote server.
      * @param {Socket} socket - A socket connected to the server
-     * @param {Presenter} presenter - The proxy object for the current HTML page 
+     * @param {Presenter} presenter - The proxy object for the current HTML page
      */
     constructor(socket, presenter) {
         this.#socket = socket;
@@ -29,13 +30,14 @@ export class Conference {
 
     /**
      * Starts a stream with the user himself, and receives the streams of all other people in the room.
-     * @param {string} username - The name of the user attempting the connection 
+     * @param {string} username - The name of the user attempting the connection
      * @param {string} roomId - The ID of the room to be connected to
+     * @param {Function} successCallback - A function to be called if the connection is successful
      */
-    connect(username, roomId) {
+    connect(username, roomId, successCallback = null) {
         this.#username = username;
         this.#roomId = roomId;
-
+        this.#successCallback = successCallback;
         // must be created here and not in constructor
         this.#myPeer = new Peer(undefined, Conference.PEER_SERVER_CONFIG);
 
@@ -44,9 +46,7 @@ export class Conference {
         this.#myPeer.on("open", peerId => {
             console.log("Opened on peer server, sending join request to server");
             let message = {
-                username: username,
-                room: roomId,
-                peer: peerId
+                username: username, room: roomId, peer: peerId
             };
 
             this.#setUpStream(message);
@@ -60,12 +60,11 @@ export class Conference {
     }
 
     /**
-     * Remove the display of a disconnected user. 
-     * @param {string} userId - The disconnected user's ID 
+     * Remove the display of a disconnected user.
+     * @param {string} userId - The disconnected user's ID
      */
     #userDisconnected(userId) {
-        if (this.#connectedPeers[userId])
-            this.#connectedPeers[userId].close();
+        if (this.#connectedPeers[userId]) this.#connectedPeers[userId].close();
     }
 
     /**
@@ -81,6 +80,9 @@ export class Conference {
                 // receive session status from server
                 this.#socket.on("join-status", (statusCode, statusMessage) => {
                     if (statusCode === 200) {
+
+                        if (this.#successCallback !== null) this.#successCallback();
+
                         this.#presenter.showConnected("Connected to room " + this.#roomId);
 
                         // set up video streams
@@ -107,8 +109,8 @@ export class Conference {
                 });
 
             }).catch(err => {
-                this.#presenter.showInputError("Error while accessing media devices: " + err);
-            });
+            this.#presenter.showInputError("Error while accessing media devices: " + err);
+        });
     }
 
     /**
@@ -128,28 +130,27 @@ export class Conference {
         });
 
         call.on("close", () => {
-            if(streamElement !== undefined)
-                streamElement.remove();
+            if (streamElement !== undefined) streamElement.remove();
         });
 
         // update connected users
         this.#connectedPeers[peerId] = call;
     }
 
-   /**
-    * Add a new video element along with its corresponding media stream to the screen.
-    * @param {string} username - The username of the connecting user
-    * @param {MediaSession} stream - The corresponding media stream
-    * @param {boolean} isMuted - Whether the video is muted
-    * @return the stream HTML element that was created, undefined if not created 
-    */
+    /**
+     * Add a new video element along with its corresponding media stream to the screen.
+     * @param {string} username - The username of the connecting user
+     * @param {MediaSession} stream - The corresponding media stream
+     * @param {boolean} isMuted - Whether the video is muted
+     * @return the stream HTML element that was created, undefined if not created
+     */
     #addVideoStream(username, stream, isMuted = false) {
-        if(username.length > 10){
+        if (username.length > 10) {
             username = username.slice(0, 10) + "..."
         }
-        
+
         // avoid bug with duplicate calls because of peer server call impl
-        if(stream.id !== this.#lastStreamId) {
+        if (stream.id !== this.#lastStreamId) {
             this.#lastStreamId = stream.id;
             return this.#presenter.addVideoElement(username, stream, isMuted);
         }

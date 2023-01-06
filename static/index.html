@@ -3,12 +3,13 @@
 <html>
 
 <head>
+    <title>TeleFrog WebRTC</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TeleFrog WebRTC</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="resources/frog.ico">
 
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script src="https://cdn.socket.io/4.5.3/socket.io.min.js"
@@ -19,12 +20,18 @@
 
     <script id="chat-template" type="text/x-handlebars-template">
         <div class="chat-message-container">
-            {{#if isSelf}}
-                <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
-            {{else}}
-                <h5 class="chat-username-label" >{{username}}</h5>
-            {{/if}}
-            <p class="timestamp">{{timestamp}}</p>
+            <div class="message-header">
+                <img src="{{profilePic}}" alt="profile picture">
+
+                <div>
+                    {{#if isSelf}}
+                        <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
+                    {{else}}
+                        <h5 class="chat-username-label" >{{username}}</h5>
+                    {{/if}}
+                <p class="timestamp">{{timestamp}}</p>
+                </div>
+            </div>
 
             <!-- Display contents-->
             {{#ifEq type "Text"}}
@@ -55,41 +62,64 @@
         </div>
     </script>
 
+    <script id="profile-template" type="text/x-handlebars-template">
+        <h2>Logged in as <p class="username">{{username}}</p></h2>
+        <a href="profile.html">My Account</a>
+        <a href="login.html">Switch accounts</a>
+        <a href="signup.html">Create a new account</a>
+        <a href="index.html" id="sign-out">Sign out</a>
+    </script>
+
 </head>
 
 <body>
     <header>
-        <img src="resources/frog.PNG" alt="frogge">
+        <a href="index.html"> <img src="resources/frog.PNG" alt="frogge"></a>
         <h1>TeleFrog Conferencing</h1>
     </header>
 
     <main>
         <article id="login">
 
+            <article class="textbox">
+                <section id="logged-in" class="hidden">
+                    <!-- profile-template content-->
+                </section>
+
+                <section id="standard-login" class="hidden">
+                    <h2><a href="login.html">Log in your Telefrog Account</a></h2>
+                    <p>or</p>
+                    <h2><a href="signup.html">Sign up Today</a></h2>
+                    <p>or</p>
+                    <h2>Sign in as a guest</h2>
+                    <label for="username_input">Username:</label>
+                    <input type="text" id="username_input" name="username">
+                </section>
+            </article>
+
             <fieldset>
                 <legend>
                     Login
                 </legend>
-                <label for="username_input">Username:</label>
-                <input type="text" id="username_input" name="username" required>
 
-                <label for="room_input">Type the room's ID:</label>
+                <label for="room_input">Room ID:</label>
                 <input type="text" id="room_input" name="room_ID">
 
                 <p id="errorMessage"></p>
             </fieldset>
 
             <div id="button-group">
-                <button id="create_room_button">
+                <button class="text-button" id="create_room_button">
                     <h3>Create a Room</h3>
                 </button>
-                <button id="join_room_button">
+                <button class="text-button" id="join_room_button">
                     <h3>Join the Room</h3>
                 </button>
             </div>
         </article>
 
         <article id="videoPanel">
+            <h3>To be released seek the frog above ↑</h3>
             <h2 id="roomBanner"></h2>
 
             <div id="videoMain">
@@ -116,6 +146,7 @@
                     </div>
                 </section>
             </div>
+
         </article>
     </main>
 </body>

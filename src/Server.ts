@@ -9,6 +9,9 @@ import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMe
 import multer, {FileFilterCallback} from "multer";
 import {randomUUID} from "crypto";
 import {Buffer} from "buffer";
+import {findName, getUserByName, register, signin, updateUser} from "./mongussy";
+import {User} from "./model/User";
+import * as CryptoJS from "crypto-js"
 
 // Create the server
 const PORT = 8080;
@@ -18,13 +21,28 @@ const io = new s.Server(http, {
     maxHttpBufferSize: 10 * 1024 * 1024
 });
 
+const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
-        if (req.path === "/user") {
-            let paths = path.join(__dirname, `../uploads/${crypto.randomUUID()}/`)
-            if (!fs.existsSync(paths))
-                fs.mkdirSync(paths);
-            cb(null, paths);
+        if (req.path === "/user/update") {
+            if (!fs.existsSync(path.join(__dirname, `../uploads/profiles`))) {
+                fs.mkdirSync(path.join(__dirname,"../uploads/profiles"))
+            }
+            let session = req.body.sessionId;
+            if (sessions.has(session)) {
+                let username = sessions.get(session);
+                console.log(username)
+                if (username !== undefined) {
+                    let paths = path.join(__dirname, `../uploads/profiles/${username}/`)
+                    if (!fs.existsSync(paths))
+                        fs.mkdirSync(paths);
+                    cb(null, paths);
+                } else {
+                    cb(new Error("Username could not be resolved"), "../uploads/profiles");
+                }
+            } else {
+                cb(new Error("Session id does not exist"), "../uploads/profiles/")
+            }
         } else {
             let paths = path.join(__dirname, `../uploads/${req.body.roomId}/`)
             if (!fs.existsSync(paths))
@@ -32,10 +50,8 @@ const storage = multer.diskStorage({
             cb(null, paths);
         }
     }, filename: function (req: Request, file: Express.Multer.File, cb) {
-        if (req.path === "/user") {
-            let name = file.originalname.split(".")
-            let suffix = name[name.length - 1];
-            cb(null, `profile.${suffix}`);
+        if (req.path === "/user/update") {
+            cb(null, `profilePic.png`);
         } else {
             let name = Buffer.from(file.originalname, "latin1").toString(`utf8`)
             cb(null, `${randomUUID()}~${name}`);
@@ -65,9 +81,11 @@ app.use("/media", express.static(path.join(__dirname, "../uploads")));
 export const log = new logging.FileLog(path.join(__dirname, "../logging.txt"));
 //You can use the console version
 // export const log=new logging.ConsoleLog();
+export const key = CryptoJS.enc.Base64.parse("aPdSgVkYp3s6v9y$B&E)H@");
+export const iv = CryptoJS.enc.Base64.parse("101112131415161718191a")
 const rooms: string[] = [];
-const people: Map<string, number> = new Map();
-const chats: Map<string, Message[]> = new Map();
+const people: Map<string, number> = new Map<string, number>();
+const chats: Map<string, Message[]> = new Map<string, Message[]>();
 
 app.get("/", (req: Request, res: Response) => {
     res.redirect("/static/index.html");
@@ -108,7 +126,6 @@ io.on("connection", socket => {
 app.get("/chat-box/refresh", async (req: Request, res: Response) => {
     const room = String(req.query.roomId);
     const last_message = String(req.query.lastMessage);
-
     try {
         let toSend = await getNewMessages(chats, room, last_message)
         res.status(200).json(toSend)
@@ -135,16 +152,126 @@ app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: 
     }
 })
 
+app.get("/user/profile/:username", async (req, res) => {
+    try {
+        let results = await getUserByName(req.params.username);
+        if (results !== null) {
+            if (results.hasOwnProperty("profilePic")) {
+                res.status(200).json(results.profilePic)
+            } else {
+                log.c("Could not get profile pic.")
+                res.status(400).send("Could not get profile pic.");
+            }
+        } else {
+            log.c("User could not be found");
+            res.status(404).send("User could not be found.");
+        }
+    } catch (e) {
+        log.c("Could not get profile pic.")
+        res.status(400).send("Could not get profile pic.");
+    }
+})
 
-app.post("/user", upload.single("profile"), (req: Request, res: Response) => {
+app.post("/user/update", upload.single("profilePic"), async (req: Request, res: Response) => {
     log.i(`Request to register user with id ${req.body.username}`);
-    res.sendStatus(200)
+    try {
+        let session = req.body.sessionId;
+        console.log(req.body)
+        if (sessions.has(session)) {
+            const username = sessions.get(session);
+            let exists: number = 0;
+            if (username !== undefined) {
+                exists = await findName(username);
+                if (exists === 1) {
+                    let filename: string;
+                    if (req.file === undefined) {
+                        filename = "";
+                    } else {
+                        let name = req.file.path.split("\\");
+                        filename = name[name.length - 2] + "\\" + name[name.length - 1];
+                    }
+                    await updateUser(new User(username, "", req.body.email, filename, req.body.aboutMe));
+                    res.sendStatus(200)
+                } else {
+                    log.c(`Username ${req.body.username} doesn't exists`)
+                    res.status(404).send(`Username ${req.body.username} doesn't exists`)
+                }
+            } else {
+                log.c(`Session id is not valid.`)
+                res.status(400).send(`Session id is not valid.`)
+            }
+        }
+    } catch (e) {
+        log.c(String(e));
+        res.sendStatus(400).send(`Username ${req.body.username} doesn't exists`)
+    }
 });
+
+app.post("/user", upload.any(), async (req, res) => {
+    let pass = req.body.password;
+    let username = req.body.username;
+    let email = req.body.email;
+    let exist = await findName(username);
+    if (exist < 1) {
+        await register(new User(username, pass, email))
+        const re = randomUUID()
+        const items = sessions.entries();
+        for (const entry of items) {
+            if (entry[1] == username) {
+                sessions.delete(entry[0])
+            }
+        }
+        sessions.set(re, username)
+        res.status(200).json({sessionId: re})
+    } else {
+        log.c(`Username ${username} already exists.`)
+        res.status(409).send(`Username ${username} already exists.`)
+    }
+
+})
+
+app.post("/user/login", async (req, res) => {
+    let pass = req.body.password;
+    let username = req.body.username;
+    try {
+        let results = await signin(username, pass);
+        const uuid = randomUUID();
+        if (results !== null && results.length !== 0) {
+            const items = sessions.entries();
+            for (const entry of items) {
+                if (entry[1] == username) {
+                    sessions.delete(entry[0])
+                }
+            }
+            sessions.set(uuid, results.username);
+            res.status(200).json(uuid)
+        } else {
+            log.c("Cannot get User username");
+            res.status(400).send("The login information were not correct");
+
+        }
+    } catch (e) {
+        log.c("Connection with the database was not successful...")
+        res.status(400).send("Connection with the database was not successful...");
+    }
+});
+
+
+app.post("user/logout", (req, res) => {
+    let session = req.body.sessionId;
+    if (sessions.has(session)) {
+        sessions.delete(session);
+        res.sendStatus(200)
+    } else {
+        res.status(400).send("Session id is not valid")
+    }
+})
 
 
 fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
     if (!err) {
         for (const i of files) {
+            if (i === "profiles") continue
             if (fs.lstatSync(path.join(__dirname, "../uploads", i)).isDirectory()) {
                 fs.rmSync(path.join(__dirname, "../uploads", i), {recursive: true, force: true});
             } else {
@@ -157,8 +284,40 @@ fs.readdir(path.join(__dirname, "../uploads"), (err, files) => {
     log.i("cleaned the upload folder");
 })
 
+app.get("/user/:sessionId", async (req, res) => {
+    let session = req.params.sessionId;
+    try {
+        if (sessions.has(session)) {
+            let username = sessions.get(session);
+            if (username !== undefined) {
+                let results = await getUserByName(username);
+                if (results !== null) {
+                    results.password = CryptoJS.AES.decrypt(results.password, key, {iv}).toString();
+                    res.status(200).json(results)
+                } else {
+                    log.c("User could not be found");
+                    res.status(404).send("User could not be found.");
+                }
+            } else {
+                log.c("User could not be found")
+                res.status(404).send("User could not be found");
+            }
+        } else {
+            log.c("Session id is not valid.")
+            res.status(404).send("Session id is not valid.");
+        }
+    } catch (e) {
+        log.c("Session id is not valid.")
+        res.status(404).send("Session id is not valid.");
+    }
+})
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+});
 
 http.listen(PORT, () => {
     log.i(`Server initialization at port ${PORT}`);
+    console.log(`Server initialization at port ${PORT}`)
 });
 
