@@ -4,21 +4,36 @@ import { Chat } from "./modules/chat.mjs";
 import { resetSessionId, getSessionId, ProfileManager } from "./modules/profile.mjs";
 
 
+/**
+ * A class handling the current participant list 
+ */
 class ParticipantList {
     #participants = [];
     #profileManager;
 
+    /**
+     * Build a new participant list manager
+     * @param {ProfileManager} profileManager a manager capable of fetching profile pictures
+     */
     constructor(profileManager) {
         this.#profileManager = profileManager;
     }
 
+    /**
+     * Update the UI with the current participants.
+     * @param {[obj]} participantsList a list containing the usernames of all current participants
+     */
     updateParticipants(participantsList) {
-        if(!this.#participantsChanged(participantsList)){
+        if(!this.#participantsSame(participantsList)){
             this.#participants = participantsList;
             this.#displayParticipants();
         }
     }
 
+    /**
+     * Get a Handlebars-template-compatible object detailing all participants. 
+     * @returns an object containing the usernames and profile pics of all participants
+     */
     #formatParticipants() {
         const participants = []
 
@@ -30,13 +45,21 @@ class ParticipantList {
         return {participants: participants}
     }
 
+    /**
+     * Display the current participants to the UI.
+     */
     #displayParticipants() {
         const compiledTemplate = Handlebars.compile(participantsTemplate.textContent);
         const html = compiledTemplate(this.#formatParticipants());
         participantsContainer.innerHTML = html;
     }
 
-    #participantsChanged(newParticipants) {
+    /**
+     * Check if the new participant list is different than the last one.
+     * @param {[obj]} newParticipants an array of all current participants
+     * @returns true if the participants haven't changed
+     */
+    #participantsSame(newParticipants) {
         return Array.isArray(newParticipants) &&
         newParticipants.length === this.#participants.length &&
         newParticipants.every((val, index) => val === this.#participants[index]);
@@ -97,6 +120,11 @@ window.addEventListener("keypress", event => {
 
 // ========== CALL HANDLERS ==========
 
+/**
+ * Begin the procedure of joining an existing room. Activates stream, chat and 
+ * the participant list observer.
+ * @param {Event} e the click event
+ */
 async function joinRoom(e) {
     console.log("Sending request to join");
 
@@ -130,18 +158,26 @@ async function joinRoom(e) {
     e.preventDefault();
 }
 
+/**
+ * Instruct the server to create a new room and paste its ID in the room HTML element.
+ * @param {Event} e the click event
+ */
 function createRoom(e) {
     // send to socket
     fetch(hostURL + "/room/create", { method: "GET" })
         .then(res => res.json())
         .then(response => {
             // place the roomId into the room input area
-            let roomInput = document.getElementById("room_input");
+            const roomInput = document.getElementById("room_input");
             roomInput.value = response.room;
         });
     e.preventDefault();
 }
 
+/**
+ * Get a list of all current participants from the server.
+ * @param {string} roomId the current room id
+ */
 async function getParticipants(roomId) {
     const res = await fetch(`${hostURL}/participants/${roomId}`);
     if(res.ok) {
@@ -153,6 +189,9 @@ async function getParticipants(roomId) {
 
 // ========== CHAT HANDLERS ==========
 
+/**
+ * Send a message to the chat.
+ */
 function sendMessage() {
     // Send any field that is filled
     let text = presenter.getChatText();
@@ -184,11 +223,18 @@ async function logout() {
     });
 }
 
+/**
+ * Called to expose the user to the login UI if he is NOT currently logged in.
+ */
 function createStandardLoginContainer() {
     standardLoginContainer.style.display = "visible";
     loggedInContainer.style.display = "none";
 }
 
+/**
+ * Called to expose the user to the login UI if he is currently logged in.
+ * @param {string} username the user's name
+ */
 function createLoggedInContainer(username) {
     let compiledTemplate = Handlebars.compile(profileTemplate.textContent);
     let html = compiledTemplate({ username: username });
@@ -200,6 +246,7 @@ function createLoggedInContainer(username) {
     const signOutButton = document.getElementById("sign-out");
     signOutButton.onclick = logout;
 }
+
 
 function usernameIsValid(username) {
     // check if is whitespace
