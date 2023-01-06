@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
         if (req.path === "/user/update") {
             if (!fs.existsSync(path.join(__dirname, `../uploads/profiles`))) {
-                fs.mkdirSync(path.join(__dirname,"../uploads/profiles"))
+                fs.mkdirSync(path.join(__dirname, "../uploads/profiles"))
             }
             let session = req.body.sessionId;
             if (sessions.has(session)) {
@@ -86,6 +86,7 @@ export const iv = CryptoJS.enc.Base64.parse("101112131415161718191a")
 const rooms: string[] = [];
 const people: Map<string, number> = new Map<string, number>();
 const chats: Map<string, Message[]> = new Map<string, Message[]>();
+const connected: Map<string, string[]> = new Map<string, string[]>();
 
 app.get("/", (req: Request, res: Response) => {
     res.redirect("/static/index.html");
@@ -96,6 +97,7 @@ app.get("/room/create", (req: Request, res: Response) => {
     const room: string = getUniqueRoomId(rooms);
     people.set(room, 0);
     chats.set(room, []);
+    connected.set(room, [])
     log.i("Created room " + room);
     res.status(200).send({room});
 })
@@ -109,6 +111,10 @@ io.on("connection", socket => {
             log.i(`Attempt from user ${roomObj.username} to join room ${roomObj.room}`);
             socket.join(roomObj.room);
             let person_count = people.get(roomObj.room);
+            let connection_people = connected.get(roomObj.room);
+            if (connection_people !== undefined) {
+                connection_people.push(roomObj.username)
+            }
             if (person_count != undefined) {
                 people.set(roomObj.room, person_count + 1)
                 socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
@@ -120,6 +126,10 @@ io.on("connection", socket => {
             }
         }
     });
+    socket.on("nameShared", (roomId, peerId, username) => {
+        console.log("Aggressively morbing")
+        socket.to(roomId).emit("nameShared", peerId, username);
+    })
 })
 
 //Callback to refresh the 
@@ -134,6 +144,15 @@ app.get("/chat-box/refresh", async (req: Request, res: Response) => {
     }
 });
 
+app.get("/participants/:roomId", (req, res) => {
+    const room = String(req.params.roomId);
+    if (connected.get(room) !== undefined) {
+        res.status(200).json(connected.get(room));
+    } else {
+        log.c("Room id does not exist");
+        res.status(404).send("Room id does not exist")
+    }
+})
 
 //Route for reading new Data
 app.post("/chat-box/message/new", upload.single("content"), (req: Request, res: Response) => {
