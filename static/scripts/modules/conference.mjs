@@ -13,6 +13,8 @@ export class Conference {
     #socket;
     #presenter;
     #connectedPeers;
+    #namedPeers;
+    #videoElements;
 
     #lastStreamId
     #successCallback;
@@ -26,6 +28,8 @@ export class Conference {
         this.#socket = socket;
         this.#presenter = presenter;
         this.#connectedPeers = {};
+        this.#namedPeers = {}
+        this.#videoElements = {}
     }
 
     /**
@@ -88,6 +92,14 @@ export class Conference {
                         // set up video streams
                         this.#addVideoStream(this.#username, stream, true);
 
+                        // this.#socket.on("nameShared", (roomid, peerid, username) => {
+                        //     console.log(peerid + " has graced us with sex")
+                        //     console.log(username + " has graced us with sex")
+                        //     this.#namedPeers[peerid] = username;
+                        //     console.log(this.#videoElements)
+                        //     if (this.#videoElements.hasOwnProperty(
+                        //         peerid)) this.#videoElements[peerid].getElementsByTagName("p")[0].innerText = username
+                        // })
                         // set up call
                         this.#myPeer.on("call", call => {
                             // listen to incoming streams
