@@ -120,6 +120,9 @@ io.on("connection", socket => {
                 socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
                 socket.on("disconnect", () => {
                     flushUploads(people, roomObj);
+                    if (connection_people !== undefined) {
+                        connected.set(roomObj.room, connection_people.filter(value => value !== roomObj.username))
+                    }
                     socket.to(roomObj.room).emit("user-disconnected", roomObj.username, roomObj.peer);
                 });
                 socket.emit("join-status", 200, "OK");
