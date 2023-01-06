@@ -1,11 +1,16 @@
 import { Presenter } from "./modules/presenter.mjs"
 import { Conference } from "./modules/conference.mjs";
 import { Chat } from "./modules/chat.mjs";
-import { getUserData, resetSessionId, getSessionId, getProfilePic } from "./modules/profile.mjs";
+import { resetSessionId, getSessionId, ProfileManager } from "./modules/profile.mjs";
 
 
 class ParticipantList {
     #participants = [];
+    #profileManager;
+
+    constructor(profileManager) {
+        this.#profileManager = profileManager;
+    }
 
     updateParticipants(participantsList) {
         if(!this.#participantsChanged(participantsList)){
@@ -14,11 +19,11 @@ class ParticipantList {
         }
     }
 
-    #buildUserObject() {
+    #formatParticipants() {
         const participants = []
 
         for(let username of this.#participants) {
-            const profilePic = getProfilePic(hostURL + "/media/profiles/" + username + "/profilePic.png")
+            const profilePic = this.#profileManager.getProfilePic(username);
             participants.push({username: username, profilePic: profilePic});
         }
         
@@ -27,7 +32,7 @@ class ParticipantList {
 
     #displayParticipants() {
         const compiledTemplate = Handlebars.compile(participantsTemplate.textContent);
-        const html = compiledTemplate(this.#buildUserObject());
+        const html = compiledTemplate(this.#formatParticipants());
         participantsContainer.innerHTML = html;
     }
 
@@ -56,15 +61,16 @@ const participantsContainer = document.getElementById("participants-container");
 const participantsTemplate = document.getElementById("participants-template");
 
 // Globals
-const participantList = new ParticipantList();
+const profileManager = new ProfileManager(hostURL);
+const participantList = new ParticipantList(profileManager);
 const presenter = new Presenter();
 const conference = new Conference(socket, presenter);
-const chat = new Chat(chatBox, hostURL, presenter);
+const chat = new Chat(chatBox, hostURL, presenter, profileManager);
 
 let login = true;
 
 // define as global because its also used in #joinRoom()
-let userObj = await getUserData(hostURL, getSessionId()) // how could this possibly go wrong
+let userObj = await profileManager.getUserData(getSessionId()) // how could this possibly go wrong
 
 // UI
 if (userObj === null)
