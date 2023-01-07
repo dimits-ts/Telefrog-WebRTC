@@ -56,7 +56,7 @@ export class ProfileManager {
     }
 
     #getProfileURL(username) {
-        return `${this.hostURL}/media/profiles/${username}/profilePic.png`;
+        return `${this.#hostURL}/media/profiles/${username}/profilePic.png`;
     }
 
     #getDataURL(sessionId) {
