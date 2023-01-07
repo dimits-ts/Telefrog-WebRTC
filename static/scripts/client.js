@@ -24,9 +24,10 @@ class ParticipantList {
      * @param {[obj]} participantsList a list containing the usernames of all current participants
      */
     updateParticipants(participantsList) {
-        if(!this.#participantsSame(participantsList)){
+        if (!this.#participantsSame(participantsList)) {
             this.#participants = participantsList;
             this.#displayParticipants();
+            this.#updateParticipantLabels();
         }
     }
 
@@ -37,12 +38,12 @@ class ParticipantList {
     #formatParticipants() {
         const participants = []
 
-        for(let username of this.#participants) {
+        for (let username of this.#participants) {
             const profilePic = this.#profileManager.getProfilePic(username);
-            participants.push({username: username, profilePic: profilePic});
+            participants.push({ username: username, profilePic: profilePic });
         }
-        
-        return {participants: participants}
+
+        return { participants: participants }
     }
 
     /**
@@ -61,8 +62,16 @@ class ParticipantList {
      */
     #participantsSame(newParticipants) {
         return Array.isArray(newParticipants) &&
-        newParticipants.length === this.#participants.length &&
-        newParticipants.every((val, index) => val === this.#participants[index]);
+            newParticipants.length === this.#participants.length &&
+            newParticipants.every((val, index) => val === this.#participants[index]);
+    }
+
+    #updateParticipantLabels() {
+        const labels = document.querySelectorAll(".stream-username-label");
+
+        for (let i = 0; i < labels.length; i++) {
+            labels[i].innerText = this.#participants[i];
+        }
     }
 }
 
@@ -180,12 +189,12 @@ function createRoom(e) {
  */
 async function getParticipants(roomId) {
     const res = await fetch(`${hostURL}/participants/${roomId}`);
-    if(res.ok) {
+    if (res.ok) {
         const participants = await res.json();
-        console.log(participants);
         participantList.updateParticipants(participants);
     }
 }
+
 
 // ========== CHAT HANDLERS ==========
 

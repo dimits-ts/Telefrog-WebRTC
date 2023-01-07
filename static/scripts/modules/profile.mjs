@@ -50,7 +50,7 @@ export class ProfileManager {
      */
     #urlExists(url) {
         let http = new XMLHttpRequest();
-        http.open('HEAD', url, false);
+        http.open('HEAD', url, false); // this should probably not be done in the main thread
         http.send();
         return http.status !== 404
     }
