@@ -4,7 +4,7 @@ import * as ht from "http";
 import s from "socket.io";
 import path from "path";
 import * as logging from "./logging";
-import {Message} from "./messages";
+import {Message} from "./model/messages";
 import {constructMessage, flushUploads, getNewMessages, getUniqueRoomId, storeMessage} from "./routes";
 import multer, {FileFilterCallback} from "multer";
 import {randomUUID} from "crypto";
@@ -25,6 +25,9 @@ const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
         if (req.path === "/user/update") {
+            if (!fs.existsSync(path.join(__dirname, `../uploads`))) {
+                fs.mkdirSync(path.join(__dirname, "../uploads"))
+            }
             if (!fs.existsSync(path.join(__dirname, `../uploads/profiles`))) {
                 fs.mkdirSync(path.join(__dirname, "../uploads/profiles"))
             }
