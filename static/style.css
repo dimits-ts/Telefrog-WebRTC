@@ -52,7 +52,7 @@ fieldset>legend {
 }
 
 /* Slightly shrink explanation text */
-fieldset>details{
+fieldset>details {
     font-size: 0.8rem;
 }
 
@@ -257,7 +257,7 @@ button>img {
  * Place the textbox in a differently colored container, with appropriate
  * space around it and some shadow.
  */
- .textbox {
+.textbox {
     font-family: Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     text-align: center;
     background-color: whitesmoke;
@@ -288,7 +288,7 @@ button>img {
 
 .error-label {
     display: none;
-    color:red;
+    color: red;
     font-size: 1.5em;
     text-align: center;
 }
@@ -298,7 +298,7 @@ button>img {
 }
 
 .hidden {
-    visibility: none;
+    display: none;
 }
 
 .username {

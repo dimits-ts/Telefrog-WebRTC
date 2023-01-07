@@ -236,7 +236,7 @@ async function logout() {
  * Called to expose the user to the login UI if he is NOT currently logged in.
  */
 function createStandardLoginContainer() {
-    standardLoginContainer.style.display = "visible";
+    standardLoginContainer.style.display = "block";
     loggedInContainer.style.display = "none";
 }
 
@@ -250,7 +250,7 @@ function createLoggedInContainer(username) {
     loggedInContainer.innerHTML = html;
 
     standardLoginContainer.style.display = "none";
-    loggedInContainer.style.display = "visible";
+    loggedInContainer.style.display = "flex";
 
     const signOutButton = document.getElementById("sign-out");
     signOutButton.onclick = logout;

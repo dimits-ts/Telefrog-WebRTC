@@ -30,6 +30,7 @@ const updateAuthContainer = document.getElementById("successful-auth");
 const updateButton = document.getElementById("update-button");
 const updateErrorLabel = document.getElementById("update-error-label");
 
+const spinner = document.getElementsByClassName("loader")[0];
 const profileManager = new ProfileManager(hostURL);
 
 
@@ -42,8 +43,10 @@ window.onload = async () => {
         }
 
         registerButton.onclick = async e => {
+            showLabel(spinner);
             e.preventDefault();
             await register();
+            hideLabel(spinner);
         }
     }
 
@@ -54,13 +57,17 @@ window.onload = async () => {
         }
 
         loginButton.onclick = async e => {
+            showLabel(spinner);
             e.preventDefault();
             await login();
+            hideLabel(spinner);
         }
     }
 
     if (updateButton !== null) {
+        showLabel(spinner);
         await displayProfile();
+        hideLabel(spinner);
     }
 }
 
