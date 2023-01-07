@@ -1,68 +1,114 @@
-﻿# Telefrog
+﻿# WebFrog RTC
 
-## Application Protocol
+## Οδηγίες Εγκατάστασης
+Ολο δικο σου ανασταση χδ
 
-### Create Room
+## Οδηγίες Χρήσης
 
-1. Client opens connection to server
-2. Client sends a create room request
-3. Server creates room
-4. Server sends room-id(randomly generated but unique)
-5. Client closes connection
+### Σύνδεση ως Guest
+Ο πιο απλός και γρήγορος τρόπος για σύνδεση στο WebFrog είναι με την σύνδεση χωρίς λογαριασμό. Εισάγετε ένα οποιοδήποτε όνομα στο `Sign in as guest` πεδίο και πατήστε το κουμπί `Create Room` έτσι ώστε να δεσμεύσετε δικό σας δωμάτιο. Πατήστε το κουμπί `Join Room` για να αρχίσετε μια κλήση. 
 
-### Join Room
+Εναλλακτικά μπορείτε να βάλετε στο πεδίο `Room ID` τον κωδικό ενός υπάρχοντος δωματιού για να μπείτε σε κλήση με έναν άλλον χρήστη.
 
-1. Client opens connection to server
-2. Client sends a join room request with the room-id.
-3. Open video stream
-4. When the client wants to exit the call, they send a terminate session request and if there are no more participants
-   the room is deleted.
+### Σύνδεση με λογαριασμό
+Το WebFrog υποστηρίζει την δημιουργία και μόνιμη αποθήκευση λογαριασμών χρήστη. Για να δημιουργήσετε λογαρισμό πατήστε τον σύνδεσμο `Sign up` της κεντρικής σελίδας και συμπληρώστε την φόρμα. Εφόσον τα δεδομένα που υποβάλλατε είναι σωστά θα ανακατευθυνθείτε στην κεντρική σελίδα συνδεδεμένοι ως νέος χρήστης.
 
-### Chat-box
+Από αυτό το σημείο μπορείτε ανα πάσα στιγμή να συνδεθείτε στον ίδιο λογαριασμό μέσω του συνδέσμου `Log in your Telefrog Account`. Μπορείτε επίσης να αλλάξετε (μερικά) στοιχεία του λογαριασμού σας όπως το `About me` και την εικόνα του λογαριασμού σας. Οι αλλαγές σας είναι μόνιμες *ακόμα και μετά το κλείσιμο του server*.
 
-1. On a given interval the client send a refresh chatbox request with the room-id to see if any text/image/file was
-   sent.(see convention a)
-2. When client wants to send a message request with the room-id, username, message type, content.
-3. Server buffers the message, issuing a message id
-4. When a refresh chat-box request is issued the client sends the id of the last message they received.
-5. The server sequentially sends the messages in the order they were in the stack, until the id is found.
+Για να συνδεθείτε ως εγγεγραμένος χρήστης ακολουθήστε την παραπάνω διαδικασία για Sign-in/Sign-up, και τα ίδια βήματα με την Σύνδεση ως Guest. 
 
-## Conventions
-
-- get /room/create: no input - {room_id: ...}
+Η σύνοδος ενός χρήστη (session) μένει ενεργή όσο αυτός βρίσκεται στην ίδια καρτέλα ή σε καρτέλα που έχει αντιγραφεί (duplicated) από οποιαδήποτε άλλη καρτέλα με ενεργή σύνοδο. Αυτό ισχύει έτσι ώστε να μπορεί να γίνει χρήση ενός browser για κλήσεις με διαφορετικούς χρήστες.
 
 
-- get /room/join?room=...?user-name=... -> status code
+## Ομάδα Ανάπτυξης
+
+### Πασχαλίδης Αναστάσιος
+Back-end: Server-side services, Permanent storage, Cyber security <οτι αλλο εχω ξεχασει>
+
+### Τσίρμπας Δημήτριος
+Front-end: HTML/CSS, Client-side scripts, Web RTC, Media servers
 
 
-- get /room/exit ????? -> status code
+## Τεκμηρίωση λογισμικού
+
+### Server-side Services
+
+#### Room Service - RS
+Διαχειρίζεται την δημιουργία και την σύνδεση χρηστών σε δωμάτια.
+
+- `GET/room/create` : Δημιουργεί καινούριο δωμάτιο και επιστρέφει μοναδικό ID που αντιστοιχεί σε αυτό.
+
+- `GET /room/join?:room?:user-name`: Συνδέει έναν χρήστη στο δωμάτιο.
+
+io shit goes here
+
+#### Chat Service - CS
+Υλοποιεί εξ'ολοκλήρου την διαχείριση, αποθήκευση και αποστολή μηνυμάτων για κάθε δωμάτιο. Υποστηρίζει 3 κύριες εντολές:
+
+- `GET /chat-box/refresh?:roomId&:lastMessage`: Επιστρέφει καινούρια μηνύματα από όλους τους χρήστες του δωματίου μετά από το τελευταίο ληφθέν μήνυμα (lastMessage).
+
+- `POST /chat-box/message/new {roomId,username, messageType,content,title?}`: Αποθηκεύει ένα καινούριο μήνυμα στην συνομιλία .
+
+- `GET /media/:roomId/:contents`: Λήψη αρχείου που έχει ανεβεί στην συνομιλία. Η παράμετρος `:contents` αντιστοιχεί σε ID αρχείου που έχει στείλει ο server μέσω της λειτρουργείας refresh.
+
+#### Login Service  – LS
+Διαχειρίζεται την δημιουργία, εγγραφή και αλλαγή στοιχείων λογαριασμών. Αποτελείται απο 6 εντολές: 
+
+- ` POST /user {username, pass, email}`: Δημιουργεί ένα καινούριο λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο χρησιμοποιείται για ταυτοποίηση.
+
+- `POST /user/update {sessionId, email, profilePic, aboutMe}`: Αλλάζει τα στοιχεία ενός λογαριασμού.
+
+- `POST /user/login {username,pass}`: Σύνδεση σε υπάρχων λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο χρησιμοποιείται για ταυτοποίηση.
+
+- `POST /user/logout {sessionId}`: Ακυρώνει την τρέχουσα σύνοδο.
+
+- `GET /user/:sessionId`: Επιστρέφει τα στοιχεία του χρήστη. Χρησιμοποιεί ταυτοποίηση με session ID ώστε μόνο ο χρήστης να έχει πρόσβαση σε αυτά.
+
+- `GET /media/profiles/:username/profilePic.png`: Επιστρέφει την εικόνα του λογαριασμού ενός χρήστη.
 
 
-- get /chat-box/refresh?roomId=...&lastMessage=... ->[{username:...,messageId:..., messageType:...,content:...}] empty
-  list if no new messages.
+### Client Scripts
+Ο client-side κώδικας χωρίζεται σε 2 κύριες λειτουργίες, την διαχείριση κλήσης και την διαχείριση λογαριασμού. Οι δύο αυτές λειτουργίες αντιστοιχούν στα δύο κύρια αρχεία κώδικα `client.js` και `authentication.js`. 
+
+Τα αρχεία αυτά χρησιμοποιούν εκτενώς λειτουργίες από 4 αρχεία modules, τα οποία είτε εκτελούν μια ανεξάρτητη και πολύπλοκη διαδικασία είτε περιέχουν κοινά τμήματα κώδικα. Τα modules είναι τα `conference.mjs`, `chat.mjs`, `profile.mjs` και `presenter.mjs`.
+
+Πλήρης τεκμηρίωση και λεπτομέρειες υλοποιήσης μπορούν να βρεθούν στον πηγαίο κώδικα με τη μορφή Jdoc και σχολίων.
+
+#### Διαχείριση κλήσης
+Η διαχείριση κλήσης υλοποιέιται από το αρχείο `client.js`. Πιο συγκεκριμένα, το αρχείο ελέγχει την σελίδα `index.html` και είναι υπεύθυνο για τη:
+ - σύνδεση του χρήστη με ένα δωμάτιο
+ - εμφάνιση των video streams
+ - εποπτεία και εμφάνιση της λίστας συμμετοχόντων 
+ - εμφάνιση του chat box και όλων των μηνυμάτων
+ - αποστολή μηνυμάτων προς το chat
+ 
+ #### Διαχείριση λογαριασμού
+ Η διαχείριση λογαριασμού υλοποιέιται από το αρχείο `authentication.js`. Το αρχείο διαχειρίζεται τις σελίδες `login.html`, `signup.html` και `profile.html` τα οποία υλοποιούν την σύνδεση, εγγραφή και αλλαγή στοιχείων του λογαριασμού αντίστοιχα.
+
+#### Modules
+ Επιγραμματικά αναφέρουμε την χρήση των αρχείων modules:
+ - `chat.mjs`: Υλοποιεί την λήψη, εμφάνιση και αποστολή μηνυμάτων στο chat
+ - `conference.mjs`: Επικοινωνεί με τον server και τους αντίστοιχους media servers έτσι ώστε να λάβει και να αποστείλει video streams
+ - `presenter.mjs`: Διαχειρίζεται τα πιο πολύπλοκα τμήματα δημιουργίας HTML elements για το περιβάλλον της κλήσης
+ - `profile.mjs`: Λειτουργεί ως διαμεσολαβητής μεταξύ της εφαρμογής και του server για την λήψη και επεξεργασία δεδομένων χρήστη
 
 
-- post /chat-box/message/new {roomId:...,username:..., messageType:...,content:...,title?:...} -> status code
+## Λογισμικό που χρησιμοποιήθηκε
 
+- [PeerJs](https://peerjs.com/) Media server για αποστολή streams peer-to-peer με χρήση του Web RTC
+- [Handlebars](https://handlebarsjs.com/) JS βιβλιοθήκη για δυναμική παραγωγή HTML κώδικα
+- [SocketIO](https://socket.io/) JS βιβλιοθήκη για γρήγορη, ad-hoc, event-driven επικοινωνία με τον server
 
-- get multimedia by href=":url/media/:roomId/:contents" (with : are placeholders )
+## Πηγές Πληροφόρησης
+- [PeerJS documentation](https://peerjs.com/docs/#api)
+- [Handlebars User Guide](https://handlebarsjs.com/guide/)
+- [SocketIO documentation](https://socket.io/docs/v4/)
+- [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+- [MDN Web Docs](https://developer.mozilla.org/en-US/)
+- [Τεχνολογίες και Προγραμματισμός Εφαρμογών στον Ιστό - Διαφάνιες ΟΠΑ](https://eclass.aueb.gr/courses/INF384/)
+- [Video: How To Create A Video Chat App With WebRTC](https://www.youtube.com/watch?v=DvlyzDZDEq4)
+- backend shit goes here
 
-
-- post /user{username=...,pass:...email:...}->status code
-
-
-- post /user/update{sessionId:...email:...,profilePic:...,aboutMe:...}->status code
-
-
-- post /user/login{username=...,pass:...}->{sessionId:...}
-
-- post /user/logout{sessionId}
-
-
-- get /user/:sessionId->{username,password,email,profilePic,aboutMe}
-
-- profilePic href=/media/profiles/:username/profilePic.png
-
-
-- Video Conference: with WebRTC we have the tutorial for one on one so the challenge is to adjust it to more pc.
+## Ανάπτυξη και Προβλήματα
+αυτο θα το κανουμε μαζι (με κανα μπουκαλι βοτκα hopefully :))
 
