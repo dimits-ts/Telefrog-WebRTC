@@ -172,7 +172,7 @@ function createEmptyProfilePage() {
  * @param {obj} userObj the profile's details
  */
 function createProfilePage(userObj) {
-    const profilePic = getProfilePic(`${hostURL}/media/profiles/${userObj.username}/profilePic.png`);
+    const profilePic = profileManager.getProfilePic(userObj.username);
     profilePicture.src = profilePic;
     console.log(profilePic);
     usernameLabel.innerText = userObj.username;
