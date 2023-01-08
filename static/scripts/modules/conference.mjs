@@ -58,7 +58,7 @@ export class Conference {
 
             const streamElement = document.getElementById(id);
 
-            if (streamElement !== undefined) {
+            if (streamElement !== null) {
                 streamElement.remove();
                 this.#userDisconnected(id);
             }
@@ -133,7 +133,7 @@ export class Conference {
      */
     #connectToNewUser(username, peerId, stream) {
         let streamElement
-        console.log(`Attempt to call user ${peerId}`);
+        console.log(`Attempt to call user with peer ID ${peerId}`);
         const call = this.#myPeer.call(peerId, stream);
 
         call.on("stream", userVideoStream => {
@@ -142,6 +142,7 @@ export class Conference {
             // ignore redundant 2nd call
             if (streamElement === undefined) {
                 streamElement = this.#addVideoStream(username, userVideoStream);
+                streamElement.id = call.peer;
             }
 
         });

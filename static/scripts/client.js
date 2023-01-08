@@ -84,7 +84,7 @@ class ParticipantList {
 // Configurations
 const hostURL = "http://localhost:8080"
 const CHAT_REFRESH_MS = 500;
-const PARTICIPANT_REFRESH_MS = 200;
+const PARTICIPANT_REFRESH_MS = 400;
 const socket = io(hostURL);
 
 // Elements
