@@ -1,0 +1,4 @@
+[INFORMATION]- 08/01/23 15:57:05:Server initialization at port 8080
+[CRITICAL]- 08/01/23 15:57:05:ENOENT: no such file or directory, scandir 'C:\Users\artem\Desktop\anastasis-temp\Telefrog-WebRTC\uploads'
+[INFORMATION]- 08/01/23 15:57:05:cleaned the upload folder
+[CRITICAL]- 08/01/23 15:57:17:Session id is not valid.
