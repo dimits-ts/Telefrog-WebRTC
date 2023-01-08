@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>TeleFrog WebRTC</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="resources/frog.ico">
+
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="https://cdn.socket.io/4.5.3/socket.io.min.js"
+        integrity="sha384-WPFUvHkB1aHA5TDSZi6xtDgkF0wXJcIIxXhC6h8OT8EH3fC5PWro5pWJ1THjcfEi"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js" async defer></script>
+    <script type="module" src="scripts/client.js" defer></script>
+
+    <script id="chat-template" type="text/x-handlebars-template">
+        <div class="chat-message-container">
+            <div class="message-header">
+                <img src="{{profilePic}}" alt="profile picture">
+
+                <div>
+                    {{#if isSelf}}
+                        <h5 class="chat-username-label chat-own-username-label">{{username}}</h5>
+                    {{else}}
+                        <h5 class="chat-username-label" >{{username}}</h5>
+                    {{/if}}
+                <p class="timestamp">{{timestamp}}</p>
+                </div>
+            </div>
+
+            <!-- Display contents-->
+            {{#ifEq type "Text"}}
+                <p>{{content}}</p>
+            {{/ifEq}}
+
+            {{#ifEq type "Link"}}
+                <a href="{{content}}" target="_blank">{{content}}</a>
+            {{/ifEq}}
+
+            {{#ifEq type "Image"}}
+                <img src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}"></img>
+            {{/ifEq}}
+
+            {{#ifEq type "Video"}}
+                <video src="{{hostURL}}/media/{{roomId}}/{{content}}" alt="{{fileName}}" controls></img>
+            {{/ifEq}}
+                
+            {{#ifEq type "File"}}
+                <div class="file-preview">
+                    <img src="resources/file_icon.png" alt="file">
+                    <p>{{fileName}}</p>
+                    <button onclick="window.open('{{hostURL}}/media/{{roomId}}/{{content}}', '_blank')">
+                        Open File
+                    </button>
+                </div>
+            {{/ifEq}}
+        </div>
+    </script>
+
+    <script id="profile-template" type="text/x-handlebars-template">
+        <h2>Logged in as <p class="username">{{username}}</p></h2>
+        <a href="profile.html">My Account</a>
+        <a href="login.html">Switch accounts</a>
+        <a href="signup.html">Create a new account</a>
+        <a href="index.html" id="sign-out">Sign out</a>
+    </script>
+
+    <script id="participants-template" type="text/x-handlebars-template">
+        <h3>Participants:</h3>
+        <section id="participants-list">
+            {{#each participants}}
+            <span>
+                <img src="{{profilePic}}" alt="profile picture">
+                <p>{{username}}</p>
+            </span>
+        {{/each}}
+        </section>
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <a href="index.html"> <img src="resources/frog.PNG" alt="frogge"></a>
+        <h1>TeleFrog Conferencing</h1>
+    </header>
+
+    <main>
+        <article id="login">
+
+            <article class="textbox">
+                <section id="logged-in" class="hidden">
+                    <!-- profile-template content-->
+                </section>
+
+                <section id="standard-login" class="hidden">
+                    <h2><a href="login.html">Log in your Telefrog Account</a></h2>
+                    <p>or</p>
+                    <h2><a href="signup.html">Sign up Today</a></h2>
+                    <p>or</p>
+                    <h2>Sign in as a guest</h2>
+                    <label for="username_input">Username:</label>
+                    <input type="text" id="username_input" name="username">
+                </section>
+            </article>
+
+            <fieldset>
+                <legend>
+                    Login
+                </legend>
+
+                <label for="room_input">Room ID:</label>
+                <input type="text" id="room_input" name="room_ID">
+
+                <p id="errorMessage"></p>
+            </fieldset>
+
+            <div id="button-group">
+                <button class="text-button" id="create_room_button">
+                    <h3>Create a Room</h3>
+                </button>
+                <button class="text-button" id="join_room_button">
+                    <h3>Join the Room</h3>
+                </button>
+            </div>
+        </article>
+
+        <article id="videoPanel">
+            <h3>To be released seek the frog above ↑</h3>
+            <h2 id="roomBanner"></h2>
+            <section id="participants-container"></section>
+
+            <div id="videoMain">
+                <section id="videoStreams">
+
+                </section>
+
+                
+
+                <section id="chatArea">
+                    <div id="chat-box">
+                        <div id="chat-display"></div>
+                    </div>
+                    <div id="text-input-area">
+                        <input type="text" id="chat-input">
+                        <button id="sendMessage" title="Send the message">
+                            <img src="resources/send_icon.png" alt="send">
+                        </button>
+                    </div>
+
+                    <div id="file-controls">
+                        <div id="send-file-button" title="Send a File">
+                            <img src="resources/file_icon.png" alt="send file">
+                            <input type="file" id="file-input" name="file_uploads" multiple>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </article>
+    </main>
+</body>
+
+</html>

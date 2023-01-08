@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        My Profile
+    </title>
+    <meta content="shop, e-shop, meteorology, hardware, home, nature" name="keywords" />
+    <meta content="The homepage of the Faymetrics store." name="description" />
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <link rel="icon" type="image/x-icon" href="resources/frog.ico">
+    <link href="style.css" rel="stylesheet" />
+    <script type="module" src="scripts/authentication.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <a href="index.html"><img src="resources/frog.PNG" alt="frogge"></a>
+        <h1>TeleFrog Conferencing</h1>
+    </header>
+
+    <main>
+        <article id="failed-auth" class="textbox hidden">
+
+            <h2>It looks like your session has expired.</h2>
+            <p> Please <a href="login.html">Log in</a> or <a href="signup.html">Sign up</a> to continue.</p>
+
+        </article>
+
+        <article id="successful-auth" class="textbox hidden">
+            <h1>
+                Update your Account Details
+            </h1>
+
+            <h3 id="profile-username"></h3>
+            <img id="profile-picture" src="resources/profile_icon.png" alt="profile picture">
+
+            <form>
+                <fieldset>
+                    <label for="update-email">
+                        Email:
+                    </label>
+                    <!--Email inputs automatically check for correct regex-->
+                    <input autocomplete="email" id="update-email" name="email" placeholder="example@gmail.com"
+                        title="Personal Email" type="email"" />
+
+                    <label for="update-about-me">
+                        About Me:
+                    </label>
+                    <!--Email inputs automatically check for correct regex-->
+                    <textarea id="update-about-me" name="aboutMe" rows="4" cols="50" ></textarea>
+
+                    <label for="update-profile-pic">
+                        Profile Picture:
+                    </label>
+                    <input id="update-profile-pic" name="profilePic" type="file" accept="image/*">
+
+                    <button id="update-button" class="text-button" type="submit">
+                        Update
+                    </button>
+
+                    <p id="update-error-label" class="hidden error-label"></p>
+
+                </fieldset>
+            </form>
+
+            <div class="loader hidden">
+                <img src="resources/spinner.gif" alt="loading">
+                <h3>Please wait...</h3>
+            </div>
+            
+        </article>
+    </main>
+
+</body>
+
+</html>
