@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
             let session = req.body.sessionId;
             if (sessions.has(session)) {
                 let username = sessions.get(session);
-                console.log(username)
+        
                 if (username !== undefined) {
                     let paths = path.join(__dirname, `../uploads/profiles/${username}/`)
                     if (!fs.existsSync(paths))
@@ -123,6 +123,8 @@ io.on("connection", socket => {
                 socket.to(roomObj.room).emit("user-connected", roomObj.username, roomObj.peer);
                 socket.on("disconnect", () => {
                     flushUploads(people, roomObj);
+                    log.i(`User ${roomObj.peer}-${roomObj.username} disconnect`)
+                    let connection_people = connected.get(roomObj.room);
                     if (connection_people !== undefined) {
                         connected.set(roomObj.room, connection_people.filter(value => value !== roomObj.username))
                     }
@@ -201,7 +203,7 @@ app.post("/user/update", upload.single("profilePic"), async (req: Request, res: 
     log.i(`Request to register user with id ${req.body.username}`);
     try {
         let session = req.body.sessionId;
-        console.log(req.body)
+
         if (sessions.has(session)) {
             const username = sessions.get(session);
             let exists: number = 0;
