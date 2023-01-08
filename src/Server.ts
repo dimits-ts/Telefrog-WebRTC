@@ -24,10 +24,10 @@ const io = new s.Server(http, {
 const sessions: Map<string, string> = new Map<string, string>();
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb) {
+        if (!fs.existsSync(path.join(__dirname, `../uploads`))) {
+            fs.mkdirSync(path.join(__dirname, "../uploads"))
+        }
         if (req.path === "/user/update") {
-            if (!fs.existsSync(path.join(__dirname, `../uploads`))) {
-                fs.mkdirSync(path.join(__dirname, "../uploads"))
-            }
             if (!fs.existsSync(path.join(__dirname, `../uploads/profiles`))) {
                 fs.mkdirSync(path.join(__dirname, "../uploads/profiles"))
             }
