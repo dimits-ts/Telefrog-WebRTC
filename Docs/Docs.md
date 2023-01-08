@@ -1,68 +1,225 @@
-﻿# Telefrog
+﻿# WebFrog RTC
 
-## Application Protocol
+## Οδηγίες Εγκατάστασης
 
-### Create Room
+### Προαπαιτούμενα
 
-1. Client opens connection to server
-2. Client sends a create room request
-3. Server creates room
-4. Server sends room-id(randomly generated but unique)
-5. Client closes connection
+Ο κώδικας δομήθηκε μέσω του περιβάλλοντος Nodejs χρησιμοποιώντας το εργαλείο npm. Για την εκτέλεση του προγράμματος και
+τα δυο εργαλεία είναι απαραίτητα.
+Εδώ παρέχεται link για την εγκατάσταση και των δυο [Nodejs](https://nodejs.org/en/download/).
 
-### Join Room
+### Λήψη
 
-1. Client opens connection to server
-2. Client sends a join room request with the room-id.
-3. Open video stream
-4. When the client wants to exit the call, they send a terminate session request and if there are no more participants
-   the room is deleted.
+Η λήψη του κώδικα μπορεί να γίνει με ένα απλό git clone από το repository του project ή με μια απλή εξαγωγή αν ο κώδικας
+έχει αναρτηθεί με τη μορφή zip.
 
-### Chat-box
+## Πρώτη λειτουργία
 
-1. On a given interval the client send a refresh chatbox request with the room-id to see if any text/image/file was
-   sent.(see convention a)
-2. When client wants to send a message request with the room-id, username, message type, content.
-3. Server buffers the message, issuing a message id
-4. When a refresh chat-box request is issued the client sends the id of the last message they received.
-5. The server sequentially sends the messages in the order they were in the stack, until the id is found.
+Έχοντας τον κώδικα πρώτα πρέπει να εγκαταστήσουμε τα dependencies του project ανοίγοντας ένα τερματικό στον φάκελο και
+τρέχοντας την εντολή `npm --install`. Στη συνέχεια σε περίπτωση που θέλετε να επαναλάβετε το build του κώδικα μπορείτε
+να εκτελέσετε στο τερματικό την εντολή `npm run build`.
 
-## Conventions
+H εκτέλεση στη συνέχεια χωρίζεται σε δυο μέρη:
 
-- get /room/create: no input - {room_id: ...}
+- Την εκκίνηση του Peer Server με την εντολή `npm run peer`.
 
+- Την εκκίνηση του Server με την εντολή `npm start`.
 
-- get /room/join?room=...?user-name=... -> status code
+## Οδηγίες Χρήσης
 
+### Σύνδεση ως Guest
 
-- get /room/exit ????? -> status code
+Ο πιο απλός και γρήγορος τρόπος για σύνδεση στο WebFrog είναι με τη σύνδεση χωρίς λογαριασμό. Εισάγετε ένα οποιοδήποτε
+όνομα στο `Sign in as guest` πεδίο και πατήστε το κουμπί `Create Room` έτσι ώστε να δεσμεύσετε δικό σας δωμάτιο. Πατήστε
+το κουμπί `Join Room` για να αρχίσετε μια κλήση.
 
+Εναλλακτικά μπορείτε να βάλετε στο πεδίο `Room ID` τον κωδικό ενός υπάρχοντος δωματίου για να μπείτε σε κλήση με έναν
+άλλον χρήστη.
 
-- get /chat-box/refresh?roomId=...&lastMessage=... ->[{username:...,messageId:..., messageType:...,content:...}] empty
-  list if no new messages.
+### Σύνδεση με λογαριασμό
 
+Το WebFrog υποστηρίζει τη δημιουργία και μόνιμη αποθήκευση λογαριασμών χρήστη. Για να δημιουργήσετε λογαριασμό πατήστε
+τον σύνδεσμο `Sign up` της κεντρικής σελίδας και συμπληρώστε τη φόρμα. Εφόσον τα δεδομένα που υποβάλλατε είναι σωστά θα
+ανακατευθυνθείτε στην κεντρική σελίδα συνδεδεμένοι ως νέος χρήστης.
 
-- post /chat-box/message/new {roomId:...,username:..., messageType:...,content:...,title?:...} -> status code
+Από αυτό το σημείο μπορείτε ανα πάσα στιγμή να συνδεθείτε στον ίδιο λογαριασμό μέσω του
+συνδέσμου `Log in your Telefrog Account`. Μπορείτε επίσης να αλλάξετε (μερικά) στοιχεία του λογαριασμού σας όπως
+το `About me` και την εικόνα του λογαριασμού σας. Οι αλλαγές σας είναι μόνιμες *ακόμα και μετά το κλείσιμο του server*.
 
+Για να συνδεθείτε ως εγγεγραμμένος χρήστης ακολουθήστε την παραπάνω διαδικασία για Sign-in/Sign-up, και τα ίδια βήματα
+με
+τη Σύνδεση ως Guest.
 
-- get multimedia by href=":url/media/:roomId/:contents" (with : are placeholders )
+Η σύνοδος ενός χρήστη (session) μένει ενεργή όσο αυτός βρίσκεται στην ίδια καρτέλα ή σε καρτέλα που έχει αντιγραφεί
+(duplicated) από οποιαδήποτε άλλη καρτέλα με ενεργή σύνοδο. Αυτό ισχύει έτσι ώστε να μπορεί να γίνει χρήση ενός browser
+για κλήσεις με διαφορετικούς χρήστες.
 
+## Ομάδα Ανάπτυξης
 
-- post /user{username=...,pass:...email:...}->status code
+### Πασχαλίδης Αναστάσιος
 
+Back-end: Server-side services, Permanent storage, Cyber-security
 
-- post /user/update{sessionId:...email:...,profilePic:...,aboutMe:...}->status code
+### Τσίρμπας Δημήτριος
 
+Front-end: HTML/CSS, Client-side scripts, Web RTC, Media servers
 
-- post /user/login{username=...,pass:...}->{sessionId:...}
+## Τεκμηρίωση λογισμικού
 
-- post /user/logout{sessionId}
+### Server-side Services
 
+#### Room Service - RS
 
-- get /user/:sessionId->{username,password,email,profilePic,aboutMe}
+Διαχειρίζεται τη δημιουργία και τη σύνδεση χρηστών σε δωμάτια.
 
-- profilePic href=/media/profiles/:username/profilePic.png
+- `GET/room/create` : Δημιουργεί καινούριο δωμάτιο και επιστρέφει μοναδικό ID που αντιστοιχεί σε αυτό.
 
+- `GET /room/join?:room?:user-name`: Συνδέει έναν χρήστη στο δωμάτιο.
 
-- Video Conference: with WebRTC we have the tutorial for one on one so the challenge is to adjust it to more pc.
+Κάθε χρήστης κατά την είσοδο του σε ένα δωμάτιο στέλνει στον server ένα TCP μήνυμα για τις προθέσεις του, το οποίο ο
+δεύτερος με τη σειρά του προωθεί σε όλους τους συμμετέχοντες του δωματίου, αν υπάρχουν. Αν μπορεί να συνδεθεί στο
+συγκεκριμένο δωμάτιο ενημερώνεται με ένα status code και όλοι οι χρήστες που υπάρχουν στο δωμάτιο ενημερωμένοι πια με
+τα στοιχεία του νέου συμμετέχοντα, μεμονωμένα προσπαθούν να επικοινωνήσουν με το νέο χρήστη με σκοπό να ανταλλάξουν ροές
+βίντεο και ήχου. Αυτό το κομμάτι λειτουργικότητας γίνεται χρησιμοποιώντας το Socket.io αντί για express api calls.
 
+#### Chat Service - CS
+
+Υλοποιεί εξ'ολοκλήρου τη διαχείριση, αποθήκευση και αποστολή μηνυμάτων για κάθε δωμάτιο. Υποστηρίζει 3 κύριες εντολές:
+
+- `GET /chat-box/refresh?:roomId&:lastMessage`: Επιστρέφει καινούρια μηνύματα από όλους τους χρήστες του δωματίου μετά
+  από το τελευταίο ληφθέν μήνυμα (lastMessage).
+
+- `POST /chat-box/message/new {roomId,username, messageType,content,title?}`: Αποθηκεύει ένα καινούριο μήνυμα στη
+  συνομιλία.
+
+- `GET /media/:roomId/:contents`: Λήψη αρχείου που έχει ανεβεί στη συνομιλία. Η παράμετρος `:contents` αντιστοιχεί σε
+  ID αρχείου που έχει στείλει ο server μέσω της λειτουργίας refresh.
+
+#### Login Service – LS
+
+Διαχειρίζεται τη δημιουργία, εγγραφή και αλλαγή στοιχείων λογαριασμών. Αποτελείται απο 6 εντολές:
+
+- ` POST /user {username, pass, email}`: Δημιουργεί ένα καινούριο λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο
+  χρησιμοποιείται για ταυτοποίηση.
+
+- `POST /user/update {sessionId, email, profilePic, aboutMe}`: Αλλάζει τα στοιχεία ενός λογαριασμού.
+
+- `POST /user/login {username,pass}`: Σύνδεση σε υπάρχων λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο
+  χρησιμοποιείται για ταυτοποίηση.
+
+- `POST /user/logout {sessionId}`: Ακυρώνει την τρέχουσα σύνοδο.
+
+- `GET /user/:sessionId`: Επιστρέφει τα στοιχεία του χρήστη. Χρησιμοποιεί ταυτοποίηση με session ID ώστε μόνο ο χρήστης
+  να έχει πρόσβαση σε αυτά.
+
+- `GET /media/profiles/:username/profilePic.png`: Επιστρέφει την εικόνα του λογαριασμού ενός χρήστη.
+
+### Client Scripts
+
+Ο client-side κώδικας χωρίζεται σε 2 κύριες λειτουργίες, τη διαχείριση κλήσης και τη διαχείριση λογαριασμού. Οι δύο
+αυτές λειτουργίες αντιστοιχούν στα δύο κύρια αρχεία κώδικα `client.js` και `authentication.js`.
+
+Τα αρχεία αυτά χρησιμοποιούν εκτενώς λειτουργίες από 4 αρχεία modules, τα οποία είτε εκτελούν μια ανεξάρτητη και
+πολύπλοκη διαδικασία είτε περιέχουν κοινά τμήματα κώδικα. Τα modules είναι
+τα `conference.mjs`, `chat.mjs`, `profile.mjs` και `presenter.mjs`.
+
+Πλήρης τεκμηρίωση και λεπτομέρειες υλοποίησης μπορούν να βρεθούν στον πηγαίο κώδικα με τη μορφή Jsdoc και σχολίων.
+
+#### Διαχείριση κλήσης
+
+Η διαχείριση κλήσης υλοποιείται από το αρχείο `client.js`. Πιο συγκεκριμένα, το αρχείο ελέγχει την σελίδα `index.html`
+και είναι υπεύθυνο για τη:
+
+- σύνδεση του χρήστη με ένα δωμάτιο
+- εμφάνιση των video streams
+- εποπτεία και εμφάνιση της λίστας συμμετεχόντων
+- εμφάνιση του chat box και όλων των μηνυμάτων
+- αποστολή μηνυμάτων προς το chat
+
+#### Διαχείριση λογαριασμού
+
+Η διαχείριση λογαριασμού υλοποιείται από το αρχείο `authentication.js`. Το αρχείο διαχειρίζεται τις
+σελίδες `login.html`, `signup.html` και `profile.html` τα οποία υλοποιούν τη σύνδεση, εγγραφή και αλλαγή στοιχείων του
+λογαριασμού αντίστοιχα.
+
+#### Modules
+
+Επιγραμματικά αναφέρουμε τη χρήση των αρχείων modules:
+
+- `chat.mjs`: Υλοποιεί τη λήψη, εμφάνιση και αποστολή μηνυμάτων στο chat
+- `conference.mjs`: Επικοινωνεί με τον server και τους αντίστοιχους media servers έτσι ώστε να λάβει και να αποστείλει
+  video streams
+- `presenter.mjs`: Διαχειρίζεται τα πιο πολύπλοκα τμήματα δημιουργίας HTML elements για το περιβάλλον της κλήσης
+- `profile.mjs`: Λειτουργεί ως διαμεσολαβητής μεταξύ της εφαρμογής και του server για τη λήψη και επεξεργασία δεδομένων
+  χρήστη
+
+### Backend Structure
+
+To Backend έχει δομηθεί χρησιμοποιώντας το `expressjs` framework. Συγκεκριμένα όλα τα Api call handles έχουν οριστεί στο
+αρχείο `Server.ts` που βρίσκεται στον φάκελο src.
+
+#### Modules:
+
+Επιγραμματικά αναφέρουμε τη χρήση των αρχείων modules:
+
+- `routes`: Υλοποιεί απλές βοηθητικές συναρτήσεις για την πιο καθαρή εξυπηρέτηση ερωτημάτων.
+- `mongussy`: Υλοποιεί όλες τις συνδέσεις με τη βάση δεδομένων.
+- `logging`: Logger capabilities
+- `router.test`: Αρχείο ελέγχων. Μπορείτε να το τρέξετε με τη χρήση της εντολής `npm run test`
+- Στον υπο-φάκελο `models`:
+
+    - `messages`: λοιποί τύποι δεδομένων που χρησιμοποιούνται για τη διαχείριση μηνυμάτων.
+    - `User`: Τύπος δεδομένων για την αναπαράσταση και διαχείριση δεδομένων χρηστών.
+
+## Λογισμικό που χρησιμοποιήθηκε
+
+_(Η εργασία δομήθηκε με τη χρήση της Typescript)_
+
+- [PeerJs](https://peerjs.com/) Media server για αποστολή streams peer-to-peer με χρήση του Web RTC.
+- [Handlebars](https://handlebarsjs.com/) JS βιβλιοθήκη για δυναμική παραγωγή HTML κώδικα.
+- [SocketIO](https://socket.io/) JS βιβλιοθήκη για γρήγορη, ad-hoc, event-driven επικοινωνία με τον server.
+- [Nodejs](https://nodejs.org/en/) Το περιβάλλον που χρησιμοποιήθηκε για τη δημιουργία του backend.
+- [Expressjs](https://expressjs.com) Το framework με το οποίο δομήθηκε ο διακομιστής.
+- [Multer](https://www.npmjs.com/package/multer) Το middleware που χρησιμοποιήθηκε για τη διαχείριση του μόνιμου
+  αποθηκευτικού χώρου.
+- [Jest](https://jestjs.io) Πακέτο παραγωγής αυτοματοποιημένου Testing.
+- [Mongodb](https://www.mongodb.com) Βάση δεδομένων για τη διαχείριση δεδομένων σύνδεσης.
+- [CryptoJS](https://cryptojs.gitbook.io) Framework για την υλοποίηση at rest κωδικοποίησης.
+- [Postman](https://www.postman.com) Εργαλείο για τον έλεγχο http request.
+
+## Πηγές Πληροφόρησης
+
+- [PeerJS documentation](https://peerjs.com/docs/#api)
+- [Handlebars User Guide](https://handlebarsjs.com/guide/)
+- [SocketIO documentation](https://socket.io/docs/v4/)
+- [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+- [MDN Web Docs](https://developer.mozilla.org/en-US/)
+- [Τεχνολογίες και Προγραμματισμός Εφαρμογών στον Ιστό - Διαφάνειες ΟΠΑ](https://eclass.aueb.gr/courses/INF384/)
+- [Video: How To Create A Video Chat App With WebRTC](https://www.youtube.com/watch?v=DvlyzDZDEq4)
+- [Express Api Reference](https://expressjs.com/en/4x/api.html)
+- [Multer Documentation](https://www.npmjs.com/package/multer)
+- [CryptoJS](https://cryptojs.gitbook.io/docs/)
+- [Jest - Getting started](https://jestjs.io/docs/getting-started)
+- [Mongodb - Nodejs - Getting started](https://www.mongodb.com/docs/drivers/node/current/)
+
+## Ανάπτυξη και Προβλήματα
+
+- Το πρώτο και πιο βασικό πρόβλημα που αντιμετωπίσαμε ήταν η αρχική επικοινωνία και ανταλλαγή πολυμεσικών ροών, λόγω
+  έλλειψης εξοικείωσης με τις εμπλεκόμενες βιβλιοθήκες, το οποίο καταφέραμε επίπονα να ξεπεράσουμε με συστηματική μελέτη
+  του documentation των βιβλιοθηκών καθώς και σε άλλες πηγές που εμφανίζονται στο υπο-κεφάλαιο _Πηγές Πληροφόρησης_.
+- Άλλο ένα σημείο που αντιμετωπίσαμε προβλήματα ήταν η διαχείριση πολυμέσων εκ μέρους της λειτουργικότητα του chat, το
+  οποίο καταφέραμε έπειτα από επανειλημμένα αποτυχημένου συγχρονισμού της υλοποίησης και του προσυμφωνημένου προτύπου
+  επικοινωνίας, το πρόβλημα επιλύθηκε με τη χρήση του λογισμικού multer.
+- Εμφανίστηκαν προβλήματα σε βοηθητικές μεθόδους του backend με αποτέλεσμα να έρχονται τα μηνύματα του chat με λάθος
+  σειρά, το οποίο επιλύθηκε δημιουργώντας test suites για τον έλεγχο ποιότητα
+- Στη διαδικασία υλοποίησης των λειτουργιών εγγραφής/ σύνδεσης αντιμετωπίσαμε προβλήματα συμμόρφωση με τα προσυμφωνημένα
+  πρότυπα το οποίο επιλύθηκε με τη χρήση εργαλείων ελέγχου όπως το _Postman_.
+- Αντιμετωπίσαμε μεγαλύτερο πρόβλημα με τη διαχείριση μόνιμων στοιχείων όπως οι εικόνες profile των χρηστών το οποίο
+  οδήγησε σε μια μεγάλη αναδιοργάνωση του τρόπου διαχείρισης του μόνιμου αποθηκευτικού χώρου.
+- Το μεγαλύτερο πρόβλημα που αντιμετωπίσαμε ήταν το ότι το Api του Peerjs δε μας επιτρέπει να περάσουμε δικές μας
+  επιπλέον πληροφορίες με αποτέλεσμα να μην μπορούμε να αντιστοιχήσουμε σε αρκετές περιπτώσεις την εισερχόμενη ροή
+  πολυμέσων με κάποιο όνομα χρήστη το οποίο αντιμετωπίσαμε χρησιμοποιώντας τη λειτουργία ανάκτησης της λίστας
+  συμμετεχόντων όπως αναφέρεται πιο πάνω.
+- Τέλος, αντιμετωπίσαμε ένα πρόβλημα με τη βιβλιοθήκη του Peerjs όπου μετά από κάποιο σημείο της ανάπτυξης ξεκίνησε να
+  στέλνει διπλά ενημερωτικά μηνύματα, κάποια χωρίς δεδομένα, τα οποία επηρέαζαν τη δυνατότητα του client να αφαιρέσει
+  όψεις χρηστών που είχαν αποχωρήσει από την κλήση.  

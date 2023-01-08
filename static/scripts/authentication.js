@@ -1,5 +1,5 @@
 import {swapPasswordType} from "./modules/presenter.mjs";
-import {getProfilePic, getSessionId, getUserData, saveSessionId} from "./modules/profile.mjs";
+import {ProfileManager, getSessionId, saveSessionId} from "./modules/profile.mjs";
 
 const hostURL = "http://localhost:8080"; // DRY principle at 3 am
 
@@ -30,6 +30,9 @@ const updateAuthContainer = document.getElementById("successful-auth");
 const updateButton = document.getElementById("update-button");
 const updateErrorLabel = document.getElementById("update-error-label");
 
+const spinner = document.getElementsByClassName("loader")[0];
+const profileManager = new ProfileManager(hostURL);
+
 
 // Attempt to load the listeners every time the window changes
 window.onload = async () => {
@@ -40,8 +43,10 @@ window.onload = async () => {
         }
 
         registerButton.onclick = async e => {
+            showLabel(spinner);
             e.preventDefault();
             await register();
+            hideLabel(spinner);
         }
     }
 
@@ -52,13 +57,17 @@ window.onload = async () => {
         }
 
         loginButton.onclick = async e => {
+            showLabel(spinner);
             e.preventDefault();
             await login();
+            hideLabel(spinner);
         }
     }
 
     if (updateButton !== null) {
+        showLabel(spinner);
         await displayProfile();
+        hideLabel(spinner);
     }
 }
 
@@ -67,7 +76,7 @@ window.onload = async () => {
  */
 async function displayProfile() {
     const sessionId = getSessionId();
-    const userObj = await getUserData(hostURL, sessionId);
+    const userObj = await profileManager.getUserData(sessionId);
 
     if (userObj === null) {
         createEmptyProfilePage();

@@ -1,5 +1,5 @@
 import {constructMessage, getNewMessages, getUniqueRoomId} from "./routes";
-import {Message} from "./messages";
+import {Message} from "./model/messages";
 import fs from "fs";
 import crypto from "crypto"
 import path from "path"

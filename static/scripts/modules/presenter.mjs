@@ -52,6 +52,7 @@ export class Presenter {
         streamContainer.classList.add("stream-container");
 
         const usernameContainer = document.createElement("p");
+        usernameContainer.classList.add("stream-username-label");
         usernameContainer.innerText = username;
 
         video.srcObject = stream;
@@ -63,7 +64,7 @@ export class Presenter {
         streamContainer.appendChild(usernameContainer);
         this.#videoGrid.append(streamContainer);
 
-        return video;
+        return streamContainer;
     }
 
     /**

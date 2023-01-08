@@ -1,4 +1,4 @@
-import {getProfilePic} from "./profile.mjs";
+import {ProfileManager} from "./profile.mjs";
 
 /**
  *  A class containing the chat messages and displaying new ones to
@@ -14,18 +14,22 @@ export class Chat {
     #chatboxElement;
     #hostURL;
     #presenter;
+    #profileManager;
+
     #messages;
 
     /**
      * Constructs an object that posts and receives posts from the server.
      * @param {string} hostURL - The remote server's URL
      * @param {Presenter} presenter - The presenter for the HTML page
+     * @param {ProfileManager} profileManager - A profile manager that fetches profile pictures
      */
-    constructor(chatBoxElement, hostURL, presenter) {
+    constructor(chatBoxElement, hostURL, presenter, profileManager) {
         this.#chatboxElement = chatBoxElement;
         this.#hostURL = hostURL;
         this.#messages = [];
         this.#presenter = presenter;
+        this.#profileManager = profileManager;
 
         Handlebars.registerHelper('ifEq', function (arg1, arg2, options) {
             return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
@@ -153,8 +157,8 @@ export class Chat {
         }
 
         // set profile pic
-        let profilePicUrl = this.#hostURL + "/media/profiles/" + message.username + "/profilePic.png";
-        message.profilePic = getProfilePic(profilePicUrl);
+        let profilePicUrl = this.#profileManager.getProfilePic(message.username);
+        message.profilePic = profilePicUrl;
 
         message.isSelf = message.username === this.#username
         message.hostURL = this.#hostURL

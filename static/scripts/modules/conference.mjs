@@ -3,8 +3,8 @@
  * on the client side.
  */
 export class Conference {
-    static STREAM_CONSTRAINTS = {audio: true, video: true};
-    static PEER_SERVER_CONFIG = {host: "/", port: "3001"};
+    static STREAM_CONSTRAINTS = { audio: true, video: true };
+    static PEER_SERVER_CONFIG = { host: "/", port: "3001" };
 
     #username; // useful to keep around
     #roomId;
@@ -13,6 +13,8 @@ export class Conference {
     #socket;
     #presenter;
     #connectedPeers;
+    #namedPeers;
+    #videoElements;
 
     #lastStreamId
     #successCallback;
@@ -26,6 +28,8 @@ export class Conference {
         this.#socket = socket;
         this.#presenter = presenter;
         this.#connectedPeers = {};
+        this.#namedPeers = {}
+        this.#videoElements = {}
     }
 
     /**
@@ -88,7 +92,6 @@ export class Conference {
                         // set up video streams
                         this.#addVideoStream(this.#username, stream, true);
 
-                        // set up call
                         this.#myPeer.on("call", call => {
                             // listen to incoming streams
                             call.answer(stream);
@@ -109,8 +112,8 @@ export class Conference {
                 });
 
             }).catch(err => {
-            this.#presenter.showInputError("Error while accessing media devices: " + err);
-        });
+                this.#presenter.showInputError("Error while accessing media devices: " + err);
+            });
     }
 
     /**
@@ -126,7 +129,10 @@ export class Conference {
 
         call.on("stream", userVideoStream => {
             console.log("Got stream from " + peerId);
-            streamElement = this.#addVideoStream(username, userVideoStream);
+
+            // ignore redundant 2nd call
+            if (streamElement === undefined)
+                streamElement = this.#addVideoStream(username, userVideoStream);
         });
 
         call.on("close", () => {
