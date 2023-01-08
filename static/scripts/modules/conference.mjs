@@ -13,8 +13,6 @@ export class Conference {
     #socket;
     #presenter;
     #connectedPeers;
-    #namedPeers;
-    #videoElements;
 
     #lastStreamId
     #successCallback;
@@ -28,8 +26,6 @@ export class Conference {
         this.#socket = socket;
         this.#presenter = presenter;
         this.#connectedPeers = {};
-        this.#namedPeers = {}
-        this.#videoElements = {}
     }
 
     /**
@@ -57,9 +53,16 @@ export class Conference {
         });
 
         // handle disconnect
-        this.#socket.on("user-disconnected", id => {
-            console.log("User disconnected " + id);
-            this.#userDisconnected(id);
+        this.#socket.on("user-disconnected", (username, id) => {
+            console.log("User disconnected " + username);
+
+            const streamElement = document.getElementById(id);
+
+            if (streamElement !== null) {
+                streamElement.remove();
+                this.#userDisconnected(id);
+            }
+
         });
     }
 
@@ -98,9 +101,15 @@ export class Conference {
 
                             // respond to incoming streams
                             call.on("stream", userVideoStream => {
-                                this.#addVideoStream(this.#username, userVideoStream);
+                                const streamElement = this.#addVideoStream("frog", userVideoStream);
+                                if (streamElement !== undefined) {
+                                    console.log(call.peer);
+                                    streamElement.id = call.peer;
+                                }
                             });
+
                         });
+
 
                         // when other user connects
                         this.#socket.on("user-connected", (username, peer) => {
@@ -124,15 +133,18 @@ export class Conference {
      */
     #connectToNewUser(username, peerId, stream) {
         let streamElement
-        console.log(`Attempt to call user ${peerId}`);
+        console.log(`Attempt to call user with peer ID ${peerId}`);
         const call = this.#myPeer.call(peerId, stream);
 
         call.on("stream", userVideoStream => {
             console.log("Got stream from " + peerId);
 
             // ignore redundant 2nd call
-            if (streamElement === undefined)
+            if (streamElement === undefined) {
                 streamElement = this.#addVideoStream(username, userVideoStream);
+                streamElement.id = call.peer;
+            }
+
         });
 
         call.on("close", () => {
@@ -151,11 +163,8 @@ export class Conference {
      * @return the stream HTML element that was created, undefined if not created
      */
     #addVideoStream(username, stream, isMuted = false) {
-        if (username.length > 10) {
-            username = username.slice(0, 10) + "..."
-        }
+        // avoid bug with duplicate calls because of peer server call implementation
 
-        // avoid bug with duplicate calls because of peer server call impl
         if (stream.id !== this.#lastStreamId) {
             this.#lastStreamId = stream.id;
             return this.#presenter.addVideoElement(username, stream, isMuted);
