@@ -66,11 +66,17 @@ class ParticipantList {
             newParticipants.every((val, index) => val === this.#participants[index]);
     }
 
+    /**
+     * Update the participants' stream labels.
+     */
     #updateParticipantLabels() {
         const labels = document.querySelectorAll(".stream-username-label");
 
-        for (let i = 0; i < labels.length; i++) {
-            labels[i].innerText = this.#participants[i];
+        // wait for a disconnect to be handled before changing the labels
+        if(labels.length === this.#participants.length) {
+            for (let i = 0; i < labels.length; i++) {
+                labels[i].innerText = this.#participants[i];
+            }
         }
     }
 }
@@ -78,7 +84,7 @@ class ParticipantList {
 // Configurations
 const hostURL = "http://localhost:8080"
 const CHAT_REFRESH_MS = 500;
-const PARTICIPANT_REFRESH_MS = 500;
+const PARTICIPANT_REFRESH_MS = 400;
 const socket = io(hostURL);
 
 // Elements
@@ -137,7 +143,7 @@ window.addEventListener("keypress", event => {
 async function joinRoom(e) {
     console.log("Sending request to join");
 
-    let username = presenter.getUsername();
+    let username = presenter.getUsername().trim();
     if (userObj !== null) {
         username = userObj.username;
     }
