@@ -1,203 +1,125 @@
-﻿# WebFrog RTC
+# WebFrog Software documentation
 
-## Οδηγίες Εγκατάστασης
+## Development Team
 
-### Προαπαιτούμενα
+### Paschalidis Anastasios
 
-Ο κώδικας δομήθηκε μέσω του περιβάλλοντος Nodejs χρησιμοποιώντας το εργαλείο npm. Για την εκτέλεση του προγράμματος και
-τα δυο εργαλεία είναι απαραίτητα.
-Εδώ παρέχεται link για την εγκατάσταση και των δυο [Nodejs](https://nodejs.org/en/download/).
+Back-end: server-side services, permanent storage, cyber-security
 
-### Λήψη
-
-Η λήψη του κώδικα μπορεί να γίνει με ένα απλό git clone από το repository του project ή με μια απλή εξαγωγή αν ο κώδικας
-έχει αναρτηθεί με τη μορφή zip.
-
-## Πρώτη λειτουργία
-
-Έχοντας τον κώδικα πρώτα πρέπει να εγκαταστήσουμε τα dependencies του project ανοίγοντας ένα τερματικό στον φάκελο και
-τρέχοντας την εντολή `npm --install`. Στη συνέχεια σε περίπτωση που θέλετε να επαναλάβετε το build του κώδικα μπορείτε
-να εκτελέσετε στο τερματικό την εντολή `npm run build`.
-
-H εκτέλεση στη συνέχεια χωρίζεται σε δυο μέρη:
-
-- Την εκκίνηση του Peer Server με την εντολή `npm run peer`.
-
-- Την εκκίνηση του Server με την εντολή `npm start`.
-
-Για να επισκευτείτε την ιστοσελίδα πηγαίνετε στο [Telefrog](http://localhost:8080).
-
-
-## Οδηγίες Χρήσης
-
-### Σύνδεση ως Guest
-
-Ο πιο απλός και γρήγορος τρόπος για σύνδεση στο WebFrog είναι με τη σύνδεση χωρίς λογαριασμό. Εισάγετε ένα οποιοδήποτε
-όνομα στο `Sign in as guest` πεδίο και πατήστε το κουμπί `Create Room` έτσι ώστε να δεσμεύσετε δικό σας δωμάτιο. Πατήστε
-το κουμπί `Join Room` για να αρχίσετε μια κλήση.
-
-Εναλλακτικά μπορείτε να βάλετε στο πεδίο `Room ID` τον κωδικό ενός υπάρχοντος δωματίου για να μπείτε σε κλήση με έναν
-άλλον χρήστη.
-
-### Σύνδεση με λογαριασμό
-
-Το WebFrog υποστηρίζει τη δημιουργία και μόνιμη αποθήκευση λογαριασμών χρήστη. Για να δημιουργήσετε λογαριασμό πατήστε
-τον σύνδεσμο `Sign up` της κεντρικής σελίδας και συμπληρώστε τη φόρμα. Εφόσον τα δεδομένα που υποβάλλατε είναι σωστά θα
-ανακατευθυνθείτε στην κεντρική σελίδα συνδεδεμένοι ως νέος χρήστης.
-
-Από αυτό το σημείο μπορείτε ανα πάσα στιγμή να συνδεθείτε στον ίδιο λογαριασμό μέσω του
-συνδέσμου `Log in your Telefrog Account`. Μπορείτε επίσης να αλλάξετε (μερικά) στοιχεία του λογαριασμού σας όπως
-το `About me` και την εικόνα του λογαριασμού σας. Οι αλλαγές σας είναι μόνιμες *ακόμα και μετά το κλείσιμο του server*.
-
-Για να συνδεθείτε ως εγγεγραμμένος χρήστης ακολουθήστε την παραπάνω διαδικασία για Sign-in/Sign-up, και τα ίδια βήματα
-με
-τη Σύνδεση ως Guest.
-
-Η σύνοδος ενός χρήστη (session) μένει ενεργή όσο αυτός βρίσκεται στην ίδια καρτέλα ή σε καρτέλα που έχει αντιγραφεί
-(duplicated) από οποιαδήποτε άλλη καρτέλα με ενεργή σύνοδο. Αυτό ισχύει έτσι ώστε να μπορεί να γίνει χρήση ενός browser
-για κλήσεις με διαφορετικούς χρήστες.
-
-## Ομάδα Ανάπτυξης
-
-### Πασχαλίδης Αναστάσιος
-
-Back-end: Server-side services, Permanent storage, Cyber-security
-
-### Τσίρμπας Δημήτριος
+### Tsirmpas Dimitris
 
 Front-end: HTML/CSS, Client-side scripts, Web RTC, Media servers
 
-## Τεκμηρίωση λογισμικού
 
-### Server-side Services
+## Server-side services
 
-#### Room Service - RS
+### Room Service - RS
 
-Διαχειρίζεται τη δημιουργία και τη σύνδεση χρηστών σε δωμάτια.
+Manages the creation of rooms and allows users to connect to them.
 
-- `GET/room/create` : Δημιουργεί καινούριο δωμάτιο και επιστρέφει μοναδικό ID που αντιστοιχεί σε αυτό.
+- `GET /room/create` : Creates a new room and returns a unique ID corresponding to it.
 
-- `GET /room/join?:room?:user-name`: Συνδέει έναν χρήστη στο δωμάτιο.
+- `GET /room/join?:room?:user-name` : Joins a user to the room.
 
-Κάθε χρήστης κατά την είσοδο του σε ένα δωμάτιο στέλνει στον server ένα TCP μήνυμα για τις προθέσεις του, το οποίο ο
-δεύτερος με τη σειρά του προωθεί σε όλους τους συμμετέχοντες του δωματίου, αν υπάρχουν. Αν μπορεί να συνδεθεί στο
-συγκεκριμένο δωμάτιο ενημερώνεται με ένα status code και όλοι οι χρήστες που υπάρχουν στο δωμάτιο ενημερωμένοι πια με
-τα στοιχεία του νέου συμμετέχοντα, μεμονωμένα προσπαθούν να επικοινωνήσουν με το νέο χρήστη με σκοπό να ανταλλάξουν ροές
-βίντεο και ήχου. Αυτό το κομμάτι λειτουργικότητας γίνεται χρησιμοποιώντας το Socket.io αντί για express api calls.
+Each user sends the server a TCP request about their intentions upon entering a room, which the server forwards to all current participants in the roomy. If they are allowed to connect to the room, all other users are informed and attempt to exchange peer-to-peer media streams. The server then updates everyone with the details of the new participant using TCP sockets. 
 
-#### Chat Service - CS
+### Chat Service - CS
 
-Υλοποιεί εξ'ολοκλήρου τη διαχείριση, αποθήκευση και αποστολή μηνυμάτων για κάθε δωμάτιο. Υποστηρίζει 3 κύριες εντολές:
+Implements the management, storage and sending of messages for each room. It supports 3 main commands:
 
-- `GET /chat-box/refresh?:roomId&:lastMessage`: Επιστρέφει καινούρια μηνύματα από όλους τους χρήστες του δωματίου μετά
-  από το τελευταίο ληφθέν μήνυμα (lastMessage).
+- `GET /chat-box/refresh?:roomId&:lastMessage`: Returns new messages from all room users after
+  (last message).
 
-- `POST /chat-box/message/new {roomId,username, messageType,content,title?}`: Αποθηκεύει ένα καινούριο μήνυμα στη
-  συνομιλία.
+- `POST /chat-box/message/new {roomId,username, messageType,content,title?}`: Post a new message to the chat-room
 
-- `GET /media/:roomId/:contents`: Λήψη αρχείου που έχει ανεβεί στη συνομιλία. Η παράμετρος `:contents` αντιστοιχεί σε
-  ID αρχείου που έχει στείλει ο server μέσω της λειτουργίας refresh.
+- `GET /media/:roomId/:contents`: Get a file uploaded to the chat. The `:contents` parameter corresponds to
+  File ID sent by the server via the refresh function.
 
-#### Login Service – LS
+### Login Service - LS
 
-Διαχειρίζεται τη δημιουργία, εγγραφή και αλλαγή στοιχείων λογαριασμών. Αποτελείται απο 6 εντολές:
+Manages the creation, registration and editing of account details. It consists of 6 commands:
 
-- ` POST /user {username, pass, email}`: Δημιουργεί ένα καινούριο λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο
-  χρησιμοποιείται για ταυτοποίηση.
+- ` POST /user {username, pass, email}`: Creates a new account. Returns a unique session ID which is used for identification.
 
-- `POST /user/update {sessionId, email, profilePic, aboutMe}`: Αλλάζει τα στοιχεία ενός λογαριασμού.
+- `POST /user/update {sessionId, email, profilePic, aboutMe}`: Changes the details of an account.
 
-- `POST /user/login {username,pass}`: Σύνδεση σε υπάρχων λογαριασμό. Επιστρέφει μοναδικό session ID το οποίο
-  χρησιμοποιείται για ταυτοποίηση.
+- `POST /user/login {username,pass}`: Login to an existing account. Returns a unique session ID which is used for identification.
 
-- `POST /user/logout {sessionId}`: Ακυρώνει την τρέχουσα σύνοδο.
+- `POST /user/logout {sessionId}`: Cancel the current session.
 
-- `GET /user/:sessionId`: Επιστρέφει τα στοιχεία του χρήστη. Χρησιμοποιεί ταυτοποίηση με session ID ώστε μόνο ο χρήστης
-  να έχει πρόσβαση σε αυτά.
+- `GET /user/:sessionId`: Returns the user's credentials. Use session ID identification so that only the user
+  The session ID is used to use the session ID.
 
-- `GET /media/profiles/:username/profilePic.png`: Επιστρέφει την εικόνα του λογαριασμού ενός χρήστη.
+- `GET /media/profiles/:username/profilePic.png`: Returns the profile image of a user's account.
 
-### Client Scripts
 
-Ο client-side κώδικας χωρίζεται σε 2 κύριες λειτουργίες, τη διαχείριση κλήσης και τη διαχείριση λογαριασμού. Οι δύο
-αυτές λειτουργίες αντιστοιχούν στα δύο κύρια αρχεία κώδικα `client.js` και `authentication.js`.
+## Client Scripts
 
-Τα αρχεία αυτά χρησιμοποιούν εκτενώς λειτουργίες από 4 αρχεία modules, τα οποία είτε εκτελούν μια ανεξάρτητη και
-πολύπλοκη διαδικασία είτε περιέχουν κοινά τμήματα κώδικα. Τα modules είναι
-τα `conference.mjs`, `chat.mjs`, `profile.mjs` και `presenter.mjs`.
+The client-side code is divided into 2 main functionalities, *call management* and *account management*, corresponding to the two main code files `client.js` and `authentication.js`.
 
-Πλήρης τεκμηρίωση και λεπτομέρειες υλοποίησης μπορούν να βρεθούν στον πηγαίο κώδικα με τη μορφή Jsdoc και σχολίων.
+These files make extensive use of functions from 4 module files, which either execute an independent and complex process or contain common code fragments. The modules are `conference.mjs`, `chat.mjs`, `profile.mjs` and `presenter.mjs`.
 
-#### Διαχείριση κλήσης
+Full documentation and implementation details can be found in the source code in the form of Jsdoc and comments.
 
-Η διαχείριση κλήσης υλοποιείται από το αρχείο `client.js`. Πιο συγκεκριμένα, το αρχείο ελέγχει την σελίδα `index.html`
-και είναι υπεύθυνο για τη:
+### Call Management
 
-- σύνδεση του χρήστη με ένα δωμάτιο
-- εμφάνιση των video streams
-- εποπτεία και εμφάνιση της λίστας συμμετεχόντων
-- εμφάνιση του chat box και όλων των μηνυμάτων
-- αποστολή μηνυμάτων προς το chat
+Call management is implemented by the `client.js` file. More specifically, the file controls the `index.html` page
+and is responsible for:
 
-#### Διαχείριση λογαριασμού
+- Connecting the user to a room
+- Displaying video streams
+- Monitoring and displaying the list of participants
+- Displaying the chat box and all messages
+- Sending messages to the chat
 
-Η διαχείριση λογαριασμού υλοποιείται από το αρχείο `authentication.js`. Το αρχείο διαχειρίζεται τις
-σελίδες `login.html`, `signup.html` και `profile.html` τα οποία υλοποιούν τη σύνδεση, εγγραφή και αλλαγή στοιχείων του
-λογαριασμού αντίστοιχα.
+### Account management
 
-#### Modules
+Account management is implemented by the `authentication.js` file. The file manages the pages `login.html`, `signup.html` and `profile.html` which implement the login, signup and change of an account respectively.
 
-Επιγραμματικά αναφέρουμε τη χρήση των αρχείων modules:
-
-- `chat.mjs`: Υλοποιεί τη λήψη, εμφάνιση και αποστολή μηνυμάτων στο chat
-- `conference.mjs`: Επικοινωνεί με τον server και τους αντίστοιχους media servers έτσι ώστε να λάβει και να αποστείλει
+### Modules
+- `chat.mjs`: implements receiving, displaying and sending messages in the chat
+- `conference.mjs`: Communicates with the server and the corresponding media servers in order to receive and send
   video streams
-- `presenter.mjs`: Διαχειρίζεται τα πιο πολύπλοκα τμήματα δημιουργίας HTML elements για το περιβάλλον της κλήσης
-- `profile.mjs`: Λειτουργεί ως διαμεσολαβητής μεταξύ της εφαρμογής και του server για τη λήψη και επεξεργασία δεδομένων
-  χρήστη
+- `presenter.mjs`: Handles the more complex parts of creating HTML elements for the call interface
+- `profile.mjs`: Acts as an intermediary between the application and the server to receive and process data.
 
-### Backend Structure
+## Backend Structure
 
-To Backend έχει δομηθεί χρησιμοποιώντας το `expressjs` framework. Συγκεκριμένα όλα τα Api call handles έχουν οριστεί στο
-αρχείο `Server.ts` που βρίσκεται στον φάκελο src.
+The backend was developed using the `expressjs` framework. Specifically all API call handles are defined in the
+`Server.ts` file located in the src folder.
 
-#### Modules:
-
-Επιγραμματικά αναφέρουμε τη χρήση των αρχείων modules:
-
-- `routes`: Υλοποιεί απλές βοηθητικές συναρτήσεις για την πιο καθαρή εξυπηρέτηση ερωτημάτων.
-- `mongussy`: Υλοποιεί όλες τις συνδέσεις με τη βάση δεδομένων.
+### Modules:
+- `routes`: implements simple helper functions for cleaner query handling.
+- `mongussy`: implements all connections to the database.
 - `logging`: Logger capabilities
-- `router.test`: Αρχείο ελέγχων. Μπορείτε να το τρέξετε με τη χρήση της εντολής `npm run test`
-- Στον υπο-φάκελο `models`:
+- `router.test`: Test file. You can run it using the `npm run test` command.
+- Inside the `models` subfolder:
+  - `messages`: Data types used for message management.
+  - `User`: A data type for representing and managing user data.
 
-    - `messages`: λοιποί τύποι δεδομένων που χρησιμοποιούνται για τη διαχείριση μηνυμάτων.
-    - `User`: Τύπος δεδομένων για την αναπαράσταση και διαχείριση δεδομένων χρηστών.
+## Software used
 
-## Λογισμικό που χρησιμοποιήθηκε
+_(The project was developed using Typescript for the application server and Javascript for the browser)_
 
-_(Η εργασία δομήθηκε με τη χρήση της Typescript για τον application server και Javascript για το browser)_
+- [PeerJs](https://peerjs.com/) Media server for sending peer-to-peer streams using Web RTC.
+- [Handlebars](https://handlebarsjs.com/) JS library for dynamic HTML code generation.
+- [SocketIO](https://socket.io/) JS library for fast, ad-hoc, event-driven communication with the server.
+- [Nodejs](https://nodejs.org/en/) The environment used to build the backend.
+- [Expressjs](https://expressjs.com) The framework used to structure the server.
+- [Multer](https://www.npmjs.com/package/multer) The middleware used to manage persistent storage for files and images.
+- [Jest](https://jestjs.io) Automated Testing production package.
+- [Mongodb](https://www.mongodb.com) Database for managing account data.
+- [CryptoJS](https://cryptojs.gitbook.io) Framework for implementing "at rest" encryption of account passwords.
+- [Postman](https://www.postman.com) Tool for testing http requests.
 
-- [PeerJs](https://peerjs.com/) Media server για αποστολή streams peer-to-peer με χρήση του Web RTC.
-- [Handlebars](https://handlebarsjs.com/) JS βιβλιοθήκη για δυναμική παραγωγή HTML κώδικα.
-- [SocketIO](https://socket.io/) JS βιβλιοθήκη για γρήγορη, ad-hoc, event-driven επικοινωνία με τον server.
-- [Nodejs](https://nodejs.org/en/) Το περιβάλλον που χρησιμοποιήθηκε για τη δημιουργία του backend.
-- [Expressjs](https://expressjs.com) Το framework με το οποίο δομήθηκε ο διακομιστής.
-- [Multer](https://www.npmjs.com/package/multer) Το middleware που χρησιμοποιήθηκε για τη διαχείριση του μόνιμου
-  αποθηκευτικού χώρου.
-- [Jest](https://jestjs.io) Πακέτο παραγωγής αυτοματοποιημένου Testing.
-- [Mongodb](https://www.mongodb.com) Βάση δεδομένων για τη διαχείριση δεδομένων σύνδεσης.
-- [CryptoJS](https://cryptojs.gitbook.io) Framework για την υλοποίηση at rest κρυπτογράφησης των κωδικών πρόσβασης λογαριασμών.
-- [Postman](https://www.postman.com) Εργαλείο για τον έλεγχο http request.
-
-## Πηγές Πληροφόρησης
+## Resources
 
 - [PeerJS documentation](https://peerjs.com/docs/#api)
 - [Handlebars User Guide](https://handlebarsjs.com/guide/)
 - [SocketIO documentation](https://socket.io/docs/v4/)
 - [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 - [MDN Web Docs](https://developer.mozilla.org/en-US/)
-- [Τεχνολογίες και Προγραμματισμός Εφαρμογών στον Ιστό - Διαφάνειες ΟΠΑ](https://eclass.aueb.gr/courses/INF384/)
+- [Web Application Technologies and Programming - UBA Slides](https://eclass.aueb.gr/courses/INF384/)
 - [Video: How To Create A Video Chat App With WebRTC](https://www.youtube.com/watch?v=DvlyzDZDEq4)
 - [Express Api Reference](https://expressjs.com/en/4x/api.html)
 - [Multer Documentation](https://www.npmjs.com/package/multer)
@@ -205,23 +127,20 @@ _(Η εργασία δομήθηκε με τη χρήση της Typescript γι
 - [Jest - Getting started](https://jestjs.io/docs/getting-started)
 - [Mongodb - Nodejs - Getting started](https://www.mongodb.com/docs/drivers/node/current/)
 
-## Ανάπτυξη και Προβλήματα
+## Development and Issues
 
-- Το πρώτο και πιο βασικό πρόβλημα που αντιμετωπίσαμε ήταν η αρχική επικοινωνία και ανταλλαγή πολυμεσικών ροών, λόγω
-  έλλειψης εξοικείωσης με τις εμπλεκόμενες βιβλιοθήκες, το οποίο καταφέραμε επίπονα να ξεπεράσουμε με συστηματική μελέτη
-  του documentation των βιβλιοθηκών καθώς και σε άλλες πηγές που εμφανίζονται στο υπο-κεφάλαιο _Πηγές Πληροφόρησης_.
-- Άλλο ένα σημείο που αντιμετωπίσαμε προβλήματα ήταν η διαχείριση πολυμέσων εκ μέρους της λειτουργικότητας του chat, το
-  οποίο καταφέραμε έπειτα από οποίο επιλύθηκε με τη χρήση του λογισμικού multer.
-- Εμφανίστηκαν προβλήματα σε βοηθητικές μεθόδους του backend με αποτέλεσμα να έρχονται τα μηνύματα του chat με λάθος
-  σειρά, το οποίο επιλύθηκε δημιουργώντας test suites για τον έλεγχο της λογικής του προγράμματος.
-- Στη διαδικασία υλοποίησης των λειτουργιών εγγραφής/ σύνδεσης αντιμετωπίσαμε προβλήματα συμμόρφωση με τα προσυμφωνημένα
-  πρότυπα το οποίο επιλύθηκε με τη χρήση εργαλείων ελέγχου όπως το _Postman_.
-- Αντιμετωπίσαμε μεγαλύτερο πρόβλημα με τη διαχείριση μόνιμων στοιχείων όπως οι εικόνες profile των χρηστών το οποίο
-  οδήγησε σε μια μεγάλη αναδιοργάνωση του τρόπου διαχείρισης του μόνιμου αποθηκευτικού χώρου.
-- Το μεγαλύτερο πρόβλημα που αντιμετωπίσαμε ήταν το ότι το API του Peerjs δε μας επιτρέπει να περάσουμε δικές μας
-  επιπλέον πληροφορίες, με αποτέλεσμα να μην μπορούμε να αντιστοιχήσουμε σε αρκετές περιπτώσεις την εισερχόμενη ροή
-  πολυμέσων με κάποιο όνομα χρήστη το οποίο αντιμετωπίσαμε χρησιμοποιώντας τη λειτουργία ανάκτησης της λίστας
-  συμμετεχόντων όπως αναφέρεται πιο πάνω και custom socket messages από τον application server μας.
-- Τέλος, αντιμετωπίσαμε ένα πρόβλημα με τη βιβλιοθήκη του Peerjs όπου μετά από κάποιο σημείο της ανάπτυξης ξεκίνησε να
-  στέλνει διπλά ενημερωτικά μηνύματα, κάποια χωρίς δεδομένα, τα οποία επηρέαζαν τη δυνατότητα του client να αφαιρέσει
-  όψεις χρηστών που είχαν αποχωρήσει από την κλήση.  
+- The first and most fundamental problem we faced was the initial communication and exchange of multimedia streams, due to lack of familiarity with the libraries involved, which we painstakingly managed to overcome by studying the limited library     documentation and other sources shown in _Sources of Information_.
+
+- Another point where we encountered problems was the multimedia management on the part of chat functionality, which we resolved using multer software.
+
+- Problems occurred in backend helper methods resulting in chat messages coming in with the wrong order, which was resolved by creating unit test suites to validate the server's behavior.
+
+- In the process of implementing the registration/login functions we encountered problems complying with the pre-agreed
+  standards which was resolved by using integration testing tools such as _Postman_.
+  
+- We encountered a more severe issue with the management of persistent elements such as user profile images which
+  led to a major reorganization of how we managed persistent storage.
+  
+- The most severe problem we encountered however was that the Peerjs API doesn't allow us to pass our own additional information, which meant that in many cases we couldn't match the incoming stream media feed to a username. The problem was ultimately addressed by using GET requests to the server to fetch user information.
+
+- Finally, we encountered a problem with the Peerjs library where after some point in the development it started sending duplicate informational messages, some with undefined data. This prevented the clinet from removing the video streams of disconnected participants. We solved the problem by filtering out empty PeerJS messages whenever a user connected or disconnected.  
