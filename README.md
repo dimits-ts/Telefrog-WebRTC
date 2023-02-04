@@ -51,6 +51,17 @@ A user's session remains active as long as they are in the same tab or in a tab 
 for calls with different users.
 
 
+## Development Team
+
+### Paschalidis Anastasios
+
+Back-end: server-side services, permanent storage, cyber-security
+
+### Tsirmpas Dimitris
+
+Front-end: HTML/CSS, Client-side scripts, Web RTC, Media servers
+
+
 ## Documentation
 
 A document containing high level documentation for the software can be found in the `Docs` directory.
